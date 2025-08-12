@@ -14,20 +14,21 @@ import mes.domain.services.SqlRunner;
 
 @Service
 public class MaterialService {
-	
+
 	@Autowired
 	SqlRunner sqlRunner;
-	
-	
-	public List<Map<String, Object>> getMaterialList(String matType, String matGroupId, String keyword, String spjangcd){
-		
-		MapSqlParameterSource paramMap = new MapSqlParameterSource();        
+
+
+	public List<Map<String, Object>> getMaterialList(String matType, String matGroupId, String keyword, String spjangcd, String useYnFlag){
+
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("mat_type", matType);
 		paramMap.addValue("mat_group_id", matGroupId);
 		paramMap.addValue("keyword", keyword);
 		paramMap.addValue("spjangcd", spjangcd);
-        
-        String sql = """
+		paramMap.addValue("UseYn", useYnFlag);
+
+		String sql = """
 			select m.id
                 --, mg."MaterialType" as mat_type
                 , fn_code_name('mat_type', mg."MaterialType" ) as mat_type_name
@@ -94,29 +95,30 @@ public class MaterialService {
             left join bom b on b."Material_id" = m.id
             where 1=1
             AND m.spjangcd = :spjangcd
+            AND m."Useyn" = :UseYn
         """;
-        if (StringUtils.isEmpty(matType)==false) sql +=" and mg.\"MaterialType\" = :mat_type ";
-        if (StringUtils.isEmpty(matGroupId)==false) sql +=" and m.\"MaterialGroup_id\" = (:mat_group_id)::int ";
-        if (StringUtils.isEmpty(keyword)==false) {
-        	sql += """  
+		if (StringUtils.isEmpty(matType)==false) sql +=" and mg.\"MaterialType\" = :mat_type ";
+		if (StringUtils.isEmpty(matGroupId)==false) sql +=" and m.\"MaterialGroup_id\" = (:mat_group_id)::int ";
+		if (StringUtils.isEmpty(keyword)==false) {
+			sql += """  
             		and ( m."Name" ilike concat('%',:keyword,'%')
             		or m."Code" ilike concat('%',:keyword,'%'))
     			""";
-        }
-        sql += "order by m.\"MaterialGroup_id\" , m.\"Name\" ";
-        
-        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
-        
-        return items;
-		
+		}
+		sql += "order by m.\"MaterialGroup_id\" , m.\"Name\" ";
+
+		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
+
+		return items;
+
 	}
-	
-    public Map<String, Object> getMaterial(int matPK, String spjangcd){
-    	MapSqlParameterSource paramMap = new MapSqlParameterSource();        
-    	paramMap.addValue("mat_pk", matPK);
+
+	public Map<String, Object> getMaterial(int matPK, String spjangcd){
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("mat_pk", matPK);
 		paramMap.addValue("spjangcd", spjangcd);
-        
-        String sql = """
+
+		String sql = """
 			select m.id, m."MaterialGroup_id" 
             , mg."Name" as mat_grp_name
             , mg."Code" as mat_grp_code
@@ -162,16 +164,16 @@ public class MaterialService {
             where m.id = :mat_pk
             AND m.spjangcd = :spjangcd
         """;
-        	
-        
-        Map<String, Object> item = this.sqlRunner.getRow(sql, paramMap);
-        return item;
-		
+
+
+		Map<String, Object> item = this.sqlRunner.getRow(sql, paramMap);
+		return item;
+
 	}
 
 	public int saveMaterial(MultiValueMap<String, Object> data) {
 		Integer id = CommonUtil.tryIntNull(data.getFirst("id"));
-		
+
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("id", id);
 		dicParam.addValue("code", CommonUtil.tryString(data.getFirst("Code")));
@@ -189,10 +191,16 @@ public class MaterialService {
 		dicParam.addValue("safetyStock", CommonUtil.tryFloatNull(data.getFirst("SafetyStock")));
 		dicParam.addValue("maxStock", CommonUtil.tryFloatNull(data.getFirst("MaxStock")));
 		dicParam.addValue("processSafetyStock", CommonUtil.tryFloatNull(data.getFirst("ProcessSafetyStock")));
-		dicParam.addValue("validDays", Integer.parseInt(data.getFirst("ValidDays").toString()));
-		
+		String validDaysStr = data.getFirst("ValidDays") != null ? data.getFirst("ValidDays").toString().trim() : "";
+		if (!validDaysStr.isEmpty()) {
+			dicParam.addValue("validDays", Integer.parseInt(validDaysStr));
+		} else {
+			// 기본값 지정(예시) 또는 예외처리
+//			dicParam.addValue("validDays", 0);
+		}
+
 		if(data.containsKey("lot_use_yn")) {
-			dicParam.addValue("lotUseYN", data.getFirst("lot_use_yn").toString());			
+			dicParam.addValue("lotUseYN", data.getFirst("lot_use_yn").toString());
 		} else {
 			dicParam.addValue("lotUseYN", null);
 		}
@@ -216,7 +224,7 @@ public class MaterialService {
 		dicParam.addValue("maxOrder", CommonUtil.tryFloatNull(data.getFirst("MaxOrder")));
 		dicParam.addValue("lotSize", CommonUtil.tryFloatNull(data.getFirst("LotSize")));
 		dicParam.addValue("leadTime", CommonUtil.tryFloatNull(data.getFirst("LeadTime")));
-		
+
 		dicParam.addValue("standardTime", CommonUtil.tryFloatNull(data.getFirst("StandardTime")));
 		dicParam.addValue("standardTimeUnit", CommonUtil.tryString(data.getFirst("StandardTimeUnit")));
 		dicParam.addValue("thickness", CommonUtil.tryFloatNull(data.getFirst("Thickness")));
@@ -227,7 +235,7 @@ public class MaterialService {
 		dicParam.addValue("color", CommonUtil.tryString(data.getFirst("Color")));
 		dicParam.addValue("usage", CommonUtil.tryString(data.getFirst("Usage")));
 		dicParam.addValue("class1", CommonUtil.tryString(data.getFirst("Class1")));
-		
+
 		dicParam.addValue("class2", CommonUtil.tryString(data.getFirst("Class2")));
 		dicParam.addValue("class3", CommonUtil.tryString(data.getFirst("Class3")));
 		dicParam.addValue("standard1", CommonUtil.tryString(data.getFirst("Standard1")));
@@ -238,13 +246,13 @@ public class MaterialService {
 		dicParam.addValue("inputManHour", CommonUtil.tryFloatNull(data.getFirst("InputManHour")));
 		dicParam.addValue("purchaseOrderStandard", CommonUtil.tryString(data.getFirst("PurchaseOrderStandard")));
 		dicParam.addValue("vatExemptionYN", CommonUtil.tryString(data.getFirst("VatExemptionYN")));
-		
+
 		dicParam.addValue("routingId", CommonUtil.tryIntNull(data.getFirst("Routing_id")));
 		dicParam.addValue("unitPrice", CommonUtil.tryFloatNull(data.getFirst("UnitPrice")));
 		dicParam.addValue("user_id", CommonUtil.tryIntNull(data.getFirst("user_id").toString()));
-		
+
 		String sql = "";
-		
+
 		if(id == null) {
 			sql = """
 					INSERT INTO public.material
@@ -404,24 +412,24 @@ public class MaterialService {
 					AND spjangcd = :spjangcd
 					""";
 		}
-		
-		
-		
+
+
+
 		return this.sqlRunner.execute(sql, dicParam);
 	}
-	
+
 	public int deleteMaterial(int matPK){
-		MapSqlParameterSource dicParam = new MapSqlParameterSource();        
-        dicParam.addValue("mat_pk", matPK);
-        String sql = "";
-        
-        //품목에 연결된 단가삭제
-        sql = " delete from mat_comp_uprice where \"Material_id\" = :mat_pk";
-        this.sqlRunner.execute(sql, dicParam);
-        
-        //품목 삭제
-    	sql = " delete from material where id = :mat_pk";
-    	return this.sqlRunner.execute(sql, dicParam);
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("mat_pk", matPK);
+		String sql = "";
+
+//        //품목에 연결된 단가삭제
+//        sql = " delete from mat_comp_uprice where \"Material_id\" = :mat_pk";
+//        this.sqlRunner.execute(sql, dicParam);
+
+		//품목 삭제
+		sql = " UPDATE material SET \"Useyn\" = '1' WHERE id = :mat_pk;";
+		return this.sqlRunner.execute(sql, dicParam);
 	}
 
 	public int deleteMaterials(List<Integer> matPKs) {
@@ -430,12 +438,12 @@ public class MaterialService {
 			MapSqlParameterSource dicParam = new MapSqlParameterSource();
 			dicParam.addValue("mat_pk", matPK);
 
-			// 1. 단가 삭제
-			String sql = "delete from mat_comp_uprice where \"Material_id\" = :mat_pk";
-			this.sqlRunner.execute(sql, dicParam);
+//			// 1. 단가 삭제
+//			String sql = "delete from mat_comp_uprice where \"Material_id\" = :mat_pk";
+//			this.sqlRunner.execute(sql, dicParam);
 
 			// 2. 품목 삭제
-			sql = "delete from material where id = :mat_pk";
+			String sql = " UPDATE material SET \"Useyn\" = '1' WHERE id = :mat_pk;";
 			total += this.sqlRunner.execute(sql, dicParam);
 		}
 		return total;

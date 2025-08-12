@@ -98,6 +98,14 @@
                                 <input type="text" class="form-control2" id="keyword" name="keyword">
                             </dd>
                         </dl>
+                        <dl>
+                            <dt>
+                                <label>사용중지여부</label>
+                            </dt>
+                            <dd>
+                                <input class="form-control2" type="checkbox" id="useYn_flag" name="useYn_flag"/>
+                            </dd>
+                        </dl>
 
                     </div>
                     <div class="search-wrap" style="margin-top: -20px; margin-left: auto;">
@@ -427,7 +435,7 @@
                                         </tr>
                                         <tr>
                                             <th>
-                                                <label for="Equipment_id">생산 설비</label>
+                                                <label for="Equipment_id">컷팅품목</label>
                                             </th>
                                             <td>
                                                 <select id="Equipment_id" name="Equipment_id"
@@ -535,7 +543,7 @@
                                         </tr>
                                         <tr>
                                             <th>
-                                                <label for="MinOrder"><span class="eq">*</span>최소 발주량</label>
+                                                <label for="MinOrder">최소 발주량</label>
                                             </th>
                                             <td>
                                                 <input type="text" style="width: 100%;" id="MinOrder"
@@ -543,7 +551,7 @@
                                             </td>
 
                                             <th>
-                                                <label for="MaxOrder"><span class="eq">*</span>최대 발주량</label>
+                                                <label for="MaxOrder">최대 발주량</label>
                                             </th>
                                             <td>
                                                 <input type="text" style="width: 100%;" id="MaxOrder"
@@ -646,7 +654,7 @@
                                             </td>
 
                                             <th>
-                                                <label for="ValidDays"><span class="eq">*</span>사용기한(일)</label>
+                                                <label for="ValidDays">사용기한(일)</label>
                                             </th>
                                             <td>
                                                 <input type="number" style="width: 100%;" id="ValidDays"
@@ -898,10 +906,10 @@
                                 <div id="routing-grid" style=""></div>
                             </div>
                         </section>
+                    </div>
                 </div>
+            </section>
         </div>
-        </section>
-    </div>
     </div>
 
 
@@ -960,7 +968,7 @@
                     autoGenerateColumns: false,
                     showMarquee: true,
                     isReadOnly: true,
-                    frozenColumns: 3, // 앞에 5개의 컬럼 고정
+                    frozenColumns: 4, // 앞에 5개의 컬럼 고정
                     formatItem: (sender, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
@@ -1090,9 +1098,11 @@
                         }
 
                         // useBOM === 1이면, 특정 컬럼/셀 스타일 적용
-                        if (item.useBOM === 1 || item.useBOM === '1') {
-                            if (col.binding === "mat_name") {
+                        if (col.binding === "mat_name") {
+                            if (item.useBOM === 1 || item.useBOM === '1') {
                                 e.cell.style.backgroundColor = "#d4edda";
+                            } else {
+                                e.cell.style.backgroundColor = "";
                             }
                         }
                     }
@@ -1305,6 +1315,7 @@
                 $('#keyword').on('keypress', function (e) {
                     if (event.keyCode == 13) {
                         _this.searchDataBind();
+                        resetForms();
                     }
                 });
 
@@ -1331,6 +1342,7 @@
                             Alert.alert('', '삭제되었습니다');
                             this.selectedIds = []; // ✅ 선택 항목 초기화!
                             this.searchDataBind();
+                            resetForms();
                         } else {
                             Alert.alert('', res.message);
                         }
@@ -1405,6 +1417,7 @@
                     'mat_group': $('#cboMaterialGroup').val(),
                     'keyword': $('#keyword').val(),
                     'action': 'read',
+                    'useYn_flag': $('#useYn_flag').is(':checked') ? '1' : '0',
                     spjangcd: sessionStorage.getItem('spjangcd'),
                 };
 
@@ -1412,38 +1425,7 @@
                 if (result.success) {
                     _this.viewData.sourceCollection = result.data;
 
-                    // 기본정보 리셋
-                    $('#matBasicForm')[0].reset();
-                    $('#matBasicForm').find('#id').val('');
-                    // 재고정보 리셋
-                    $('#matProductionForm')[0].reset();
-                    // 재고정보 리셋
-                    $('#matStockForm')[0].reset();
-                    // 검사정보 리셋
-                    $('#matTestForm')[0].reset();
-                    // 라우팅정보 리셋
-                    //$('#matRoutingForm')[0].reset();
-                    // 도면 파일 리셋
-                    //_this.setUploader();
 
-                    //$('#mat_detail').find('input, select').each(function () {
-                    $('.mat_detail').find('input, select').each(function () {
-                        if (!$(this).is(':disabled')) {
-                            $(this).attr('disabled', 'disabled');
-                        }
-                    });
-
-                    // 단가정보 리셋
-                    /*$('#priceForm')[0].reset();*/
-
-                    /*_this.price_grid.setData([]);*/
-                    $('#companyPriceForm')[0].reset();
-                    $('#companyPriceForm').find('#price_id').val('');
-                    $('#companyPriceForm').find('input, select').each(function () {
-                        if (!$(this).is(':disabled')) {
-                            $(this).attr('disabled', 'disabled');
-                        }
-                    });
                 }
 
                 //this.setButtonDisable(false, true, true);
@@ -1628,6 +1610,7 @@
                     if (res.success) {
                         Alert.alert('', '삭제되었습니다'); // Notification
                         _this.searchDataBind();
+                        resetForms();
                         setTimeout(() => {
                             let targetIndex = -1;
                             for (let i = 0; i < _this.grid.rows.length; i++) { // ← 반드시 _this!
@@ -2100,11 +2083,13 @@
             // 검색버튼
             $('#btnSearch').click(function (e) {
                 page.searchDataBind();
+                resetForms();
             });
 
             $('#keyword').on('keypress', function (e) {
                 if (event.keyCode == 13) {
                     page.searchDataBind();
+                    resetForms();
                 }
             });
 
@@ -2247,35 +2232,35 @@
                     return;
                 }
 
-                if (!data.MinOrder) {
-                    Alert.alert('', '최소 발주량을 입력해 주세요');
-                    $('#matStockForm #MinOrder').focus();  // 해당 input으로 포커스 이동
-                    // 탭 이동 및 내용 표시
-                    $('a[href="#tab_inventory"]').tab('show');  // 탭 전환
-                    $('#tab_basic').hide();
-                    $('#tab_inventory').show();  // 해당 탭 내용 표시
-                    return;
-                }
-
-                if (!data.MaxOrder) {
-                    Alert.alert('', '최대 발주량을 입력해 주세요');
-                    $('#matStockForm #MaxOrder').focus();  // 해당 input으로 포커스 이동
-                    // 탭 이동 및 내용 표시
-                    $('a[href="#tab_inventory"]').tab('show');  // 탭 전환
-                    $('#tab_basic').hide();
-                    $('#tab_inventory').show();  // 해당 탭 내용 표시
-                    return;
-                }
-
-                if (!data.ValidDays) {
-                    Alert.alert('', '사용기한(일)를 입력해 주세요');
-                    $('#matStockForm #ValidDays').focus();  // 해당 input으로 포커스 이동
-                    // 탭 이동 및 내용 표시
-                    $('a[href="#tab_inventory"]').tab('show');  // 탭 전환
-                    $('#tab_basic').hide();
-                    $('#tab_inventory').show();  // 해당 탭 내용 표시
-                    return;
-                }
+                // if (!data.MinOrder) {
+                //     Alert.alert('', '최소 발주량을 입력해 주세요');
+                //     $('#matStockForm #MinOrder').focus();  // 해당 input으로 포커스 이동
+                //     // 탭 이동 및 내용 표시
+                //     $('a[href="#tab_inventory"]').tab('show');  // 탭 전환
+                //     $('#tab_basic').hide();
+                //     $('#tab_inventory').show();  // 해당 탭 내용 표시
+                //     return;
+                // }
+                //
+                // if (!data.MaxOrder) {
+                //     Alert.alert('', '최대 발주량을 입력해 주세요');
+                //     $('#matStockForm #MaxOrder').focus();  // 해당 input으로 포커스 이동
+                //     // 탭 이동 및 내용 표시
+                //     $('a[href="#tab_inventory"]').tab('show');  // 탭 전환
+                //     $('#tab_basic').hide();
+                //     $('#tab_inventory').show();  // 해당 탭 내용 표시
+                //     return;
+                // }
+                //
+                // if (!data.ValidDays) {
+                //     Alert.alert('', '사용기한(일)를 입력해 주세요');
+                //     $('#matStockForm #ValidDays').focus();  // 해당 input으로 포커스 이동
+                //     // 탭 이동 및 내용 표시
+                //     $('a[href="#tab_inventory"]').tab('show');  // 탭 전환
+                //     $('#tab_basic').hide();
+                //     $('#tab_inventory').show();  // 해당 탭 내용 표시
+                //     return;
+                // }
 
                 Alert.confirm('',
                     '저장하시겠습니까?',
@@ -2577,7 +2562,44 @@
 
 
             page.searchDataBind();
+            resetForms();
         });
+
+        // 1. 폼 리셋 유틸 함수
+        function resetForms() {
+            // 기본정보 리셋
+            $('#matBasicForm')[0].reset();
+            $('#matBasicForm').find('#id').val('');
+            // 재고정보 리셋
+            $('#matProductionForm')[0].reset();
+            // 재고정보 리셋
+            $('#matStockForm')[0].reset();
+            // 검사정보 리셋
+            $('#matTestForm')[0].reset();
+            // 라우팅정보 리셋
+            //$('#matRoutingForm')[0].reset();
+            // 도면 파일 리셋
+            //_this.setUploader();
+
+            //$('#mat_detail').find('input, select').each(function () {
+            $('.mat_detail').find('input, select').each(function () {
+                if (!$(this).is(':disabled')) {
+                    $(this).attr('disabled', 'disabled');
+                }
+            });
+
+            // 단가정보 리셋
+            /*$('#priceForm')[0].reset();*/
+
+            /*_this.price_grid.setData([]);*/
+            $('#companyPriceForm')[0].reset();
+            $('#companyPriceForm').find('#price_id').val('');
+            $('#companyPriceForm').find('input, select').each(function () {
+                if (!$(this).is(':disabled')) {
+                    $(this).attr('disabled', 'disabled');
+                }
+            });
+        }
     </script>
 
 </th:block>

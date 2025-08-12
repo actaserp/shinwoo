@@ -36,31 +36,31 @@ import mes.domain.services.CommonUtil;
 @RestController
 @RequestMapping("/api/definition/material")
 public class MaterialController {
-	
+
 	@Autowired
 	private MaterialService materialService;
-	
+
 	@Autowired
 	private UnitPriceService unitPriceService;
-	
+
 	@Autowired
 	private BomByMatService bomService;
-	
+
 	@Autowired
 	private RoutingByMatService routingService;
-	
+
 	@Autowired
 	private TestByMatService testService;
-	
+
 	@Autowired
 	MaterialRepository materialRepository;
-	
-	@Autowired 
+
+	@Autowired
 	TestMastMatRepository testMastMatRepository;
-	
+
 	/**
 	 * @apiNote 품목조회
-	 * 
+	 *
 	 * @param matType 품목구분
 	 * @param matGroupId 품목그룹pk
 	 * @param keyword 키워드
@@ -68,33 +68,34 @@ public class MaterialController {
 	 */
 	@GetMapping("/read")
 	public AjaxResult getMaterialList(
-			@RequestParam("mat_type") String matType, 
-    		@RequestParam("mat_group") String matGroupId,
-    		@RequestParam("keyword") String keyword,
-			@RequestParam(value ="spjangcd") String spjangcd) {
-       
-        List<Map<String, Object>> items = this.materialService.getMaterialList(matType, matGroupId, keyword,spjangcd);
-               		
-        AjaxResult result = new AjaxResult();
-        result.data = items;        				
-        
+			@RequestParam("mat_type") String matType,
+			@RequestParam("mat_group") String matGroupId,
+			@RequestParam("keyword") String keyword,
+			@RequestParam(value ="spjangcd") String spjangcd,
+			@RequestParam(value ="useYn_flag") String useYnFlag) {
+
+		List<Map<String, Object>> items = this.materialService.getMaterialList(matType, matGroupId, keyword,spjangcd, useYnFlag);
+
+		AjaxResult result = new AjaxResult();
+		result.data = items;
+
 		return result;
 	}
-	
+
 	/**
 	 * @apiNote 품목상세조회
-	 * 
+	 *
 	 * @param matPk 품목pk
 	 * @return
 	 */
 	@GetMapping("/detail")
 	public AjaxResult getMaterial(@RequestParam("id") int matPk,
 								  @RequestParam(value ="spjangcd") String spjangcd) {
-        Map<String, Object> item = this.materialService.getMaterial(matPk,spjangcd);
-               		
-        AjaxResult result = new AjaxResult();
-        result.data = item;        				
-        
+		Map<String, Object> item = this.materialService.getMaterial(matPk,spjangcd);
+
+		AjaxResult result = new AjaxResult();
+		result.data = item;
+
 		return result;
 	}
 
@@ -111,68 +112,68 @@ public class MaterialController {
 
 	/**
 	 * @apiNote 품목저장(생성/수정)
-	 * 
+	 *
 	 * @param data 품목정보
 	 * @return
 	 */
 	@PostMapping("/save")
 	public AjaxResult saveMaterial(@RequestBody MultiValueMap<String,Object> data) {
 		SecurityContext sc = SecurityContextHolder.getContext();
-        Authentication auth = sc.getAuthentication();         
-        User user = (User)auth.getPrincipal();
-        data.set("user_id", user.getId());
-        
-        AjaxResult result = new AjaxResult();
-		
-        if (this.materialService.saveMaterial(data) > 0) {
-        	
-        } else {
-        	result.success = false;
-        }; 
-        
+		Authentication auth = sc.getAuthentication();
+		User user = (User)auth.getPrincipal();
+		data.set("user_id", user.getId());
+
+		AjaxResult result = new AjaxResult();
+
+		if (this.materialService.saveMaterial(data) > 0) {
+
+		} else {
+			result.success = false;
+		};
+
 		return result;
 	}
-	
+
 	/**
 	 * @apiNote 품목삭제
-	 * 
+	 *
 	 * @param matPk 품목pk
 	 * @return
 	 */
 	@PostMapping("/delete")
 	public AjaxResult deleteMaterial(@RequestParam("id") int matPk) {
-        
-        AjaxResult result = new AjaxResult();
-		
-        if (this.materialService.deleteMaterial(matPk) > 0) {
-        	
-        } else {
-        	result.success = false;
-        }; 
-        
+
+		AjaxResult result = new AjaxResult();
+
+		if (this.materialService.deleteMaterial(matPk) > 0) {
+
+		} else {
+			result.success = false;
+		};
+
 		return result;
 	}
-	
+
 	/**
 	 * @apiNote 품목 업체별 단가조회
-	 * 
+	 *
 	 * @param matPk 품목pk
 	 * @return
 	 */
 	@GetMapping("/readPrice")
 	public AjaxResult getPriceList(@RequestParam("mat_pk") int matPk) {
-       
-        List<Map<String, Object>> items = this.unitPriceService.getPriceListByMat(matPk);      
-               		
-        AjaxResult result = new AjaxResult();
-        result.data = items;        				
-        
+
+		List<Map<String, Object>> items = this.unitPriceService.getPriceListByMat(matPk);
+
+		AjaxResult result = new AjaxResult();
+		result.data = items;
+
 		return result;
 	}
-	
+
 	/**
 	 * @apiNote 품목 업체별 단가이력 조회
-	 * 
+	 *
 	 * @param matPk 품목pk
 	 * @return
 	 */
@@ -180,45 +181,45 @@ public class MaterialController {
 	public AjaxResult getPriceHistory(@RequestParam("mat_pk") int matPk,
 									  @RequestParam("com_pk") int comPk) {
 
-        List<Map<String, Object>> items = this.unitPriceService.getPriceHistoryByMat(matPk,comPk);
-               		
-        AjaxResult result = new AjaxResult();
-        result.data = items;        				
-        
+		List<Map<String, Object>> items = this.unitPriceService.getPriceHistoryByMat(matPk,comPk);
+
+		AjaxResult result = new AjaxResult();
+		result.data = items;
+
 		return result;
 	}
-	
+
 	/**
 	 * @apiNote 품목 업체별 단가상세조회
-	 * 
+	 *
 	 * @param pricePk 단가pk
 	 * @return
 	 */
 	@GetMapping("/detailPrice")
 	public AjaxResult getPriceDetail(@RequestParam("price_id") int pricePk) {
-       
-        Map<String, Object> item = this.unitPriceService.getPriceDetail(pricePk);      
-               		
-        AjaxResult result = new AjaxResult();
-        result.data = item;        				
-        
+
+		Map<String, Object> item = this.unitPriceService.getPriceDetail(pricePk);
+
+		AjaxResult result = new AjaxResult();
+		result.data = item;
+
 		return result;
 	}
-	
+
 	/**
 	 * @apiNote 단가저장(등록/변경)
-	 * 
+	 *
 	 * @param data 품목단가정보
 	 * @return
 	 */
 	@PostMapping("/savePrice")
 	public AjaxResult savePriceByMat(@RequestBody MultiValueMap<String,Object> data) {
 		SecurityContext sc = SecurityContextHolder.getContext();
-        Authentication auth = sc.getAuthentication();         
-        User user = (User)auth.getPrincipal();
-        data.set("user_id", user.getId());
-        
-        AjaxResult result = new AjaxResult();
+		Authentication auth = sc.getAuthentication();
+		User user = (User)auth.getPrincipal();
+		data.set("user_id", user.getId());
+
+		AjaxResult result = new AjaxResult();
 
 		try {
 			int saveCount = this.unitPriceService.saveCompanyUnitPrice(data);
@@ -236,112 +237,112 @@ public class MaterialController {
 
 		return result;
 	}
-	
+
 	/**
 	 * @apiNote 단가수정
-	 * 
+	 *
 	 * @param data 품목단가정보
 	 * @return
 	 */
 	@PostMapping("/updatePrice")
 	public AjaxResult updatePriceByMat(@RequestBody MultiValueMap<String,Object> data) {
 		SecurityContext sc = SecurityContextHolder.getContext();
-        Authentication auth = sc.getAuthentication();         
-        User user = (User)auth.getPrincipal();
-        data.set("user_id", user.getId());
-        
-        AjaxResult result = new AjaxResult();
-		
-        if (this.unitPriceService.updateCompanyUnitPrice(data) > 0) {
-        	
-        } else {
-        	result.success = false;
-        }; 
-        
+		Authentication auth = sc.getAuthentication();
+		User user = (User)auth.getPrincipal();
+		data.set("user_id", user.getId());
+
+		AjaxResult result = new AjaxResult();
+
+		if (this.unitPriceService.updateCompanyUnitPrice(data) > 0) {
+
+		} else {
+			result.success = false;
+		};
+
 		return result;
 	}
-	
+
 	/**
 	 * @apiNote 단가삭제
-	 * 
+	 *
 	 * @param priceId 단가pk
 	 * @return
 	 */
 	@PostMapping("/deletePrice")
 	public AjaxResult deletePriceByMat(@RequestParam("id") int priceId) {
-        
-        AjaxResult result = new AjaxResult();
-		
-        if (this.unitPriceService.deleteCompanyUnitPrice(priceId) > 0) {
-        	
-        } else {
-        	result.success = false;
-        }; 
-        
+
+		AjaxResult result = new AjaxResult();
+
+		if (this.unitPriceService.deleteCompanyUnitPrice(priceId) > 0) {
+
+		} else {
+			result.success = false;
+		};
+
 		return result;
 	}
-	
+
 	/**
 	 * @apiNote BOM목록조회
-	 * 
+	 *
 	 * @param matPk
 	 * @return
 	 */
 	@GetMapping("/bom")
 	public AjaxResult readBomList(@RequestParam("mat_id") String matPk) {
-		List<Map<String, Object>> items = this.bomService.getBomListByMat(matPk);      
-   		
-        AjaxResult result = new AjaxResult();
-        result.data = items;        				
-        
+		List<Map<String, Object>> items = this.bomService.getBomListByMat(matPk);
+
+		AjaxResult result = new AjaxResult();
+		result.data = items;
+
 		return result;
 	}
-	
+
 	/**
 	 * @apiNote BOM목록조회
-	 * 
+	 *
 	 * @param matPk
 	 * @return
 	 */
 	@GetMapping("/bomReverse")
 	public AjaxResult readBomReverseList(@RequestParam("mat_id") int matPk) {
-		List<Map<String, Object>> items = this.bomService.getBomReverseListByMat(matPk);      
-   		
-        AjaxResult result = new AjaxResult();
-        result.data = items;        				
-        
+		List<Map<String, Object>> items = this.bomService.getBomReverseListByMat(matPk);
+
+		AjaxResult result = new AjaxResult();
+		result.data = items;
+
 		return result;
 	}
-	
+
 	/**
 	 * @apiNote 라우팅목록조회
-	 * 
+	 *
 	 * @param routingPk
 	 * @return
 	 */
 	@GetMapping("/routingProcess")
 	public AjaxResult readRoutingProcessList(@RequestParam("routing_pk") String routingPk) {
-		List<Map<String, Object>> items = this.routingService.getRoutingProcessList(routingPk);      
-   		
-        AjaxResult result = new AjaxResult();
-        result.data = items;        				
-        
+		List<Map<String, Object>> items = this.routingService.getRoutingProcessList(routingPk);
+
+		AjaxResult result = new AjaxResult();
+		result.data = items;
+
 		return result;
 	}
-	
+
 	/**
 	 * @apiNote 검사정보조회
-	 * 
+	 *
 	 * @param matPk
 	 * @return
 	 */
 	@GetMapping("/testMaster")
 	public AjaxResult readTestMasterList(@RequestParam("mat_id") int matPk) {
-		List<Map<String, Object>> items = this.testService.getTestMasterList(matPk);      
-   		
-        AjaxResult result = new AjaxResult();
-        result.data = items;        				
-        
+		List<Map<String, Object>> items = this.testService.getTestMasterList(matPk);
+
+		AjaxResult result = new AjaxResult();
+		result.data = items;
+
 		return result;
 	}
 
