@@ -60,10 +60,9 @@
   "wm_mat_inout_test": { "name": "입고검사", "templates": { "default": "haccp/mat_inout_test_list.html", "edit": "haccp/mat_inout_test_diary.html" } },
   "wm_api_log": { "name": "api로그", "templates": { "default": "system/api_log.html" } },
 
-  "wm_prod_plan": { "name": "작업계획등록", "templates": { "default": "production/prod_plan.html" } },
-  "wm_job_plan": { "name": "생산계획등록", "templates": { "default": "production/job_plan.html" } },
+  "wm_prod_plan": { "name": "생산계획등록", "templates": { "default": "production/prod_plan.html" } },
   "wm_prod_order_edit": { "name": "작업지시등록(수주)", "templates": { "default": "production/prod_order_edit.html" } },
-  "wm_prod_order_a": { "name": "작업지시등록(개별)", "templates": { "default": "production/prod_order_a.html" } },
+  "wm_prod_order_a": { "name": "자체재고생산지시", "templates": { "default": "production/prod_order_a.html" } },
   "wm_prod_prepare_a": { "name": "작업준비", "templates": { "default": "production/prod_prepare_a.html" } },
   "wm_mat_requ_simulation_a": { "name": "소요량 시뮬레이션", "templates": { "default": "schedule/mat_requ_simulation_a.html" } },
   "wm_prod_result_lot": { "name": "생산실적입력", "templates": { "default": "production/prod_result_lot.html" } },

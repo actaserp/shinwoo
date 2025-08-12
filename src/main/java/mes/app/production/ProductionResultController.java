@@ -989,6 +989,8 @@ public class ProductionResultController {
             return result;
         }
 
+
+
         for (int i = 0; i < bomMatItems.size(); i++) {
             Map<String, Object> bomMap = bomMatItems.get(i);
             float chasuBomQty = Float.parseFloat(bomMap.get("chasu_bom_qty").toString());
@@ -996,6 +998,7 @@ public class ProductionResultController {
             String matName = bomMap.get("mat_name").toString();
             Material consMat = this.materialRepository.getMaterialById(consumeMatPk);
             String lotUseYn = bomMap.get("lotUseYn").toString();
+            float totalLotQty = 0;
 			
 			/*
 			 선입선출로 mat_lot 찾아서 차감 
@@ -1010,7 +1013,7 @@ public class ProductionResultController {
                 List<Map<String, Object>> mpiList = this.productionResultService.getMaterialProcessInputList(jr.getId(), consumeMatPk);
                 // 투입요청에서 해당 품목이 로트 투입인지 조회한다
 
-                float totalLotQty = 0;
+
                 for (int j = 0; j < mpiList.size(); j++) {
                     Map<String, Object> mpiMap = mpiList.get(j);
 
@@ -1018,12 +1021,12 @@ public class ProductionResultController {
                     totalLotQty += currQty;
                 }
 
-                if (totalLotQty < chasuBomQty) {
-                    result.message = "가용한 LOT 재고가 없습니다.(" + matName + ")\n 투입 내역에서 가용 재고를 추가해주세요. ";
-                    result.success = false;
-                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                    return result;
-                }
+//                if (totalLotQty < chasuBomQty) {
+//                    result.message = "가용한 LOT 재고가 없습니다.(" + matName + ")\n 투입 내역에서 가용 재고를 추가해주세요. ";
+//                    result.success = false;
+//                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+//                    return result;
+//                }
 
                 // 작업준비에 설정된 lot 투입 품목이면
                 // 로트 사용량 추가
@@ -1061,12 +1064,12 @@ public class ProductionResultController {
 
                 }
 
-                if (remainQty > 0) {
-                    result.message = "로트 수량이 부족합니다.(" + matName + ")";
-                    result.success = false;
-                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                    return result;
-                }
+//                if (remainQty > 0) {
+//                    result.message = "로트 수량이 부족합니다.(" + matName + ")";
+//                    result.success = false;
+//                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+//                    return result;
+//                }
             } else {
                 if ("1".equals(consMat.getUseyn())) {
                     result.message = "사용 불가능한 품목이 BOM에 등록되어 있습니다.(" + matName + ")";
@@ -1103,8 +1106,8 @@ public class ProductionResultController {
             mc.setStartTime(now);
             mc.setEndTime(now);
             mc.setDescription("차수생산분");
-            mc.setBomQty(chasuBomQty);
-            mc.setConsumedQty(chasuBomQty);        // 차수 생산분에 해당하는 BOM기준물량
+            mc.setBomQty(totalLotQty);
+            mc.setConsumedQty(totalLotQty);        // 차수 생산분에 해당하는 BOM기준물량
             mc.set_audit(user);
             mc.setState("finished");
             mc.set_status("a");
@@ -1122,7 +1125,7 @@ public class ProductionResultController {
             mic.setInoutTime(LocalTime.parse(time.format(timeFormat)));
             mic.setInOut("out");
             mic.setOutputType("consumed_out");
-            mic.setOutputQty(mc.getConsumedQty());
+            mic.setOutputQty(totalLotQty);
             mic.setSourceDataPk(mc.getId());
             mic.setSourceTableName("mat_consu");
             mic.setState("confirmed");
