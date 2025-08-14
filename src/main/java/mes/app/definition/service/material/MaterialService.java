@@ -191,13 +191,10 @@ public class MaterialService {
 		dicParam.addValue("safetyStock", CommonUtil.tryFloatNull(data.getFirst("SafetyStock")));
 		dicParam.addValue("maxStock", CommonUtil.tryFloatNull(data.getFirst("MaxStock")));
 		dicParam.addValue("processSafetyStock", CommonUtil.tryFloatNull(data.getFirst("ProcessSafetyStock")));
+		dicParam.addValue("temperature", CommonUtil.tryFloatNull(data.getFirst("Temperature")));
+		dicParam.addValue("pressure", CommonUtil.tryFloatNull(data.getFirst("Pressure")));
+		dicParam.addValue("validDays", CommonUtil.tryFloatNull(data.getFirst("ValidDays")));
 		String validDaysStr = data.getFirst("ValidDays") != null ? data.getFirst("ValidDays").toString().trim() : "";
-		if (!validDaysStr.isEmpty()) {
-			dicParam.addValue("validDays", Integer.parseInt(validDaysStr));
-		} else {
-			// 기본값 지정(예시) 또는 예외처리
-//			dicParam.addValue("validDays", 0);
-		}
 
 		if(data.containsKey("lot_use_yn")) {
 			dicParam.addValue("lotUseYN", data.getFirst("lot_use_yn").toString());
@@ -305,6 +302,8 @@ public class MaterialService {
 						 , "Useyn"
 						 ,"Avrqty"
 						 ,"spjangcd"
+						 , "Temperature"
+						 , "Pressure"
 						 )
 						VALUES
 						(now()
@@ -355,7 +354,10 @@ public class MaterialService {
 						, :mtyn
 						, :useyn
 						, :avrqty
-						, :spjangcd)
+						, :spjangcd
+						, :pressure
+						, :temperature
+						)
 					""";
 		}else {
 			sql = """
@@ -408,6 +410,8 @@ public class MaterialService {
 					, "Mtyn" = :mtyn
 					, "Useyn" = :useyn
 					,"Avrqty" = :avrqty
+					, "Temperature" = :temperature
+					, "Pressure" = :pressure
 					WHERE id = :id
 					AND spjangcd = :spjangcd
 					""";
