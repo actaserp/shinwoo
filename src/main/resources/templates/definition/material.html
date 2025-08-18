@@ -451,17 +451,6 @@
                                         </tr>
                                         <tr>
                                             <th>
-                                                <label for="Equipment_id">컷팅품목</label>
-                                            </th>
-                                            <td>
-                                                <select id="Equipment_id" name="Equipment_id"
-                                                        style="width: 100%;"></select>
-                                            </td>
-
-
-                                        </tr>
-                                        <tr>
-                                            <th>
                                                 <label for="StandardTime">표준 생산 시간</label>
                                             </th>
                                             <td>
@@ -918,6 +907,18 @@
 
                         <!--section8-->
                         <section class="tab-item" id="tab_routing" style="border-top-left-radius: 0;">
+                            <dl>
+                                <dt></dt>
+                                <dd>
+                                    <select class="s-150" id="Routing_id"
+                                            name="Routing_id"></select>
+                                    <button disabled type="button" class="btn-excellt btn-default" id="routingSave"
+                                            style="width: 50px; height: 36px;">
+                                        <i class="fas fa-save"></i>
+                                    </button>
+                                </dd>
+                            </dl>
+                            <br>
                             <div class="container-fluid">
                                 <div id="routing-grid" style=""></div>
                             </div>
