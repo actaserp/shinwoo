@@ -264,7 +264,7 @@
                             <th style="text-align: center">
                                 <label for="cboCompany">판매처*</label>
                             </th>
-                            <td colspan="3">
+                            <td >
                                 <input id="cboCompany" name="Company_id" type="hidden">
                                 <input class="form-control2" type="text" id="CompanyName" name="CompanyName"
                                 placeholder="판매처 검색 버튼을 클릭하여 판매처를 검색하세요" readonly/>
@@ -273,6 +273,12 @@
                                     <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                                     판매처 검색
                                 </a>
+                            </td>
+                            <th style="text-align: center">
+                                <label for="delivery">납품처*</label>
+                            </th>
+                            <td colspan="3">
+                                <input class="form-control2" type="text" id="DeliveryName" name="DeliveryName" placeholder="납품처"/>
                             </td>
                         </tr>
 <!--                        <tr>-->
@@ -291,6 +297,19 @@
 <!--                            </td>-->
 <!--                        </tr>-->
                         <tr>
+                           <th style="text-align: center">
+                                <label for="cboOrder">수주처*</label>
+                            </th>
+                            <td >
+                                <input id="SuJuOrderId" name="SuJuOrderId" type="hidden">
+                                <input class="form-control2" type="text" id="SuJuOrderName" name="SuJuOrderName"
+                                placeholder="수주처 검색 버튼을 클릭하여 판매처를 검색하세요" readonly/>
+                                &nbsp;
+                                <a class="btn btn-delete" title="검색" id="btnOrderSearch">
+                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    수주처 검색
+                                </a>
+                            </td>
                             <th style="text-align: center">
                                 <label for="cboSujuType">수주구분</label>
                             </th>
@@ -334,7 +353,7 @@
                         <col style="width: 9%">
                         <col style="width: 9%">
                         <col style="width: 9%">
-                        <col style="width: 10%">
+<!--                        <col style="width: 10%">-->
                         <col style="width: 11%">
                         <col style="width: 6%">
                         <col style="width: 4%">
@@ -348,7 +367,7 @@
                         <th>공급가액</th>
                         <th>부가세</th>
                         <th>합계</th>
-                        <th>프로젝트</th>
+<!--                        <th>프로젝트</th>-->
                         <th>비고</th>
                         <th>상태</th>
                         <th>
@@ -360,7 +379,7 @@
                     </thead>
                     <tr class="item-template-row" style="display: none;">
                         <td>
-                            <input type="text" name="product_code" readonly/>
+                            <input type="text" name="product_code" placeholder="코드" readonly/>
                         </td>
                         <td>
                             <div class="input-with-button">
@@ -381,17 +400,17 @@
                                 <input type="checkbox" name="VatIncluded" />
                             </div>
                         </td>
-                        <td><input type="text" name="supplyAmount" /></td>
-                        <td><input type="text" name="VatAmount" /></td>
-                        <td><input type="text" name="totalAmount" /></td>
-                        <td>
-                            <input name="projectHidden" type="hidden">
-                            <input type="text" name="project" placeholder="입력 후 엔터">
-                        </td>
-                        <td><input type="text" name="description" /></td>
+                        <td><input type="text" name="supplyAmount" placeholder="공급가액" /></td>
+                        <td><input type="text" name="VatAmount" placeholder="부과세"/></td>
+                        <td><input type="text" name="totalAmount" placeholder="합계" /></td>
+<!--                        <td>-->
+<!--                            <input name="projectHidden" type="hidden">-->
+<!--                            <input type="text" name="project" placeholder="입력 후 엔터">-->
+<!--                        </td>-->
+                        <td><input type="text" name="description" placeholder="비고" /></td>
                          <td>
                             <input type="hidden" name="State"/>
-                            <input type="text" name="suju_StateName" readonly />
+                            <input type="text" name="suju_StateName" placeholder="상태" readonly />
                         </td>
                         <td class="al_c item_border">
                             <a class="btn in_btn" title="삭제" onclick="removeItemRow(this)">
@@ -639,6 +658,20 @@
 
                     poppage.show(searchcallback);
                 });
+                $content.find('#btnOrderSearch').click(function () {
+                    let poppage = new PopCompComponent();
+                    let $poppage = $(poppage);
+                    let searchcallback = function (items) {
+                        $content.find('#order_id').val(items.id);
+                        $content.find('#OrderName').val(items.compname);
+
+                        // if ($Material_id.val() && $cboCompany.val()) {
+                        //     tryShowPrice();
+                        // }
+                    };
+
+                    poppage.show(searchcallback);
+                });
 
                 // 저장버튼
                 let $btnPopSujuSave = $('#btnPopSujuSave');
@@ -673,6 +706,7 @@
 
                     //수주일, 납기일 체크?
                     let data = FormUtil.extractForm($sujuForm);
+                    console.log('데이터 확인:', data);
 
                     if (!$('#cboCompany').val()) {
                         Alert.alert('', '판매처를 선택하세요.');
@@ -744,6 +778,9 @@
                             spjangcd: data.spjangcd,
                             totalAmountSum: data.totalAmountSum,
                             Description: data.Description,
+                            order_id:data.SuJuOrderId,
+                            OrderName:data.SuJuOrderName,
+                            DeliveryName:data.DeliveryName ,
                             items: items
                         };
 
