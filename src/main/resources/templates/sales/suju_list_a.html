@@ -94,16 +94,16 @@
                                 수정
                             </a>
                         </li>
-                        <li>
-                            <a class="btn" title="엑셀 업로드" id="btnShowUpload">
-                                엑셀 업로드
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn" title="양식 다운로드" id="btnDownloadTemplate">
-                                양식 다운로드
-                            </a>
-                        </li>
+<!--                        <li>-->
+<!--                            <a class="btn" title="엑셀 업로드" id="btnShowUpload">-->
+<!--                                엑셀 업로드-->
+<!--                            </a>-->
+<!--                        </li>-->
+<!--                        <li>-->
+<!--                            <a class="btn" title="양식 다운로드" id="btnDownloadTemplate">-->
+<!--                                양식 다운로드-->
+<!--                            </a>-->
+<!--                        </li>-->
                     </ul>
                 </div>
             </div>
@@ -681,6 +681,13 @@
 
                 setTimeout(() => {
                     FormUtil.BindDataSujuForm(data, $sujuForm);
+                    if (data.mode === 'new') {
+                        // 신규는 기본 해제 + 값도 N으로 맞춰서 extractForm 시 누락 방지
+                        $content.find('input[type="checkbox"][name^="VatIncluded"]')
+                            .prop('checked', false)
+                            .val('N')
+                            .trigger('change'); // 계산식 즉시 반영
+                    }
                     $content.find('tr:visible').each(function () {
                         calculateAmounts($(this), 'unit');
                     });
