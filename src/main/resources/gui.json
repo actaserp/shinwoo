@@ -100,6 +100,8 @@
   "wm_test_item": { "name": "검사항목", "templates": { "default": "test/test_item.html" } },
 
   "wm_custom_service": { "name": "고객별 부적합 분석", "templates": { "default": "support/custom_service.html"	} },
+  "wm_material_optimal_stock_status" : { "name": "자재 적정 재고 현황", "templates": { "default": "support/material_optimal_stock_status.html"	} },
+
 
   "wm_meeting_calendar": { "name": "캘린더", "templates": { "default": "support/meeting_calendar.html" } },
   "wm_doc_form": { "name": "문서종류", "templates": { "default": "document/doc_form.html" } },
