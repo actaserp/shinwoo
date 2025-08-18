@@ -138,7 +138,7 @@ public class SujuController {
 	@Transactional
 	public AjaxResult SujuSave(@RequestBody Map<String, Object> payload, Authentication auth) {
 		User user = (User) auth.getPrincipal();
-
+		//log.info("수주등록 들어온 데이터: payload:{}", payload);
 		String jumunDateStr = (String) payload.get("JumunDate");
 		String dueDateStr = (String) payload.get("DueDate");
 
@@ -151,6 +151,9 @@ public class SujuController {
 		String description = (String) payload.get("Description");
 		String projectId = (String) payload.get("projectHidden");
 		String spjangcd = (String) payload.get("spjangcd");
+		Integer order_id = Integer.parseInt(payload.get("order_id").toString()); //수주처
+		String SuJuOrderName = (String) payload.get("OrderName");
+		String DeliveryName = (String) payload.get("DeliveryName");	//납품처
 		String amountStr = payload.get("totalAmountSum").toString().replace(",", "");
 		double totalAmount = 0.0;
 		try {
@@ -181,6 +184,9 @@ public class SujuController {
 		head.setSujuType(sujuType);
 		head.setTotalPrice(totalAmount);
 		head.setDescription(description);
+		head.setSuJuOrderId(order_id);
+		head.setSuJuOrderName(SuJuOrderName);
+		head.setDeliveryName(DeliveryName);
 		head.set_status("manual");
 		head = sujuHeadRepository.save(head);
 
@@ -203,7 +209,7 @@ public class SujuController {
 			suju.setCompanyId(companyId);
 			suju.setCompanyName(companyName);
 			suju.setSpjangcd(spjangcd);
-			suju.setProject_id(projectId);
+			//suju.setProject_id(projectId);
 			suju.set_status("manual");
 			suju.setState("received");
 			suju.set_audit(user);

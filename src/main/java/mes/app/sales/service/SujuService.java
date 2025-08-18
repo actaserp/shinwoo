@@ -174,6 +174,9 @@ public class SujuService {
 				sh."TotalPrice",
 				sh."Description",
 				sh."SujuType",
+				sh."SuJuOrderId" ,
+				sh."SuJuOrderName"  ,
+				sh."DeliveryName",
 				fn_code_name('suju_type', sh."SujuType") AS "SujuTypeName"
 			FROM suju_head sh
 			LEFT JOIN company c ON c.id = sh."Company_id"
