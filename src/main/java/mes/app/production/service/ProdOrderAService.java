@@ -45,7 +45,12 @@ public class ProdOrderAService {
 	            , jr."State" as state, fn_code_name('job_state', jr."State") as state_name
                 , jr."Description" as description
                 , up."Name" as creator
-	            from job_res jr 
+                , rp."ProcessOrder" as process_order
+			    , coalesce(pr_rt."Code", pr_wc."Code") as process_code
+				, coalesce(pr_rt."Name", pr_wc."Name") as process_name
+			    , jr."ProcessCount" as process_count
+			    , flow.process_flow
+	            from job_res jr
 	            left join material m on m.id = jr."Material_id"
 	            left join mat_grp mg on mg.id = m."MaterialGroup_id"
 	            left join unit u on u.id = m."Unit_id"
@@ -53,8 +58,27 @@ public class ProdOrderAService {
 	            left join equ e on e.id = jr."Equipment_id"
 	            left join shift sh on sh."Code" = jr."ShiftCode"
                 left join user_profile up on up."User_id" = jr."_creater_id"
+                
+                -- (1) 라우팅 기반 공정 (헤더=마지막 공정: WorkIndex=ProcessOrder 매칭)
+                left join routing_proc rp
+					   on rp."Routing_id"   = jr."Routing_id"
+					  and rp."ProcessOrder" = jr."WorkIndex"
+				left join process pr_rt
+					   on pr_rt.id = rp."Process_id"
+				
+				-- 라우팅이 없을 때 워크센터 기반 공정
+				left join process pr_wc
+					   on pr_wc.id = wc."Process_id"
+                
+                left join lateral (
+					select string_agg(p2."Name", ' → ' order by rp2."ProcessOrder") as process_flow
+					from routing_proc rp2
+					left join process p2 on p2.id = rp2."Process_id"
+					where rp2."Routing_id" = jr."Routing_id"
+				) flow on true
                 where jr."ProductionDate" between cast(:dateFrom as date) and cast(:dateTo as date)
                 and jr.spjangcd = :spjangcd
+                and jr."Parent_id" is null
 				""";
 		if (StringUtils.isEmpty(workcenterPk) == false) sql += " and jr.\"WorkCenter_id\" = cast(:workcenterPk as Integer) ";
 		if (StringUtils.isEmpty(matGrpPk) == false) {
@@ -160,18 +184,35 @@ public class ProdOrderAService {
 	}
 
 	public int deleteById(Integer id) {
-		
-		MapSqlParameterSource paramMap = new MapSqlParameterSource();
-		paramMap.addValue("id", id);
-		
-		String sql = """
-				delete from job_res
-                where id = :id
-                and "State" = 'ordered'
-				""";
-		
-		int value = this.sqlRunner.execute(sql, paramMap);
-		return value;
+
+		MapSqlParameterSource p = new MapSqlParameterSource().addValue("pid", id);
+
+		// 1) 부모인지 확인 (UI상 부모만 오지만 서버에서도 가드)
+		int isParent = sqlRunner.queryForCount("""
+            select count(*) from job_res
+            where id = :pid and "Parent_id" is null
+        """, p);
+		if (isParent == 0) {
+			return -1; // 부모가 아님
+		}
+
+		// 2) not-ordered 존재 체크 (부모 + 자식)
+		int notOrdered = sqlRunner.queryForCount("""
+            select count(*) from job_res
+             where (id = :pid or "Parent_id" = :pid)
+               and "State" <> 'ordered'
+        """, p);
+		if (notOrdered > 0) {
+			return -2; // 삭제 거부
+		}
+
+		// 3) 일괄 삭제 (부모 + 자식)
+		int deleted = sqlRunner.execute("""
+            delete from job_res
+             where (id = :pid or "Parent_id" = :pid)
+        """, p);
+
+		return deleted;
 	}
 
 	public void updateBySujuPk(Integer sujuPk) {

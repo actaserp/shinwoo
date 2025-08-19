@@ -215,7 +215,7 @@
                             </tr>
                             <tr>
                                 <th style="text-align: center">
-                                    <label for="cboWorcenter">워크센터*</label>
+                                    <label for="cboWorcenter">워크센터</label>
                                 </th>
                                 <td>
                                     <select class="form-control2" id="cboWorcenter" name="cboWorcenter"></select>
@@ -271,19 +271,21 @@
                             }
                         },
                         columns: [
-                            {binding: 'workorder_number', header: '작지번호', width: 150, align: 'center'},
-                            {binding: 'production_date', header: '생산일', width: 120, align: 'center'},
-                            {binding: 'shift_name', header: '근무조', width: 100, align: 'center'},
-                            {binding: 'mat_type_name', header: '제품구분', width: 100, align: 'center'},
-                            {binding: 'mat_grp_name', header: '제품그룹', width: 120, align: 'left'},
-                            {binding: 'mat_code', header: '제품코드', width: 100, align: 'left'},
+                            {binding: 'workorder_number', header: '작지번호', width: 140, align: 'center'},
+                            {binding: 'production_date', header: '생산일', width: 110, align: 'center'},
+                            {binding: 'shift_name', header: '근무조', width: 80, align: 'center'},
+                            {binding: 'mat_type_name', header: '제품구분', width: 80, align: 'center'},
+                            {binding: 'mat_grp_name', header: '제품그룹', width: 100, align: 'center'},
+                            {binding: 'mat_code', header: '제품코드', width: 100, align: 'center'},
                             {binding: 'mat_name', header: '제품명', width: 180, align: 'left'},
                             {binding: 'unit_name', header: '단위', width: 60, align: 'center'},
-                            {binding: 'order_qty', header: '지시량', width: 100, align: 'right'},
-                            {binding: 'workcenter_name', header: '워크센터', width: 150, align: 'left'},
+                            {binding: 'order_qty', header: '지시량', width: 90, align: 'right'},
+                            {binding: 'workcenter_name', header: '워크센터', width: 100, align: 'center'},
+                            {binding: 'process_name', header: '공정', width: 100, align: 'center'},
                             {binding: 'equip_name', header: '설비', width: 100, align: 'left'},
                             {binding: 'state_name', header: '상태', width: 100, align: 'center'},
-                            {binding: 'description', header: '비고', width: 100, align: 'left'}
+                            {binding: 'process_flow', header: '공정 과정', width: 120, align: 'left'},
+                            {binding: 'description', header: '비고', width: '*', align: 'left'}
                         ]
                     });
 
