@@ -43,6 +43,7 @@
   "wm_balju_order": {"name": "발주등록", "templates": { "default": "balju_rp/balju_order" }},
   "wm_balju_order_aggregate": {"name": "발주량집계", "templates": { "default": "balju_rp/balju_order_aggregate" }},
   "wm_balju_order_list": {"name": "월별 발주량", "templates": { "default": "balju_rp/balju_order_list" }},
+  "wm_balju_optimal_stock": {"name": "수주량대비 적정재고현황", "templates": { "default": "balju_rp/balju_optimal_stock" }},
   "wm_mat_rp_input": { "name": "수불전표등록", "templates": { "default": "balju_rp/rp_input.html" } },
   "wm_mat_rp_list": { "name": "수불전표조회", "templates": { "default": "balju_rp/rp_list.html" } },
 
