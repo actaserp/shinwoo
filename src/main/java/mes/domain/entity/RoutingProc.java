@@ -23,7 +23,7 @@ public class RoutingProc extends AbstractAuditModel{
 	int id;
 	
 	@Column(name = "\"ProcessOrder\"")
-	Float processOrder;
+	Integer processOrder;
 	
 	@Column(name = "\"StandardTime\"")
 	Float standardTime;
@@ -32,8 +32,9 @@ public class RoutingProc extends AbstractAuditModel{
 	String description;
 	
 	@Column(name = "\"Process_id\"")
-	Float processId;
-	
+	Integer processId;
+
 	@Column(name = "\"Routing_id\"")
 	Integer routingId;
+
 }

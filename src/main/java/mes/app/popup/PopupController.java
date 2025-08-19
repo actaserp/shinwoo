@@ -137,6 +137,36 @@ public class PopupController {
 		return result;
 	}
 
+	@RequestMapping("/search_process")
+	public AjaxResult getSearchProcess(
+			@RequestParam(value="keyword", required=false) String keyword
+	) {
+		AjaxResult result = new AjaxResult();
+
+		String sql ="""
+	            select 
+                 p.id
+                 , p."Code"
+                 , p."Name"
+                 , p."ProcessType"
+                from process p
+                where 1=1  
+	    """;
+
+		if(StringUtils.hasText(keyword)){
+			sql+="""
+            and upper(e."Name") like concat('%%',:keyword,'%%')
+            """;
+		}
+
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("keyword", keyword);
+
+		result.data = this.sqlRunner.getRows(sql, paramMap);
+
+		return result;
+	}
+
 	@RequestMapping("/pop_prod_input/mat_list")
 	public AjaxResult getMatList(
 			@RequestParam(value="mat_type", required=false) String matType,
