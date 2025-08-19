@@ -95,14 +95,11 @@ public class ProdOrderAController {
 			@RequestParam("production_date") String productionDate,
 			@RequestParam(value = "cboEquipment", required=false) Integer cboEquipment,
 			@RequestParam("cboMaterial") Integer cboMaterial,
-			@RequestParam("cboMaterialGrp") Integer cboMaterialGrp,
 			@RequestParam("cboShiftCode") String cboShiftCode,
 			@RequestParam("cboWorcenter") Integer cboWorcenter, // 헤더 기본 워크센터(라우팅 없을 때만 사용)
 			@RequestParam("txtDescription") String txtDescription,
 			@RequestParam("txtOrderQty") Integer txtOrderQty,
-			@RequestParam("txtUnit") String txtUnit,
 			@RequestParam("spjangcd") String spjangcd,
-			HttpServletRequest request,
 			Authentication auth) {
 
 		User user = (User) auth.getPrincipal();
@@ -146,7 +143,6 @@ public class ProdOrderAController {
 			// 라우팅 없음 → 화면값 사용
 			header.setRouting_id(null);
 			header.setProcessCount(1);
-			header.setWorkIndex(0); // 헤더만 존재
 			header.setWorkCenter_id(cboWorcenter);
 			header.setFirstWorkCenter_id(cboWorcenter);
 			header.setEquipment_id(cboEquipment);
@@ -173,7 +169,6 @@ public class ProdOrderAController {
 
 		header.setRouting_id(routingPk);
 		header.setProcessCount(steps.size()); // 전체 공정 수
-		header.setWorkIndex(last.getProcessOrder()); // 헤더=마지막 공정 순서
 		header.setWorkCenter_id(lastWcId);
 		header.setFirstWorkCenter_id(lastWcId);
 		header.setEquipment_id(cboEquipment);   // 설비/교대는 라우팅 있을 땐 화면값 미사용
@@ -223,7 +218,6 @@ public class ProdOrderAController {
 			child.setParent_id(header.getId());
 			child.setRouting_id(routingPk);
 			child.setProcessCount(1);
-			child.setWorkIndex(step.getProcessOrder());
 			child.setWorkCenter_id(wcId);
 			child.setFirstWorkCenter_id(wcId);
 			child.setEquipment_id(null);

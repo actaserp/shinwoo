@@ -52,6 +52,7 @@ public class ProdPrepareService {
                 left join shift sh on sh."Code" = jr."ShiftCode"
                 where jr."ProductionDate" = :data_date and jr."State" = 'ordered'
                 and jr.spjangcd = :spjangcd
+                and jr."Parent_id" is null
         		""";
   		
 	    if (StringUtils.isEmpty(shift_code) == false) {

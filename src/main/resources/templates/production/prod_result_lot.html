@@ -282,19 +282,19 @@
                 </div>
                 <div class="section-top" id="prodResultList">
                     <div class="search-wrap">
-                        <dl>
-                            <dt>
-                                <label for="cboWorkCenter">
-                                    워크센터<span class="eq"></span>
-                                </label>
-                            </dt>
-                            <dd>
-                                <div class="srch-box">
-                                    <select id="cboWorkCenter" name="cboWorkCenter">
-                                    </select>
-                                </div>
-                            </dd>
-                        </dl>
+<!--                        <dl>-->
+<!--                            <dt>-->
+<!--                                <label for="cboWorkCenter">-->
+<!--                                    워크센터<span class="eq"></span>-->
+<!--                                </label>-->
+<!--                            </dt>-->
+<!--                            <dd>-->
+<!--                                <div class="srch-box">-->
+<!--                                    <select id="cboWorkCenter" name="cboWorkCenter">-->
+<!--                                    </select>-->
+<!--                                </div>-->
+<!--                            </dd>-->
+<!--                        </dl>-->
 
                         <dl>
                             <dt>
@@ -346,9 +346,9 @@
 
                 <ul class="tab-links">
                     <li><a href="#tabBasic" name="tabBasic">기본 정보</a></li>
+                    <li><a href="#tabConsumed" name="tabConsumed">투입 내역</a></li>
                     <li><a href="#tabChasu" name="tabChasu">차수별 생산</a></li>
                     <li><a href="#tabDefect" name="tabDefect">부적합 정보</a></li>
-                    <li><a href="#tabConsumed" name="tabConsumed">투입 내역</a></li>
                     <li hidden><a href="#tabBarcode" name="tabBarcode">바코드</a></li>
                 </ul>
                 <div>
@@ -540,6 +540,14 @@
                         </div>
                     </section>
                     <section class="tab-item" id="tabConsumed" style="border-top-left-radius: 0;">
+                        <div class="grid_box">
+                            <div class="title_box">
+                                투입 계획
+                            </div>
+                            <div class="container-fluid">
+                                <div id="consumed-grid" style="height: 20vh;"></div>
+                            </div>
+                        </div>
                         <div>
                             <label class="switch">
                                 <input type="checkbox" id="btnToggle"><span class="slider round"></span>
@@ -574,14 +582,6 @@
                             </div>
                             <div class="container-fluid">
                                 <div id="input-lot-grid" style="height: 20vh;"></div>
-                            </div>
-                        </div>
-                        <div class="grid_box">
-                            <div class="title_box">
-                                투입 내역
-                            </div>
-                            <div class="container-fluid">
-                                <div id="consumed-grid" style="height: 20vh;"></div>
                             </div>
                         </div>
                     </section>
@@ -1394,7 +1394,7 @@
                 // 필터
                 AjaxUtil.fillSelectOptions($('#cboMaterialType'), 'system_code', 'all', false, 'mat_type');
                 AjaxUtil.fillSelectOptions($('#cboShift'), 'shift', 'choose', false); // 근무조
-                AjaxUtil.fillSelectOptions($('#cboWorkCenter'), 'workcenter', 'choose', false); // 워크센터
+                // AjaxUtil.fillSelectOptions($('#cboWorkCenter'), 'workcenter', 'choose', false); // 워크센터
 
                 // form내부
                 AjaxUtil.fillSelectOptions($('#shift_code'), 'shift', 'choose', false); // 근무조
@@ -1565,7 +1565,7 @@
                     'date_from': $('#date_from').val(),
                     'date_to': $('#date_to').val(),
                     'shift_code': $('#cboShift').val(),
-                    'workcenter_pk': $('#cboWorkCenter').val(),
+                    // 'workcenter_pk': $('#cboWorkCenter').val(),
                     'mat_type': $('#cboMaterialType').val(),
                     'is_include_comp': $('#chxCompYn').is(':checked')
                 };
