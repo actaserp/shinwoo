@@ -1,10 +1,13 @@
 package mes.app.production;
 
 import java.text.ParseException;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -73,44 +76,73 @@ public class ProdPrepareController {
 	
 	// 작업지시내역 - 순서저장
 	@PostMapping("/save_work_index")
+	@Transactional
 	public AjaxResult saveWorkIndex(
-			@RequestParam(value = "to_storehouse_id", required = false) Integer to_storehouse_id,
 			@RequestBody MultiValueMap<String,Object> dataList,
 			HttpServletRequest request,
 			Authentication auth) throws ParseException {
 
 		AjaxResult result = new AjaxResult();
+		User user = (User) auth.getPrincipal();
 
-		User user = (User)auth.getPrincipal();
-		
-	    List<Map<String, Object>> items = CommonUtil.loadJsonListMap(dataList.getFirst("Q").toString());
-
-		if (items.size() == 0) {
+		List<Map<String, Object>> items =
+				CommonUtil.loadJsonListMap(String.valueOf(dataList.getFirst("Q")));
+		if (items == null || items.isEmpty()) {
 			result.success = false;
+			result.message = "업데이트할 항목이 없습니다.";
 			return result;
 		}
-		
-		Integer index = 1;
-		
-		for (int i = 0; i < items.size(); i++) {
-			
-			Integer pk = Integer.parseInt(items.get(i).get("id").toString());
-			//Integer work_index = index;
-			
-			JobRes jr = this.jobResRepository.getJobResById(pk);
-			
-			if(jr != null) {
-				jr.setWorkIndex(index);
-				jr.set_audit(user);
-				jr = this.jobResRepository.save(jr);
-			}			
-			
-			index = index + 1;
+
+		// parent_id별로 첫 등장 순서대로 work_index 1,2,3... 부여
+		Map<Integer, Integer> indexByParent = new LinkedHashMap<>();
+		int nextIndex = 1;
+
+		// id -> JobRes 캐시(optional)
+		Map<Integer, JobRes> jrCache = new HashMap<>();
+
+		for (Map<String, Object> row : items) {
+			if (row == null || row.get("id") == null) continue;
+
+			Integer pk;
+			try { pk = Integer.parseInt(row.get("id").toString()); }
+			catch (NumberFormatException e) { continue; }
+
+			JobRes jr = jrCache.computeIfAbsent(pk, k -> jobResRepository.getJobResById(k));
+			if (jr == null) continue;
+
+			Integer parentId = jr.getParentId();   // parent_id만 사용
+			if (parentId == null) parentId = jr.getId(); // parent_id가 null이면 단독 그룹으로 취급
+
+			if (!indexByParent.containsKey(parentId)) {
+				indexByParent.put(parentId, nextIndex++);
+			}
 		}
-		
+
+		// 그룹별로 동일 work_index 적용
+		int updated = 0;
+		for (Map.Entry<Integer, Integer> e : indexByParent.entrySet()) {
+			Integer parentId = e.getKey();
+			Integer workIdx  = e.getValue();
+
+			List<JobRes> groupRows = jobResRepository.getJobResByParentId(parentId);
+			// parent_id가 null→id로 대체한 단독 그룹일 수 있으므로, 비어있으면 해당 단일건만 처리
+			if (groupRows == null || groupRows.isEmpty()) {
+				JobRes self = jobResRepository.getJobResById(parentId);
+				if (self != null) groupRows = List.of(self);
+			}
+
+			for (JobRes r : groupRows) {
+				r.setWorkIndex(workIdx);
+				r.set_audit(user);
+				updated++;
+			}
+			jobResRepository.saveAll(groupRows);
+		}
+
+		result.success = true;
 		return result;
 	}
-	
+
 	// 해당소요자재탭 - 소요량 조회
 	@GetMapping("/bom_detail_list")
 	public AjaxResult bomDetailList(

@@ -15,6 +15,8 @@ public interface JobResRepository extends JpaRepository<JobRes, Integer> {
 	
 	JobRes getJobResById(Integer id);
 
+	List<JobRes> getJobResByParentId(Integer parentId);
+
 	List<JobRes> findBySourceDataPkAndSourceTableName(Integer id, String string);
 
 	List<JobRes> findBySourceDataPkAndSourceTableNameAndMaterialIdAndIdNotIn(Integer id, String string,

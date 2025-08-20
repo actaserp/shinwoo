@@ -80,7 +80,7 @@ public class JobRes extends AbstractAuditModel {
 	String description;
 	
 	@Column(name = "\"Parent_id\"")
-	Integer parent_id;
+	Integer parentId;
 	
 	@Column(name = "\"LotCount\"")
 	Integer lotCount;

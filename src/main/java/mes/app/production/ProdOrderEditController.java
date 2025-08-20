@@ -243,7 +243,7 @@ public class ProdOrderEditController {
 //			child.setOrderQty(childQty);
 			child.setOrderQty(null);
 
-			child.setParent_id(header.getId());
+			child.setParentId(header.getId());
 			child.setRouting_id(routingPk);
 			child.setProcessCount(1);
 			child.setWorkCenter_id(wcId);

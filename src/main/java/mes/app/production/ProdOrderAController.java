@@ -215,7 +215,7 @@ public class ProdOrderAController {
 			child.setOrderQty(null);
 
 			child.setDescription(txtDescription);
-			child.setParent_id(header.getId());
+			child.setParentId(header.getId());
 			child.setRouting_id(routingPk);
 			child.setProcessCount(1);
 			child.setWorkCenter_id(wcId);
