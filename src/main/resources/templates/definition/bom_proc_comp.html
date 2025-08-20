@@ -49,33 +49,12 @@
     <div style="display: flex; gap: 5px">
       <section class="section" style="width: 50%;">
         <div class="section-top">
-          <!--<div class="search-wrap">
-            <dl>
-              <dt>
-                <label>라우팅명</label>
-              </dt>
-              <dd>
-                <input type="text" class="form-control2" id="txtRouting" name="txtRouting">
-              </dd>
-            </dl>
-            <dl>
-              <dt><span class="eq"></span></dt>
-              <dd>
-                <li>
-                  <a class="btn btn-delete" title="검색" id="btnSearch">
-                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                    검색
-                  </a>
-                </li>
-              </dd>
-            </dl>
-          </div>-->
           <div class="button-wrap">
             <ul>
               <li>
                 <button type="button" class="btn-excellt btn-default" id="btnBomCompNew"
                         style="width: 115px; height: 36px;"><i
-                    class="fas fa-plus"></i>등록
+                    class="fas fa-plus"></i>행 추가
                 </button>
               </li>
 
@@ -103,48 +82,58 @@
           </div>
             <table class="write-table">
             <caption style="text-align: left; margin-bottom: 8px;">bom r</caption>
-            <input type="hidden" id="id" name="id"/>
+            <input type="hidden" id="bom_proc_comp_id" name="bom_proc_comp_id"/>
             <col class="wp20">
             <col class="wp80">
             <tbody>
             <tr>
               <th>
-                <label for="cboBom">BOM</label><span class="eq">*</span>
+                <label for="SearchBom">BOM</label><span class="eq">*</span>
               </th>
               <td>
-                <input type="text" id="cboBom" name="cboBom" style="width: 100%;"/>
+                <input type="hidden" id="BomId" name="BomId"/>
+                <input type="text" id="SearchBom" name="SearchBom" style="width: 100%;"
+                       placeholder="엔터를 눌러 검색하세요." autocomplete="off" />
               </td>
             </tr>
             <tr>
               <th>
-                <label for="cboProduct">제품</label>
+                <label for="Product">제품</label>
               </th>
               <td>
-                <input type="text" id="cboProduct" name="cboProduct" style="width: 100%;" placeholder="제품" required=""/>
+                <input type="hidden" id="product_id" name="product_id"/>
+                <input type="hidden" id="mat_code" name="mat_code"/>
+                <input type="text" id="Product" name="Product" style="width: 100%;"
+                       placeholder="제품" required="" autocomplete="off"/>
               </td>
             </tr>
             <tr>
               <th>
-                <label for="cboRouting">라우팅</label>
+                <label for="SearchRouting">라우팅</label>
               </th>
               <td>
-                <input type="text" id="cboRouting" name="cboRouting" style="width: 100%;" placeholder="라우팅"/>
+                <input type="hidden" id="routing_id" name="routing_id">
+                <input type="text" id="SearchRouting" name="SearchRouting" style="width: 100%;"
+                       placeholder="엔터를 눌러 검색하세요." autocomplete="off"/>
               </td>
             </tr>
             <tr>
               <th>
-                <label for="Process">공정</label>
+                <label for="cboProcess">공정</label>
               </th>
               <td>
-                <input type="text" id="Process" name="Process" style="width: 100%;" placeholder=""/>
+                <select type="text" id="cboProcess" name="cboProcess" style="width: 100%;" > </select>
               </td>
             </tr>
             <tr>
               <th>
-                <label for="Material">자재</label>
+                <label for="SearchMaterial">자재</label>
               </th>
               <td>
-                <input type="text" id="Material" name="Material" style="width: 100%;" placeholder=""/>
+                <input type="hidden" id="Material_id" name="Material_id">
+                <input type="hidden" id="Material_code" name="Material_code">
+                <input type="text" id="SearchMaterial" name="SearchMaterial" style="width: 100%;"
+                       placeholder="엔터를 눌러 검색하세요." autocomplete="off"/>
               </td>
             </tr>
             <tr>
@@ -155,14 +144,6 @@
                 <input type="number" id="Amount" name="Amount" style="width: 100%;" placeholder=""/>
               </td>
             </tr>
-            <tr>
-              <th>
-                <label for="vercode">버전</label>
-              </th>
-              <td>
-                <input type="text" id="vercode" name="vercode" style="width: 100%;" placeholder="버전" />
-              </td>
-            </tr>
 
           </table>
         </div>
@@ -170,46 +151,15 @@
 
       <div class="tab-wrap" style="width: 50%;">
         <ul class="tab-links">
-          <li><a href="#tabs_routing">라우팅 목록</a></li>
           <li><a href="#tabs_second">공정별 BOM</a></li>
         </ul>
 
         <div>
-          <section class="tab-item" id="tabs_routing" style="border-top-left-radius: 0;">
-            <div class="section-top">
-
-            </div>
-            <div class="container-fluid">
-              <div id="routing-grid" style="height: 250px;"></div>
-            </div>
-          </section>
-
-
           <section class="tab-item" id="tabs_second" style="border-top-left-radius: 0;">
             <div class="section-top">
-              <!--<div class="button-wrap">
-                <ul>
-                  <li>
-                    <button type="button" class="btn-excellt btn-default" id="btnNewProcess" name="btnNew"
-                            style="width: 115px; height: 36px;"><i class="fas fa-plus"></i></button>
-                  </li>
-
-                  <li>
-                    <button type="button" class="btn-delete btn-danger" id="btnDelProcess"
-                            style="float:none; width: 115px; height: 36px;"><i class="fas fa-trash"></i>
-                    </button>
-                  </li>
-                  <li>
-                    <a class="btn btn-excell" title="수정" id="btnIndexSave">
-                      저장
-                    </a>
-                  </li>
-                </ul>
-              </div>-->
             </div>
-
             <div class="container-fluid">
-              <div id="bom-grid" style="height: 360px;"></div>
+              <div id="bom-grid" ></div>
             </div>
           </section>
 
@@ -218,7 +168,7 @@
     </section>
     </div>
     <div>
-      <section class="section" style="height: 250px;">
+      <section class="section" style="height: 300px;">
         <div class="button-wrap">
           <ul>
             <li>
@@ -237,19 +187,16 @@
 </th:block>
 
 <th:block layout:fragment="scripts">
+  <th:block th:replace="/common/pop_bom_list :: pop_bom_list"></th:block>
+  <th:block th:replace="/common/pop_routing :: pop_routing"></th:block>
+  <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
   <script type="text/javascript">
     class BomProcCompPage {
       constructor() {
-        this.routingGrid = null;
-        this.productGrid = null;
         this.bomGrid = null;
         this.itemGrid = null;
-        this.selectedRoutingId = null;
-        this.selectedProdId = null;
-        this.procList = [];
         this.baseUrl = '/api/definition/bom_proc_comp';
-        this.routingView = new wijmo.collections.CollectionView([]);
-        this.bomView     = new wijmo.collections.CollectionView([]);
+        this.bomView = new wijmo.collections.CollectionView([]);
         this.itemView = new wijmo.collections.CollectionView([]);
 
         this.init();
@@ -270,46 +217,21 @@
             }
           },
           columns: [
+            {binding: 'id', header: 'bom_proc_comp_id',visible: false},
+            {binding: 'bom_id', header: 'bom_id',visible: false},
+            {binding: 'routing_pk', header: 'routing_pk',visible: false},
+            {binding: 'prod_pk', header: '제품id',visible: false},
+            {binding: 'process_code', header: '공정코드', visible: false},
+            {binding: 'process_name', header: '공정', width: 170, align: 'left'},
             {binding: 'prod_grp_name', header: '제품그룹', width: 120, align: 'left'},
-            {binding: 'prod_code', header: '제품코드', width: 120, align: 'center'},
-            {binding: 'prod_name', header: '제품명', width: 200, align: 'left'},
-            {binding: 'base_prod_qty', header: '기준생산량', width: 150, align: 'left'},
-            {binding: 'bom_version', header: 'BOM버전', width: 120, align: 'left'},
-            {binding: 'pc_check', header: '공정별 BOM', width: 120, align: 'left'},
+            // {binding: 'prod_code', header: '제품코드', width: 120, align: 'center'},
+            // {binding: 'prod_name', header: '제품명', width: 200, align: 'center'},
+            {binding: 'mat_name', header: '자재명',     width: 200, isReadOnly: true },
+            {binding: 'amount', header: '수량', width: 150, align: 'left'},
           ],
           itemsSource: this.bomView, // 데이터를 설정할 배열
         });
 
-        this.routingGrid = new wijmo.grid.FlexGrid('#routing-grid', {
-          selectionMode: wijmo.grid.SelectionMode.Row,
-          headersVisibility: wijmo.grid.HeadersVisibility.Column,
-          autoGenerateColumns: false,
-          showMarquee: true,
-          isReadOnly: true,
-          formatItem: (s, e) => {
-            if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
-              e.cell.style.textAlign = 'center';
-            }
-           /* if (e.panel.cellType === wijmo.grid.CellType.Cell) {
-              let item = sender.rows[e.row].dataItem; // 현재 행의 데이터 아이템
-              if (item && item.children && item.children.length > 0) {
-                // 부모(그룹) 행 배경색
-                e.cell.style.backgroundColor = '#f0fcf7';
-              } else {
-                // 자식(일반) 행 배경색
-                e.cell.style.backgroundColor = '#ffffff';
-              }
-            }*/
-          },
-          columns: [
-            { binding: 'routing_name', header: '라우팅명',   width: 200, align: 'left'   },
-            { binding: 'proc_count',   header: '공정수',     width: 120, align: 'center' },
-            { binding: 'mat_count',    header: '해당제품수', width: 140, align: 'left'   },
-            { binding: 'routing_desc', header: '(반)제품코드', width: 300, align: 'left' },
-          ],
-          //childItemsPath: 'children',
-          itemsSource: this.routingView,   // ✅ CollectionView 바인딩
-        });
 
         this.itemGrid = new wijmo.grid.FlexGrid('#item-grid', {
           headersVisibility: wijmo.grid.HeadersVisibility.Column,
@@ -320,14 +242,14 @@
           itemsSource: this.itemView,
           columns: [
             // 필요한 필드 키는 마음대로; 서버 보낼 때 매핑만 맞추면 됩니다.
-            { binding: 'bom',      header: 'BOM',     width: 200, },
-            { binding: 'product',  header: '제품',     width: 200 },
-            { binding: 'routing',  header: '라우팅',   width: 200 },
-            { binding: 'process',  header: 'Process', width: 200 },
-            { binding: 'material', header: '자재',     width: 200},
-            { binding: 'amount',   header: '합계',     width: 100, format: 'n2', align: 'right' },
-            { binding: 'vercode',  header: '버전',     width: 100 },
-            { binding: '__del__',    header: '삭제',   width: 70, isReadOnly: true },
+            { binding: 'bom_proc_comp_id',      header: 'bom_proc_comp_id',   visible: false },
+            { binding: 'bom',      header: 'BOM',     width: 200,isReadOnly: true  },
+            { binding: 'product',  header: '제품',     width: 200 , isReadOnly: true },
+            { binding: 'routing',  header: '라우팅',   width: 200 , isReadOnly: true },
+            { binding: 'process',  header: '공정', width: 200 , isReadOnly: true },
+            { binding: 'material', header: '자재',     width: 200, isReadOnly: true },
+            { binding: 'amount',   header: '수량',     width: 100, format: 'n0', align: 'right' },
+            { binding: 'del',    header: '삭제',   width: 70, isReadOnly: true },
           ],
           formatItem: (s, e) => {
             if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
@@ -335,12 +257,35 @@
             }
             if (e.panel === s.cells) {
               const col = s.getColumn(e.col);
-              if (col.binding === '__del__') {
-                e.cell.innerHTML = '<button class="btnMini btnRowDelete">삭제</button>';
+              if (col.binding === 'del') {
+                e.cell.innerHTML = `
+                  <div style="
+                    display:flex;
+                    justify-content:center;
+                    align-items:center;
+                    height:100%;
+                    width:100%;
+                  ">
+                    <button class="btnMini btnRowDelete"
+                      style="height:26px; width:50px;">삭제</button>
+                  </div>`;
               }
+
             }
           }
         });
+        // 그리드 내부 삭제 버튼 동작
+        this.itemGrid.hostElement.addEventListener('click', (e) => {
+          const target = e.target;
+          if (target && target.classList.contains('btnRowDelete')) {
+            const ht = this.itemGrid.hitTest(e);
+            if (ht && ht.row > -1) {
+              const item = this.itemGrid.rows[ht.row].dataItem;
+              this.itemView.remove(item);
+            }
+          }
+        });
+
 
         this.itemGrid.hostElement.addEventListener('click', (ev) => {
           const ht = this.itemGrid.hitTest(ev);
@@ -354,24 +299,260 @@
           }
         });
 
+        // 유효성 체크 도우미
+        function required(val) { return val !== undefined && val !== null && String(val).trim() !== ''; }
+
+        $('#btnBomCompNew').on('click', () => {
+          // 표시용(텍스트)
+          const bomName       = $('#SearchBom').val();          // 표시
+          const productName   = $('#Product').val();            // 표시
+          const routingName   = $('#SearchRouting').val();      // 표시
+          const processText   = $('#cboProcess option:selected').text(); // 표시
+          const materialName  = $('#SearchMaterial').val();     // 표시
+          const amountVal     = $('#Amount').val();
+
+          // 서버 전송/키 필드(숨김 input/선택값)
+          const bom_proc_comp_id = $('#bom_proc_comp_id').val();
+          const bomId         = $('#BomId').val();
+          const routingId     = $('#routing_id').val();
+          const processId     = $('#cboProcess').val();
+          const matId         = $('#Material_id').val();
+          const matCode       = $('#Material_code').val();
+          const productCode   = $('#mat_code').val();
+          const product_id   = $('#product_id').val();
+
+          // 간단 유효성 검사
+          if (!required(bomId))     { Alert.alert('','BOM을 선택해 주세요.'); return; }
+          if (!required(productName)) { Alert.alert('','제품을 입력해 주세요.'); return; }
+          if (!required(routingId)) { Alert.alert('','라우팅을 선택해 주세요.'); return; }
+          if (!required(processId)) { Alert.alert('','공정을 선택해 주세요.'); return; }
+          if (!required(matId))     { Alert.alert('','자재를 선택해 주세요.'); return; }
+          const amount = Number(amountVal);
+          if (!Number.isFinite(amount) || amount <= 0) { Alert.alert('','수량을 0보다 큰 숫자로 입력해 주세요.'); return; }
+
+          // (선택) 중복 방지: bomId+processId+matId 기준으로 한 줄만
+          const dup = this.itemView.items.some(it =>
+            it.bomId == bomId && it.processId == processId && it.materialId == matId
+          );
+          if (dup) {
+            Alert.alert('','이미 동일한 BOM/공정/자재 조합이 추가되어 있습니다.');
+            return;
+          }
+
+          // 그리드 표시용 + 서버 전송용 함께 담기
+          const newRow = {
+            // 화면 표시 컬럼에 매핑되는 필드
+            bom:      bomName,
+            product:  productName,
+            routing:  routingName,
+            process:  processText,
+            material: materialName,
+            amount:   amount,
+            del:      '삭제',
+
+            // 서버 전송용 숨김 데이터(필요시 매핑에 사용)
+            bom_proc_comp_id,
+            bomId,
+            routingId,
+            processId,
+            materialId: matId,
+            materialCode: matCode || '',
+            product_id: product_id || ''
+          };
+
+          // 추가
+          this.itemView.sourceCollection.push(newRow);
+          this.itemView.refresh();
+
+          // (선택) 추가 후 입력값 초기화
+          // $('#SearchMaterial').val(''); $('#Material_id').val(''); $('#Material_code').val(''); $('#Amount').val('');
+        });
+
+        $('#btnBomCompSave').on('click', function () {
+          let csrf = $('[name=_csrf]').val();
+          const items = page.itemView.items;
+
+          // 유효성 검사
+          if (!items || items.length === 0) {
+            Alert.alert('','저장할 데이터가 없습니다.');
+            return;
+          }
+
+          // 예시: 유효성 추가로 모든 항목에 수량이 0보다 큰지 확인
+          for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            if (!item.amount || Number(item.amount) <= 0) {
+              Alert.alert(`"${item.material}" 행의 수량이 올바르지 않습니다.`);
+              return;
+            }
+          }
+
+          // 서버로 보낼 데이터 가공
+          const sendData = items.map(item => ({
+            id: item.bom_proc_comp_id,
+            bom_id: item.bomId,
+            routing_id: item.routingId,
+            process_id: item.processId,
+            material_id: item.materialId,
+            material_code: item.materialCode,
+            amount: item.amount,
+            product_id: item.product_id
+          }));
+
+          // 저장 요청
+          $.ajax({
+            url: '/api/definition/bom_proc_comp/save',
+            type: 'POST',
+            contentType: 'application/json', // ✅ JSON 전송 명시
+            data: JSON.stringify({ list: sendData }),
+            headers: {
+              'X-CSRF-TOKEN': csrf
+            },
+            success: function (res) {
+              if (res.success) {
+                Alert.alert('', '저장되었습니다.');
+                _this.itemView.sourceCollection = [];
+                _this.searchMainData();
+              } else {
+                Alert.alert('','저장에 실패했습니다');
+              }
+            },
+            error: function (xhr) {
+              console.error(xhr);
+              Alert.alert('',"저장 중 오류가 발생했습니다.");
+            }
+          });
+        });
+
+        //bom 검색팝업
+        $('#SearchBom').on('keypress', function (e) {
+          if (e.keyCode === 13) {
+            let poppage = new PopBOMListComponent();
+            let searchcallback = function (items) {
+              //console.log('bom items : ', items);
+              document.getElementById('SearchBom').value = items.Name;
+              document.getElementById('BomId').value = items.id;
+              document.getElementById('product_id').value = items.Material_id;
+              document.getElementById('Product').value = items.mat_name;
+              document.getElementById('mat_code').value = items.mat_code;
+            };
+
+            poppage.show(searchcallback);
+          }
+        });
+
+        //routing 검색팝업
+        $('#SearchRouting').on('keypress', function (e) {
+          if (e.keyCode === 13) {
+            let poppage = new PopRoutingComponent();
+            let searchcallback = function (items) {
+              //console.log('routing items : ', items);
+              document.getElementById('SearchRouting').value = items.routing_name;
+              document.getElementById('routing_id').value = items.id;
+
+              let processIds = getProcessIdsByRoutingId(items.id);
+              let processIdString = processIds.join(',');
+
+              AjaxUtil.fillSelectOptions(
+                $('#cboProcess'),   // $combo
+                'workcenter',       // combo_type
+                'choose',           // null_option
+                null,               // selected_value
+                null,               // cond1
+                processIdString,    // cond2→ process_id들
+                null                // cond3
+              );
+            };
+
+            poppage.show(searchcallback);
+          }
+        });
+
+        //자재 검색팝업
+        $('#SearchMaterial').on('keypress', function (e) {
+          if (e.keyCode === 13) {
+            let poppage = new PopMatComponent();
+            poppage.material_type = 'product,sangpum';
+            let searchcallback = function (items) {
+              //console.log('자재 items : ', items);
+              document.getElementById('Material_id').value = items.id;
+              document.getElementById('SearchMaterial').value = items.Name;
+              document.getElementById('Material_code').value = items.Code;
+            };
+
+            poppage.show(searchcallback);
+          }
+        });
+
+        function getProcessIdsByRoutingId(routingId) {
+          let result = AjaxUtil.getSyncData('/api/definition/routing/process_list', {
+            id: routingId
+          });
+
+          if (result && Array.isArray(result.data)) {
+            return result.data.map(item => item.process_id);
+          }
+
+          return [];
+        }
+
+
       }//init
 
       searchMainData() {
         const url = '/api/definition/bom_proc_comp/read';
         const data = {
-          routing_name: $('#txtRouting').val(),
-          spjangcd:sessionStorage.getItem('spjangcd'),
+          routing_name: $('#SearchRouting').val(), // ← 수정
+          spjangcd: sessionStorage.getItem('spjangcd'),
         };
 
         const fnsuccess = (result) => {
           const rows = (result && result.data) ? result.data : [];
-          this.routingView.sourceCollection = rows;
-          this.bomView.sourceCollection = [];
+
+          // 숫자 보정
+          rows.forEach(r => r.amount = Number(r.amount || 0));
+
+          // CollectionView
+          this.bomView = new wijmo.collections.CollectionView(rows);
+
+          // 정렬(그룹 안정화)
+          this.bomView.sortDescriptions.push(
+            new wijmo.collections.SortDescription('process_code', true),
+            new wijmo.collections.SortDescription('prod_code', true),
+            new wijmo.collections.SortDescription('process_name', true),
+            new wijmo.collections.SortDescription('prod_name', true)
+          );
+
+          // ✅ 공정+제품을 단일 그룹 키로
+          const gd = new wijmo.collections.GroupDescription();
+          gd.groupNameFromItem = (item) => {
+            const pn = item?.process_name || '';
+            const pr = item?.prod_name || '';
+            return `공정:${pn} / 제품:${pr}`;
+          };
+          this.bomView.groupDescriptions.clear();
+          this.bomView.groupDescriptions.push(gd);
+
+          // 바인딩
+          this.bomGrid.itemsSource = this.bomView;
+
+          // 그룹 헤더 포맷(선택)
+          this.bomGrid.groupHeaderFormat = '{value}';
+
+          // 합계 컬럼 설정
+          const amtCol = this.bomGrid.columns.getColumn('amount');
+          if (amtCol) {
+            amtCol.aggregate = wijmo.Aggregate.Sum;
+            amtCol.align = 'right';
+            amtCol.format = 'n0';
+          }
+
+          // 필요 시 강제 갱신
+          this.bomView.refresh();
         };
 
         AjaxUtil.getAsyncData(url, data, fnsuccess);
       }
-
     }
 
     let page = null;

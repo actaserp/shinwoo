@@ -1,0 +1,240 @@
+<th:block th:fragment="pop_bom_list">
+  <script type="text/x-tmpl" id="popup_BomSearchTemplate">
+
+    <div class="content_wrap popup">
+
+        <section class="section" style="padding-top: 10px;">
+            <div class="section-top">
+                <div class="search-wrap" style="text-align: left;">
+                    <dl>
+                            <dt>
+                                <label>BOM구분</label>
+                            </dt>
+                            <dd>
+                                <select class="form-control2" id="cboBOMType" name="cboBOMType"></select>
+                            </dd>
+
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label>품목구분</label>
+                            </dt>
+                            <dd>
+                                <select class="form-control2" id="cboMaterialType" name="cboMaterialType"></select>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label>제품명</label>
+                            </dt>
+                            <dd>
+                                <input type="text" class="form-control2" id="txtMatName" name="txtMatName">
+                            </dd>
+                        </dl>
+
+                        <dl>
+                            <dt>
+                                <label>품목그룹</label>
+                            </dt>
+                            <dd>
+                                <select class="form-control2" id="cboMaterialGroup" name="cboMaterialGroup"></select>
+                            </dd>
+                        </dl>
+
+                    <dl>
+                        <dt>&nbsp;</dt>
+                        <dd>
+                            <li>
+                                <a class="btn btn-delete" title="검색" id="btnCompSearch">
+                                    <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    검색
+                                </a>
+                            </li>
+                        </dd>
+                    </dl>
+                </div>
+                <div class="container-fluid">
+                    <div id="BomGrid" style="height: 300px;"></div>
+                </div>
+            </div>
+
+        </section>
+
+
+            <div class="popup-button">
+                <button type="button" class="btn-popup" id="btnCompSelect" ><span data-commonCd="선택">선택</span></button>
+                <button type="button" class="btn-popup" id="btn-search-close"><span data-commonCd="닫기">닫기</span></button>
+            </div>
+
+
+    </div>
+  </script>
+
+  <script type="text/javascript">
+
+    class PopBOMListComponent {
+      constructor(ele) {
+
+        this.ele = ele;
+        this.grid = null;
+        this.viewData = new wijmo.collections.CollectionView();
+        this.selectedItem = null;
+        this.callback = null;
+        this.modalContainer = new PopupDraggable('bom 선택');
+        this.$btnCompSearch = null;
+        this.$btnCompSelect = null;
+
+      }
+
+      searchDataBind() {
+        let _this = this;
+        let url = '/api/popup/search_bom';
+        let data = {
+          'mat_type': $('#cboMaterialType').val(),
+          'mat_group': $('#cboMaterialGroup').val(),
+          'bom_type': $('#cboBOMType').val(),
+          'mat_name': $('#txtMatName').val(),
+          spjangcd: sessionStorage.getItem('spjangcd'),
+        };
+
+        AjaxUtil.fillSelectOptions($('#cboMaterialType'), 'system_code', 'all', false, 'mat_type');
+        AjaxUtil.fillSelectOptions($('#cboMaterialGroup'), 'material_group', 'all', false);
+        AjaxUtil.fillSelectOptions($('#cboBOMType'), 'system_code', 'all', false, 'bom_type');
+
+        let result = AjaxUtil.getSyncData(url, data);
+
+        if (result && Array.isArray(result.data)) {
+          _this.viewData.sourceCollection = result.data;
+        } else {
+          _this.viewData.sourceCollection = [];
+        }
+
+        this.selectedItem = null;
+
+
+      }
+
+      selectData(item) {
+        if (typeof this.callback !== 'undefined' && this.callback != null) {
+          this.callback(item);
+        }
+        this.close();
+      }
+
+      show(callback, presetName = '') {
+        let _this = this;
+
+        this.callback = callback;
+
+        let content = tmpl('popup_BomSearchTemplate', {});
+        let $content = $(content);
+        this.modalContainer.open({width: 1000, height: 500, $content});
+
+
+        this.grid = new wijmo.grid.FlexGrid('#BomGrid', {
+          selectionMode: wijmo.grid.SelectionMode.Row,
+          autoGenerateColumns: false,
+          showMarquee: true,
+          isReadOnly: true,
+          keyActionEnter: wijmo.grid.KeyAction.None, //Enter 키를 눌렀을 때 아무 동작도 하지 않도록 설정하는 옵션
+          columns: [
+            {binding: 'id', header: '번호', width: 70, align: 'center'},
+            {binding: 'mat_group_name', header: '품목그룹', width: 85, align: 'left'},
+            {binding: 'Name', header: 'BOM명', width: 250, align: 'left'},
+            {binding: 'mat_code', header: '(반)제품코드', width: 110, align: 'left'},
+            {binding: 'bom_type_name', header: 'BOM종류', width: 110, align: 'center'},
+            {binding: 'OutputAmount', header: '기준수량', width: 80, align: 'right'},
+            {binding: 'unit', header: '단위', width: 100, align: 'center'},
+            {binding: 'Version', header: 'Ver.', width: 60, align: 'center'},
+            {binding: 'StartDate', header: '적용시작일', width: 130, align: 'center'},
+            {binding: 'EndDate', header: '적용종료일', width: 130, align: 'center'},
+            {binding: 'mat_type', header: '품목구분', width: 85, align: 'center'},
+          ],
+          itemsSource: this.viewData,
+        });
+
+        this.grid.rowHeaders.columns.splice(0, 1);
+        new FlexGridContextMenu(this.grid);
+        this.grid.downloadFileName = 'bom 리스트';
+
+        setTimeout(() => {
+          if (_this.grid.rows.length > 0) {
+            _this.grid.select(new wijmo.grid.CellRange(0, 1));
+            _this.grid.focus();
+          }
+        }, 100);
+
+        this.$btnCompSearch = $content.find('#btnCompSearch');
+        this.$btnCompSelect = $content.find('#btnCompSelect');
+        this.$txtMatName = $content.find('#txtMatName');
+
+        if (presetName && presetName.trim() !== '') {
+          this.$txtMatName.val(presetName);
+          this.searchDataBind();
+        }
+
+        // 엔터키로 검색
+        this.$txtMatName.on('keypress', function (e) {
+          if (e.keyCode === 13) {
+            _this.searchDataBind();
+          }
+        });
+
+
+        this.$btnCompSearch.click(function (e) {
+          _this.searchDataBind();
+        });
+
+        $('#btnCompSearch').click();
+
+
+        this.$btnCompSelect.click(function (e) {
+          // 그리드에서 현재 선택된 item을 찾아서 호출한다.
+          let items = _this.grid.selectedItems;
+          if (items.length === 0) {
+            return false;
+          }
+          _this.selectData(items[0]);
+        });
+
+
+        //닫기버튼을 아래 ID로 사용한다면 호출하는 화면에서 이벤트 처리 필요없음
+        $content.find('#btn-search-close').on('click', function () {
+          _this.close();
+        });
+
+        //새로고침
+        // $('#btnTest').click(function (e) {
+        //     _this.grid.collectionView.refresh(); // Wijmo 그리드 새로고침
+        // });
+
+        this.grid.hostElement.addEventListener('dblclick', function (e) {
+          let items = _this.grid.selectedItems;
+          if (items.length === 0) {
+            return false;
+          }
+          _this.selectData(items[0]); // btnCompSelect 클릭과 동일한 동작
+        });
+
+        this.grid.hostElement.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.keyCode === 13) {
+            setTimeout(() => {
+              const selected = _this.grid.selectedItems;
+              if (selected.length > 0) {
+                _this.selectData(selected[0]);
+              } else {
+                console.log('선택된 행 없음');
+              }
+            }, 0); // 다음 이벤트 루프에서 실행
+          }
+        });
+      }
+
+      close() {
+        this.modalContainer.close();
+      }
+
+    }
+
+  </script>

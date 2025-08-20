@@ -807,13 +807,16 @@ public class ComboService {
 		return this.sqlRunner.getRows(sql, dicParam);
 	};
 
-	ComboDataFunction workcenter=(String cond1, String cond2, String cond3)-> { 
+	ComboDataFunction workcenter=(String cond1, String cond2, String cond3)-> {
 		String	sql = "select id as value,\"Name\" as text from work_center where 1=1 ";
-		if (StringUtils.hasText(cond1)) { 
+		if (StringUtils.hasText(cond1)) {
 			sql +="and \"Process_id\" in (select unnest(string_to_array(:cond1,','))::int)";
 		}
-		if (StringUtils.hasText(cond2)) {
-			sql +="and \"Area_id\" = :cond2 ";
+		if (StringUtils.hasText(cond2) && cond2.trim().matches("^[0-9]+(,[0-9]+)*$")) {
+			sql += " AND id IN (SELECT unnest(string_to_array(:cond2, ','))::int)";
+		}
+		if (StringUtils.hasText(cond3)) {
+			sql +="and \"Area_id\" = :cond3 ";
 		}
 		sql += " order by \"Name\" ";
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();

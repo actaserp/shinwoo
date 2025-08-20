@@ -874,5 +874,115 @@ public class PopupController {
 
 		return result;
 	}
+	@RequestMapping("/search_bom")
+	public AjaxResult getSearchBomAll(
+			@RequestParam(value="mat_type", required=false) String mat_type,
+			@RequestParam(value="mat_group", required=false) Integer mat_group,
+			@RequestParam(value="bom_type", required=false) String bom_type,
+			@RequestParam(value="mat_name", required=false) String mat_name,
+			@RequestParam(value ="spjangcd") String spjangcd) {
+		AjaxResult result = new AjaxResult();
+		String sql = """        		
+				 with A as (
+				 select b.id
+				, b."Name"
+				, b."BOMType"
+				, fn_code_name('bom_type', b."BOMType") as bom_type_name
+				, b."OutputAmount"
+				, b."Version"
+				, to_char(b."StartDate", 'yyyy-mm-dd') as "StartDate"
+				, to_char(b."EndDate", 'yyyy-mm-dd') as "EndDate"
+				, b."Material_id"
+				, m."Name" as mat_name
+				, m."Code" as mat_code
+				, mg."Name" as mat_group_name
+				, fn_code_name('mat_type', mg."MaterialType") as mat_type
+				, u."Name" as unit
+				, row_number() over (partition by b."BOMType", b."Material_id" order by b."StartDate" desc) as g_idx
+				, case when to_char(current_date, 'yyyy-mm-dd') between to_char(b."StartDate", 'yyyy-mm-dd') and to_char(b."EndDate", 'yyyy-mm-dd') then 'current'
+				    when b."StartDate" is null or b."EndDate" is null then 'error'
+					when to_char(current_date, 'yyyy-mm-dd') > to_char(b."EndDate", 'yyyy-mm-dd') then 'past' 
+					when to_char(current_date, 'yyyy-mm-dd') < to_char(b."StartDate", 'yyyy-mm-dd') then 'future'
+					else 'error' end as current_flag
+				from bom b 
+				left join material m on b."Material_id" = m.id 
+				left join unit u on u.id = m."Unit_id"
+				left join mat_grp mg on mg.id=m."MaterialGroup_id" 
+				where 1=1
+				AND b.spjangcd = :spjangcd
+				""";
+
+		if (StringUtils.hasText(mat_type)) {
+			sql += """                		
+					and mg."MaterialType" = :mat_type
+					""";
+		}
+
+		if (mat_group != null) {
+			sql += """                		
+					and m."MaterialGroup_id" = :mat_group
+					""";
+		}
+		if (StringUtils.hasText(bom_type)) {
+			sql += """            		
+					and b."BOMType" = :bom_type
+					""";
+		}
+
+		if (StringUtils.hasText(mat_name))
+			sql += """ 
+					and  (m."Code" like concat('%%',:mat_name,'%%') or m."Name" like concat('%%',:mat_name,'%%') )
+					""";
+		sql += """            		
+				)
+				select *
+				from A
+				""";
+
+		sql += """            		
+				order by A.mat_group_name, A.mat_code , A.mat_name , A."Material_id", A.bom_type_name
+				""";
+
+
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+
+		paramMap.addValue("mat_type", mat_type);
+		paramMap.addValue("mat_group", mat_group);
+		paramMap.addValue("bom_type", bom_type);
+		paramMap.addValue("mat_name", mat_name);
+		paramMap.addValue("spjangcd", spjangcd);
+		result.data = this.sqlRunner.getRows(sql, paramMap);
+
+		return result;
+	}
+
+	@GetMapping("/search_routing")
+	public AjaxResult getSearchRouting(@RequestParam(value="routingName", required=false) String routingName,
+																		 @RequestParam(value = "spjangcd") String spjangcd){
+
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("routing_name", routingName);
+		dicParam.addValue("spjangcd", spjangcd);
+		AjaxResult result = new AjaxResult();
+		String sql = """
+                select r.id
+                         , r."Name" as routing_name
+                         , to_char(r."_created" ,'yyyy-mm-dd hh24:mi') as created
+                         , s."Name" as "storeHouse_nm"
+                         , r."StoreHouse_id" as "storeHouse_id"
+                         , r."Description" as description
+                         from routing r
+                         left join store_house s on r."StoreHouse_id"=s.id
+                         where 1=1
+                         AND r.spjangcd = :spjangcd
+                         """;
+
+		if (!io.micrometer.core.instrument.util.StringUtils.isEmpty(routingName))
+			sql += "and upper(r.\"Name\") like concat('%%',upper(:routing_name),'%%')";
+
+		result.data = this.sqlRunner.getRows(sql, dicParam);
+
+		return result;
+	}
 
 	}
