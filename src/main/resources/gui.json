@@ -68,6 +68,7 @@
   "wm_mat_requ_simulation_a": { "name": "소요량 시뮬레이션", "templates": { "default": "schedule/mat_requ_simulation_a.html" } },
   "wm_prod_result_lot": { "name": "생산실적입력", "templates": { "default": "production/prod_result_lot.html" } },
   "wm_prod_result_list": { "name": "생산실적현황", "templates": { "default": "production/prod_result_list.html" } },
+  "wm_prod_result_process": { "name": "공정별 생산실적현황", "templates": { "default": "production/prod_result_process.html" } },
   "wm_prod_defect_list": { "name": "생산 실적 부적합 현황", "templates": { "default": "production/prod_defect_list.html" } },
   "wm_production_month": { "name": "생산 현황 집계표", "templates": { "default": "summary/production_month.html" } },
   "wm_defect_type_month": { "name": "부적합 집계 현황", "templates": { "default": "summary/defect_type_month.html" } },

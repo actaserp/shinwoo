@@ -73,6 +73,69 @@ public class ProdResultListService {
         
         return items;
 	}
+
+	// 작업목록
+	public List<Map<String, Object>> getProdProcessList(String date_from, String date_to, Integer process_pk, String spjangcd){
+
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("date_from", Timestamp.valueOf(date_from + " 00:00:00"));
+		dicParam.addValue("date_to", Timestamp.valueOf(date_to + " 23:59:59"));
+		dicParam.addValue("process_pk", process_pk);
+		dicParam.addValue("spjangcd", spjangcd);
+
+		String sql = """
+	            select jr.id as pk
+	                 , mp.id as mp_pk
+		             , jr."WorkOrderNumber" as order_num
+		             , to_char(mp."ProductionDate", 'yyyy-mm-dd') as prod_date
+		             , wc."Name" as workcenter
+		             , p."Name" as process
+		             , mp."ShiftCode" as shift_code, sh."Name" as shift_name
+		             , jr."WorkIndex" as work_idx    
+		             , fn_code_name('job_state', jr."State") as job_state
+		             , jr."State" as state
+		             , m.id as mat_pk
+		             , m."Code" as mat_code
+		             , m."Name" as mat_name
+		             , u."Name" as unit
+		             , e."Name" as equipment
+		             , jr."Description" as description 
+		             , jr."OrderQty" as order_qty
+		             , coalesce(mp."GoodQty", 0) as good_qty
+		             , coalesce(mp."DefectQty", 0) as defect_qty
+		             , coalesce(mp."LossQty", 0) as loss_qty
+		             , coalesce(mp."ScrapQty", 0) as scrap_qty
+		             , ROUND((
+						   CASE
+							   WHEN (COALESCE(mp."GoodQty", 0) + COALESCE(mp."DefectQty", 0)) = 0 THEN 0
+							   ELSE (
+								   COALESCE(mp."DefectQty", 0)::float /
+								   (COALESCE(mp."GoodQty", 0) + COALESCE(mp."DefectQty", 0)) * 100
+							   )
+						   END
+					   )::numeric, 2) AS defect_percent
+	            from job_res jr 
+	            inner join mat_produce mp on mp."JobResponse_id" = jr.id
+	            left join material m on m.id = jr."Material_id"
+	            left join unit u on u.id = m."Unit_id"
+	            left join work_center wc on wc.id = mp."WorkCenter_id"
+	            left join process p on p.id = wc."Process_id" 
+	            left join equ e on e.id = mp."Equipment_id"
+	            left join shift sh on sh."Code" = mp."ShiftCode"
+	            where jr."ProductionDate" between :date_from and :date_to
+	            and jr."State" = 'finished'
+	            and jr.spjangcd = :spjangcd
+            """;
+
+		if (process_pk != null)
+			sql += " and wc.\"Process_id\" = :process_pk ";
+
+		sql += " order by jr.\"ProductionDate\" desc, jr.\"WorkOrderNumber\" asc ";
+
+		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
+
+		return items;
+	}
 	
 	// 상세내역
 	public Map<String, Object> getProdResultDetail(int mp_pk) {

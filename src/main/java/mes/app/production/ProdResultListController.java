@@ -104,5 +104,20 @@ public class ProdResultListController {
 		result.data = jopRes;
 		return result;
 	}
+
+	// 작업목록
+	@GetMapping("/read_process")
+	public AjaxResult getProdProcessList(
+			@RequestParam(value="date_from", required=false) String date_from,
+			@RequestParam(value="date_to", required=false) String date_to,
+			@RequestParam(value="process_pk", required=false) Integer process_pk,
+			@RequestParam("spjangcd") String spjangcd,
+			HttpServletRequest request) {
+
+		List<Map<String, Object>> items = this.prodResultListService.getProdProcessList(date_from, date_to, process_pk, spjangcd);
+		AjaxResult result = new AjaxResult();
+		result.data = items;
+		return result;
+	}
 	
 }
