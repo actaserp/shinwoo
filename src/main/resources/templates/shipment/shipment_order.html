@@ -159,7 +159,7 @@
                                 </label>
                             </dt>
                             <dd>
-                                <select class="" id="company_id" name="company_id" disabled></select>
+                                <select class="" id="company_id" name="company_id"></select>
                             </dd>
                         </dl>
                         <dl>
@@ -178,11 +178,12 @@
                         <dl>
                             <dt>
                                 <label>
-                                    비고<span class="eq"></span>
+                                    납품처<span class="eq"></span>
                                 </label>
                             </dt>
                             <dd>
-                                <input class="" type="text" id="description" value="">
+                                <input class="" type="text" id="DeliveryName" value="">
+                                <input class="" type="hidden" id="description" value="">
                             </dd>
                         </dl>
                     </div>
@@ -654,6 +655,7 @@
                 data['Company_id'] = $('#company_id').val();
                 data['ShipDate'] = $('#shipdate').val();
                 data['Description'] = $('#description').val();
+                data['DeliveryName'] = $('#DeliveryName').val();
 
                 if ($('#cboSource').val() == 'product')
                     data['TableName'] = 'product'
@@ -668,15 +670,9 @@
 
                         Notify.success('출하 지시 완료.');
 
-                        $('#description').val('');
+                        $('#DeliveryName').val('');
 
                         let comboBox = $('#cboSource').val();
-
-                        if (comboBox === 'product') {
-                            $('#company_id').attr('disabled', false);
-                        } else {
-                            $('#company_id').attr('disabled', true);
-                        }
 
                         $('#company_id option:eq(0)').prop('selected', true);
 
@@ -777,12 +773,8 @@
                 $('#divList').show();
 
                 if ($("#cboSource").val() === 'product') {
-                    $("#company_id").attr("disabled", false);
-
                     $("#company_id option:eq(0)").prop("selected", true);
                 } else {
-                    $("#company_id").attr("disabled", true);
-
                     $("#company_id option:eq(0)").prop("selected", true);
                 }
 

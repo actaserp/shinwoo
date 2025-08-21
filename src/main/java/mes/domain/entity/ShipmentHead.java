@@ -39,6 +39,9 @@ public class ShipmentHead extends AbstractAuditModel{
 	
 	@Column(name = "\"Description\"")
 	String description;
+
+	@Column(name = "\"DeliveryName\"")
+	String deliveryName;
 	
 	@Column(name = "\"State\"")
 	String state;

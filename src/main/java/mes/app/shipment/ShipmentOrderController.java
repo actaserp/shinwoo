@@ -86,6 +86,7 @@ public class ShipmentOrderController {
 	public AjaxResult saveShipmentOrder(
 			@RequestParam("Company_id") Integer CompanyId,
 			@RequestParam("Description") String Description,
+			@RequestParam("DeliveryName") String DeliveryName,
 			@RequestParam("ShipDate") String Ship_date,
 			@RequestBody MultiValueMap<String,Object> Q,
 			@RequestParam("TableName") String TableName,
@@ -109,6 +110,7 @@ public class ShipmentOrderController {
 		smh.setShipDate(shipDate);
 		smh.setOrderDate(today);
 		smh.setDescription(Description);
+		smh.setDeliveryName(DeliveryName);
 		smh.set_audit(user);
 		smh.setState("ordered");
 		

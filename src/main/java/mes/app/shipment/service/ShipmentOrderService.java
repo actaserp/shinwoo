@@ -165,6 +165,7 @@ public class ShipmentOrderService {
                 , sh."StatementIssuedYN" as issue_yn
                 , sh."StatementNumber" as stmt_number 
                 , sh."IssueDate" as issue_date
+                , sh."DeliveryName"
                 from shipment_head sh 
                 join company c on c.id = sh."Company_id"   
                 where sh."ShipDate"  between :date_from and :date_to
