@@ -7,7 +7,6 @@ import mes.domain.entity.BomProcComp;
 import mes.domain.entity.User;
 import mes.domain.model.AjaxResult;
 import mes.domain.repository.BomProcCompRepository;
-import mes.domain.services.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +37,26 @@ public class BomProcCompController {  //공정별 bom
     return result;
   }
 
+  @GetMapping("/detail")
+  public AjaxResult detail(@RequestParam(value = "id") Integer id) {
+
+    List<Map<String, Object>> detailItem =bomProcCompService.getDetail(id);
+
+    AjaxResult result = new AjaxResult();
+    result.data = detailItem;
+    return result;
+  }
+
+  @GetMapping("/endpoint")
+  public AjaxResult bomCompList(@RequestParam(value = "bomId")Integer bom_id) {
+
+    List<Map<String, Object>> bomCompList = bomProcCompService.getbomCompList(bom_id);
+
+    AjaxResult result = new AjaxResult();
+    result.data = bomCompList;
+    return result;
+  }
+
 
   @PostMapping("/save")
   @Transactional
@@ -45,7 +64,7 @@ public class BomProcCompController {  //공정별 bom
     List<Map<String, Object>> list = request.get("list");
     User user = (User) auth.getPrincipal();
 
-    log.info(" 공정별bom 저장 list:{}", list);
+//    log.info(" 공정별bom 저장 list:{}", list);
     AjaxResult result = new AjaxResult();
 
     if (list == null || list.isEmpty()) {
@@ -90,7 +109,7 @@ public class BomProcCompController {  //공정별 bom
         entity.setSpjangcd(spjangcd);
         entity.set_audit(user);
 
-        log.info("저장 대상 entity: {}", new ObjectMapper().writeValueAsString(entity));
+//        log.info("저장 대상 entity: {}", new ObjectMapper().writeValueAsString(entity));
 
         bomProcCompRepository.save(entity);  // id가 있으면 update, 없으면 insert
       }
@@ -105,6 +124,38 @@ public class BomProcCompController {  //공정별 bom
       result.message = "저장 중 오류 발생: " + e.getMessage();
       return result;
     }
+  }
+
+  @PostMapping("/delete")
+  public AjaxResult delete(@RequestParam("id") Integer id) {
+    AjaxResult res = new AjaxResult();
+    log.info("공정별 bom 삭제 들어옴 id:{}", id);
+    try {
+      if (id == null) {
+        res.success = false;
+        res.message = "삭제할 ID가 없습니다.";
+        res.code = "NO_ID";
+        return res;
+      }
+
+      if (bomProcCompRepository.existsById(id)) {
+        bomProcCompRepository.deleteById(id);
+
+        res.success = true;
+        res.message = "삭제되었습니다.";
+        res.code = "OK";
+      } else {
+        res.success = false;
+        res.message = "해당 데이터가 존재하지 않습니다.";
+        res.code = "NOT_FOUND";
+      }
+    } catch (Exception e) {
+      res.success = false;
+      res.message = "삭제 중 오류가 발생했습니다: " + e.getMessage();
+      res.code = "ERROR";
+    }
+
+    return res;
   }
 
   private Integer toInt(Object val) {

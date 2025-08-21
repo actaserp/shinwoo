@@ -507,7 +507,9 @@ public class ComboService {
 	ComboDataFunction process=(String cond1, String cond2, String cond3)-> { 
 		String sql = "select id as Value, \"Name\" as text from process where 1=1 order by \"Name\" ";
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
-        dicParam.addValue("cond1", cond1);
+		if (StringUtils.hasText(cond1) && cond1.trim().matches("^[0-9]+(,[0-9]+)*$")) {
+			sql += " AND id IN (SELECT unnest(string_to_array(:cond1, ','))::int)";
+		}
         dicParam.addValue("cond2", cond2);
         dicParam.addValue("cond3", cond3);
         return this.sqlRunner.getRows(sql, dicParam);
@@ -812,11 +814,11 @@ public class ComboService {
 		if (StringUtils.hasText(cond1)) {
 			sql +="and \"Process_id\" in (select unnest(string_to_array(:cond1,','))::int)";
 		}
-		if (StringUtils.hasText(cond2) && cond2.trim().matches("^[0-9]+(,[0-9]+)*$")) {
-			sql += " AND id IN (SELECT unnest(string_to_array(:cond2, ','))::int)";
+		if (StringUtils.hasText(cond2)) {
+			sql +="and \"Area_id\" = :cond2 ";
 		}
-		if (StringUtils.hasText(cond3)) {
-			sql +="and \"Area_id\" = :cond3 ";
+		if (StringUtils.hasText(cond3) && cond3.trim().matches("^[0-9]+(,[0-9]+)*$")) {
+			sql += " AND id IN (SELECT unnest(string_to_array(:cond3, ','))::int)";
 		}
 		sql += " order by \"Name\" ";
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
