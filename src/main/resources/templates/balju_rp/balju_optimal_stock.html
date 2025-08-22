@@ -123,8 +123,9 @@
             {binding: 'material_name', header: '자재명', width: 300, align: 'left', isReadOnly: true},
             {binding: 'unit_name', header: '단위', width: 100, align: 'center', isReadOnly: true},
             {binding: 'order_qty', header: '수주량', width: 120, align: 'left', isReadOnly: true},
+            {binding: 'current_stock', header: '현재고', width: 120, align: 'left', isReadOnly: true},
             {binding: 'optimal_stock', header: '적정재고', width: 120, align: 'left', isReadOnly: true},
-            {binding: 'need_more_qty', header: '차이재고', width: 120, align: 'left', isReadOnly: true},
+            {binding: 'need_more_qty', header: '필요수량', width: 120, align: 'left', isReadOnly: true},
             {binding: 'state', header: '상태', width: 120, align: 'center', isReadOnly: true},
           ],
           itemsSource: new wijmo.collections.CollectionView([]), // 빈 데이터로 초기화
@@ -146,7 +147,7 @@
           }
         });
         new FlexGridContextMenu(this.grid);
-        this.grid.downloadFileName = '자재 적정 재고 현황 내역';
+        this.grid.downloadFileName = '수주대비 자재적정 재고현황 내역';
 
         $('#txtMatName').on('keypress', function (e) {
           if (e.keyCode === 13) {
