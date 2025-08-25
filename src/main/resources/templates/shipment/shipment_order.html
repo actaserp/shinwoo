@@ -182,7 +182,7 @@
                                 </label>
                             </dt>
                             <dd>
-                                <input class="" type="text" id="DeliveryName" value="">
+                                <input class="" type="text" id="DeliveryName" value="" placeholder="납품처를 선택하여 주십시오">
                                 <input class="" type="hidden" id="description" value="">
                             </dd>
                         </dl>
@@ -215,7 +215,7 @@
                     </div>
                 </div>
                 <div class="container-fluid" style="height: 15vh;">
-                    <div id="theGrid2"></div>
+                    <div id="theGrid4"></div>
                 </div>
             </section>
         </div>
@@ -227,6 +227,8 @@
     <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
     <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
     <th:block th:replace="/common/multiform_company :: multiform_company"></th:block>
+    <th:block th:replace="/common/popup_company :: popup_company"></th:block>
+    <th:block th:replace="/common/popup_project :: popup_project"></th:block>
 
     <script type="text/javascript">
 
@@ -234,7 +236,6 @@
         let $content;
         let SelectItem = [];
         let SelectItem2 = [];
-
 
         class ShipmentOrderPage {
             constructor() {
@@ -297,7 +298,6 @@
                         {binding: 'JumunDate', header: '수주일', width: 100, align: 'center', isReadOnly: true},
                         {binding: 'mat_grp', header: '제품그룹', width: 100, align: 'left', isReadOnly: true},
                         {binding: 'unit_name', header: '단위', width: 80, align: 'center', isReadOnly: true},
-                        {binding: 'remark', header: '비고', width: 100, align: 'left', isReadOnly: true}
                     ],
                     itemsSource: this.viewData,
                     formatItem: (s, e) => {
@@ -337,7 +337,7 @@
                     }
                 })
 
-                this.grid_shipment = new wijmo.grid.FlexGrid('#theGrid2', {
+                this.grid_shipment = new wijmo.grid.FlexGrid('#theGrid4', {
                     selectionMode: wijmo.grid.SelectionMode.Row,
                     headersVisibility: wijmo.grid.HeadersVisibility.All,
                     autoGenerateColumns: false,
@@ -741,6 +741,8 @@
                 $('#btnSaveOrderQty').prop('disabled', bDisabled);
                 $('#btnSaveShipDate').prop('disabled', bDisabled);
             }
+
+
         }
 
 
@@ -918,6 +920,21 @@
 
             $("#btnDeleteAllShipMat").click(function (e) {
                 page.grid_shipment_clear();
+            });
+
+            // 납품처 검색 팝업
+            $("#DeliveryName").click(function () {
+                let poppage = new PopCompComponent();
+                let $poppage = $(poppage);
+                let searchcallback = function (items) {
+                    $('#DeliveryName').val(items.compname);
+
+                    // if ($Material_id.val() && $cboCompany.val()) {
+                    //     tryShowPrice();
+                    // }
+                };
+
+                poppage.show(searchcallback);
             });
 
             page.searchMain();
