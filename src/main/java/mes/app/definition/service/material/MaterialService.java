@@ -80,6 +80,7 @@ public class MaterialService {
                 , m."Mtyn" as mtyn
                 , m."Useyn" as useyn
                 , m."Avrqty" as avrqty
+                , m."Routing_id"
                 , CASE
 					 WHEN b."Material_id" IS NOT NULL THEN 1
 					 ELSE 0

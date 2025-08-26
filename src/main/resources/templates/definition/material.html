@@ -1056,14 +1056,14 @@
                         let row = hitTest.row;
                         let selectedItem = this.grid.rows[row].dataItem;
                         let mat_pk = selectedItem.id;
-
+                        let routing_id = selectedItem.Routing_id;
                         // 상세정보 및 모든 탭별 호출
                         _this.showDetail(mat_pk);
                         _this.showPriceList(mat_pk);
                         _this.showBomList(mat_pk);
                         _this.showBomReverseList(mat_pk);
                         _this.showTestList(mat_pk);
-                        _this.showRoutingProcessList(mat_pk);
+                        _this.showRoutingProcessList(routing_id);
                         // 필요시 추가
                         // 현재 활성화된 탭에 따라 추가 기능 실행
                         if (_this.current_tab == 'tab_unitcost') {
