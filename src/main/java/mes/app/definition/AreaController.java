@@ -1,5 +1,6 @@
 package mes.app.definition;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -52,13 +53,22 @@ public class AreaController {
 		Optional<Area> optArea = this.areaRepository.findById(id);
 		
 		Area area = null;
+		Optional<Area> parentArea = Optional.of(new Area());
+		String parentName = null;
 		if (optArea.isPresent()) {
+			if(optArea.get().getParent_id() != null) {
+				parentArea = this.areaRepository.findById(optArea.get().getParent_id());
+				parentName = parentArea.get().getName();
+			}
 			area = optArea.get();
 		}
 		AjaxResult result = new AjaxResult();
-		
-		
-		result.data = area;
+		Map<String, Object> response = new HashMap<>();
+		response.put("area", area);
+		response.put("parent_name", parentName);
+
+		result.data = response;
+
 		
 		return result;
 		

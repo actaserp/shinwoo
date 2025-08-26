@@ -345,7 +345,8 @@
 
                 let result = AjaxUtil.getSyncData(this.url+'/detail', param);
                 if (result.success) {
-                    FormUtil.BindDataForm(result.data, $('#basicForm'));
+                    FormUtil.BindDataForm(result.data.area, $('#basicForm'));
+                    document.getElementById('parent_name').value = result.data.parent_name;
                     //$('#description').text(result.description);
                 }
 
