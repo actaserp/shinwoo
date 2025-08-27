@@ -979,6 +979,7 @@
                 this._procCascadeBound = false;
                 this._suppressProcessChange = false;
                 this._currentJrPk = null;
+                this._hasRouting = false;
                 this.init();
             }
 
@@ -1612,128 +1613,129 @@
 
             // 생산정보 조회
             showBasicInfo(jr_pk) {
-                let _this = this;
-                let param = {
-                    'jr_pk': jr_pk
-                };
-
-                let res = AjaxUtil.getSyncData(this.baseUrl + '/detail', param);
-
+                const res = AjaxUtil.getSyncData(this.baseUrl + '/detail', { jr_pk });
                 this._suppressProcessChange = true;
 
-                let result = res.data
-                if (result) {
-                    $('#selected_order_num').val(result.order_num);
+                const result = res.data;
+                if (!result) return;
 
-                    let workcenter_id = result.workcenter_id;
-                    let routing_id = result.routing_id;
-                    let process_id = result.process_id;
-                    let equipment_id = result.equipment_id;
+                $('#selected_order_num').val(result.order_num);
 
+                const workcenter_id = result.workcenter_id;
+                const routing_id = result.routing_id ?? null;
+                const process_id = result.process_id;
+                const process_nm = result.process_nm || '';
+                const equipment_id = result.equipment_id;
+
+                // 공통: 설비 선택 박스(워크센터 기준)만 먼저 맞춰둠
+                AjaxUtil.fillSelectOptions($('#equipment_id'), 'equipment_code', 'choose', equipment_id, workcenter_id);
+                FormUtil.BindDataForm(result, $('#basicForm'));
+
+                // 상태 뱃지 처리 등 생략...
+                $('#ordqty').text((result.order_qty ?? 0).toLocaleString());
+                $('#chasuLotSize').val(result.lot_size);
+
+                // 라우팅 존재 여부 판단
+                this._hasRouting = (routing_id != null && String(routing_id).trim() !== '');
+
+                if (this._hasRouting) {
+                    console.log('jr_pk', jr_pk);
+                    console.log('routing_id', routing_id);
+                    console.log('process_id', process_id);
+                    // 라우팅 있는 경우: 라우팅 기반 공정 옵션 세팅 + 체인지 바인딩 + onProcessChange 실행
                     AjaxUtil.fillSelectOptions($('#process_id'), 'routing_mat', '', process_id, routing_id);
-                    AjaxUtil.fillSelectOptions($('#equipment_id'), 'equipment_code', 'choose', equipment_id, workcenter_id);
-                    FormUtil.BindDataForm(result, $('#basicForm'));
 
-                    $('#bom_output_amount').val(result.bom_output_amount);
-                    if (!result.end_time)
-                        $('#end_date').val(page.today);
+                    // 의존 필드 활성화
+                    $('#tabBasic #prod_mat_id, #tabBasic #need_pro_mat_qty, #tabBasic #proc_jr_pk, #tabBasic #consumed_mode').prop('disabled', false);
 
-                    $('#job_state').removeClass('working-status');
-                    $('#job_state').removeClass('finished-status');
-                    $('#job_state').removeClass('stopped-status');
-
-                    if (result.state === 'working') {
-                        $('#job_state').addClass('working-status');
-                    } else if (result.state === 'finished') {
-                        $('#job_state').addClass('finished-status');
-                    } else if (result.state === 'stopped') {
-                        $('#job_state').addClass('stopped-status');
-                    }
-
-
-                    $('#ordqty').text(result.order_qty.toLocaleString());
-                    $('#chasuLotSize').val(result.lot_size);
-
-                    this.setButtonState();
                     if (!this._procCascadeBound) {
-                        this.initProcessCascade();
+                        this.initProcessCascade();         // change 핸들러 바인딩
                         this._procCascadeBound = true;
+                    } else {
+                        // 이미 바인딩되어 있으면 충분
                     }
 
                     this._suppressProcessChange = false;
-                    this.onProcessChange();
+                    this.onProcessChange();               // 라우팅 있을 때만 필요
+                } else {
+                    // 라우팅 없는 경우: 현재 공정만 옵션으로 꽂고 change 핸들러 해제
+                    const $proc = $('#process_id');
+                    $proc.off('change.prod');             // onProcessChange 비활성
+                    this._procCascadeBound = false;       // 상태 초기화
+
+                    $proc.empty().append(
+                        new Option(process_nm || String(process_id), process_id, true, true)
+                    );
+
+                    // 의존 필드 비활성화
+                    $('#tabBasic #prod_mat_id, #tabBasic #need_pro_mat_qty, #tabBasic #proc_jr_pk, #tabBasic #consumed_mode').prop('disabled', true);
+
+                    // 라우팅이 없으므로 onProcessChange 호출하지 않음
+                    this._suppressProcessChange = false;
+
+                    // 소비내역/투입 LOT 리스트는 바로 갱신
+                    this.showConsumedList(this._currentJrPk);
+                    this.showInputLotList();
                 }
+
+                this.setButtonState();
             }
 
             initProcessCascade() {
                 const $proc = $('#process_id');
                 $proc.off('change.prod').on('change.prod', () => {
-                    if (this._suppressProcessChange) return;  // 초기화 중엔 무시
+                    if (this._suppressProcessChange) return;
+                    if (!this._hasRouting) return;   // 라우팅 없으면 무시
                     this.onProcessChange();
                 });
             }
 
             onProcessChange() {
                 if (this._suppressProcessChange) return;
+                if (!this._hasRouting) return; // 라우팅 없으면 전혀 필요 없음
 
                 const processId = $('#tabBasic #process_id').val();
                 const routingId = this.jobres?.routing_id || $('#routing_id').val();
-                const materialId= $('#tabBasic #mat_pk').val();           // 최상위(작지 품목)
-                const orderQty  = parseFloat($('#tabBasic #order_qty').val()) || 1;
-                const prodDate  = $('#tabBasic #prod_date').val() || null;
-                const orderNum   = $('#tabBasic #order_num').val();
+                const materialId = $('#tabBasic #mat_pk').val();
+                const orderQty = parseFloat($('#tabBasic #order_qty').val()) || 1;
+                const prodDate = $('#tabBasic #prod_date').val() || null;
+                const orderNum = $('#tabBasic #order_num').val();
 
-                // 1) 공정→워크센터(단건) 조회 및 세팅
-                const wcRes = AjaxUtil.getSyncData('/api/definition/workcenter/of-process', {
-                    process_id: processId,
-                    routing_id: routingId
-                });
-                const wc = wcRes && wcRes.data ? wcRes.data : null;
+                // 1) 공정→워크센터 세팅
+                const wcRes = AjaxUtil.getSyncData('/api/definition/workcenter/of-process', { process_id: processId, routing_id: routingId });
+                const wc = wcRes?.data || {};
                 $('#tabBasic #workcenter_id').val(wc.workcenter_id || '');
                 $('#tabBasic #workcenter_name').val(wc.workcenter_nm || '');
                 AjaxUtil.fillSelectOptions($('#tabBasic #equipment_id'), 'equipment_code', '', '', wc.workcenter_id);
 
-
-                // 2) 공정별 BOM 메타(산출품/해당 BOM id) 조회
+                // 2) 공정별 BOM 메타
                 const metaRes = AjaxUtil.getSyncData(this.baseUrl + '/process-step-meta', {
                     material_id: materialId, routing_id: routingId, process_id: processId, order_qty: orderQty, prod_date: prodDate
                 });
-
-                $('#tabBasic #prod_mat_id').removeAttr('disabled');
-                $('#tabBasic #need_pro_mat_qty').removeAttr('disabled');
-                $('#tabBasic #proc_jr_pk').removeAttr('disabled');
-                $('#tabBasic #consumed_mode').removeAttr('disabled');
-
                 const meta = metaRes?.data || {};
                 $('#tabBasic #prod_mat_id').val(meta.pro_mat_id || '');
                 $('#tabBasic #need_pro_mat_qty').val(meta.need_pro_mat_qty || '');
 
-
+                // PLAN/ACTUAL 모드 판정
                 let found = null;
                 if (orderNum && meta.pro_mat_id && processId) {
                     const findRes = AjaxUtil.getSyncData(this.baseUrl + '/find-by-order-process', {
-                        order_num: orderNum,
-                        process_id: processId,
-                        pro_mat_id: meta.pro_mat_id
+                        order_num: orderNum, process_id: processId, pro_mat_id: meta.pro_mat_id
                     });
-                    found = findRes?.data || null; // { jr_pk: 123 } or null
+                    found = findRes?.data || null;
                 }
-
-
                 if (found?.jr_pk) {
-                    // ACTUAL 모드
                     $('#tabBasic #id').val(found.jr_pk);
                     $('#tabBasic #consumed_mode').val('ACTUAL');
                 } else {
-                    // PLAN 모드
                     $('#tabBasic #consumed_mode').val('PLAN');
                 }
 
+                // 최신 상태로 목록 갱신
                 this.showConsumedList(this._currentJrPk);
                 this.showInputLotList();
-
-
             }
+
 
             // 생산정보 저장
             saveBasicInfo() {
