@@ -416,6 +416,7 @@ public class BomService {
 				newBom.setStartDate(Timestamp.valueOf("1900-01-01 00:00:00"));
 				newBom.setEndDate(Timestamp.valueOf("1900-01-01 00:00:00"));
 				newBom.set_audit(user);
+				newBom.setSpjangcd(bom.getSpjangcd());
 				//신규BOM저장
 				this.bomRepository.save(newBom);			
 				
@@ -472,6 +473,7 @@ public class BomService {
 				newBom.setBomType(bom.getBomType());
 				newBom.setOutputAmount(bom.getOutputAmount());
 				newBom.setVersion(newVer);
+				newBom.setSpjangcd(bom.getSpjangcd());
 
 				Timestamp start = DateUtil.getNowTimeStamp();
 				newBom.setStartDate(start);
