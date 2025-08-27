@@ -93,7 +93,10 @@ public class MaterialService {
             left join work_center wc on wc.id = m."WorkCenter_id"
             left join equ e on e.id = m."Equipment_id"
             left join routing r on r.id = m."Routing_id"
-            left join bom b on b."Material_id" = m.id
+            left join bom b
+				on b."Material_id" = m.id
+				and (b."StartDate" IS NULL OR b."StartDate" <= CURRENT_DATE)
+				and (b."EndDate"   IS NULL OR b."EndDate"   >= CURRENT_DATE)
             where 1=1
             AND m.spjangcd = :spjangcd
             AND m."Useyn" = :UseYn
