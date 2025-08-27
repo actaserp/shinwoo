@@ -78,12 +78,6 @@
             background-color: #EDEFF5 !important;
         }
 
-        .wj-flexgrid .wj-cells .col-work-idx {
-            display: flex;
-            align-items: center;     /* 수직 가운데 */
-            justify-content: center; /* (원하면 가로도 가운데) */
-        }
-
     </style>
     <style id="print_css">
         @media print {
@@ -288,19 +282,19 @@
                 </div>
                 <div class="section-top" id="prodResultList">
                     <div class="search-wrap">
-<!--                        <dl>-->
-<!--                            <dt>-->
-<!--                                <label for="cboWorkCenter">-->
-<!--                                    워크센터<span class="eq"></span>-->
-<!--                                </label>-->
-<!--                            </dt>-->
-<!--                            <dd>-->
-<!--                                <div class="srch-box">-->
-<!--                                    <select id="cboWorkCenter" name="cboWorkCenter">-->
-<!--                                    </select>-->
-<!--                                </div>-->
-<!--                            </dd>-->
-<!--                        </dl>-->
+                        <dl>
+                            <dt>
+                                <label for="cboWorkCenter">
+                                    워크센터<span class="eq"></span>
+                                </label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <select id="cboWorkCenter" name="cboWorkCenter">
+                                    </select>
+                                </div>
+                            </dd>
+                        </dl>
 
                         <dl>
                             <dt>
@@ -328,19 +322,19 @@
                                 </li>
                             </dd>
                         </dl>
-<!--                        <dl>-->
-<!--                            <dt>-->
-<!--                                선택한 작지번호-->
-<!--                            </dt>-->
-<!--                            <dd>-->
-<!--                                <ul class="date-box">-->
-<!--                                    <li>-->
-<!--                                        <input type="text" id="selected_order_num" name="selected_order_num" readonly>-->
-<!--                                        <label for="selected_order_num" class="hide">생산일</label>-->
-<!--                                    </li>-->
-<!--                                </ul>-->
-<!--                            </dd>-->
-<!--                        </dl>-->
+                        <dl>
+                            <dt>
+                                선택한 작지번호
+                            </dt>
+                            <dd>
+                                <ul class="date-box">
+                                    <li>
+                                        <input type="text" id="selected_order_num" name="selected_order_num" readonly>
+                                        <label for="selected_order_num" class="hide">생산일</label>
+                                    </li>
+                                </ul>
+                            </dd>
+                        </dl>
                     </div>
                 </div>
                 <div class="container-fluid">
@@ -403,8 +397,13 @@
                             <div class="table-wrap">
                                 <form id="basicForm">
                                     <input type="hidden" id="id" name="id"/>
+                                    <input type="hidden" id="routing_id" name="routing_id"/>
                                     <input type="hidden" id="mp_id" name="mp_id"/>
                                     <input type="hidden" id="mat_pk" name="mat_pk"/>
+                                    <input type="hidden" id="prod_mat_id" name="prod_mat_id"/>
+                                    <input type="hidden" id="need_pro_mat_qty" name="need_pro_mat_qty"/>
+                                    <input type="hidden" id="proc_jr_pk" name="proc_jr_pk" />
+                                    <input type="hidden" id="consumed_mode" name="consumed_mode" />
                                     <input type="hidden" id="state" name="state"/>
                                     <table class="work-table">
                                         <caption>작업 지시 테이블</caption>
@@ -430,18 +429,24 @@
                                         <tr>
                                             <th><label for="job_state">상태</label></th>
                                             <td><input type="text" id="job_state" name="job_state" readonly/></td>
+                                            <th><label for="process_id">공정</label></th>
+                                            <td>
+                                                <select id="process_id" name="process_id"></select>
+                                            </td>
+                                        </tr>
+                                        <tr>
                                             <th><label for="workcenter_id">워크센터</label></th>
                                             <td>
                                                 <input id="workcenter_id" name="workcenter_id" readonly type="hidden"/>
                                                 <input id="workcenter_name" name="workcenter_name" readonly
                                                        style="width: 160px"/>
                                             </td>
-                                        </tr>
-                                        <tr>
                                             <th><label for="equipment_id">설비</label></th>
                                             <td><select id="equipment_id" name="equipment_id" disabled></select></td>
+                                        </tr>
+                                        <tr>
                                             <th><label for="shift_code">근무조</label></th>
-                                            <td><select id="shift_code" name="shift_code" disabled></select></td>
+                                            <td colspan="3"><select id="shift_code" name="shift_code" disabled></select></td>
                                         </tr>
                                         <tr>
                                             <th><label for="prod_date">생산 시작시간</label></th>
@@ -469,13 +474,8 @@
                                         </tr>
                                         <tr>
                                             <th><label for="order_qty">지시량</label></th>
-                                            <td>
-                                                <input type="number" id="order_qty" name="order_qty" class="background-order" readonly/>
-                                            </td>
-                                            <th><label for="cons_qty">필요수량</label></th>
-                                            <td>
-                                                <input type="number" id="cons_qty" name="cons_qty" class="background-order" readonly/>
-                                            </td>
+                                            <td colspan="3"><input type="number" id="order_qty" name="order_qty"
+                                                                   class="background-order" readonly/></td>
                                         </tr>
                                         <tr>
                                             <th><label for="good_qty">양품량</label></th>
@@ -503,7 +503,7 @@
                             <div class="button-wrap">
                                 <ul>
                                     <li>
-                                        지시량(or 필요수량) : <label id="ordqty">0</label>, LOT size :
+                                        지시량 : <label id="ordqty">0</label>, LOT size :
                                         <input type="number" class="w-80" id="chasuLotSize" name="chasuLotSize"
                                                value="0"
                                                min="0">
@@ -595,6 +595,7 @@
                                 <div id="input-lot-grid" style="height: 20vh;"></div>
                             </div>
                         </div>
+
                     </section>
                     <section class="tab-item" id="tabBarcode">
 
@@ -975,6 +976,9 @@
                 this.modifiedItems = [];
                 this.$tabBasic = $('#tabBasic');
                 this.baseUrl = '/api/production/prod_result';
+                this._procCascadeBound = false;
+                this._suppressProcessChange = false;
+                this._currentJrPk = null;
                 this.init();
             }
 
@@ -985,58 +989,28 @@
                     autoGenerateColumns: false,
                     selectionMode: wijmo.grid.SelectionMode.Row,
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
-                    frozenColumns: 5,
-                    formatItem: (s, e) => {
+                    formatItem: (sender, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
-                            e.cell.style.color = '';
-                            e.cell.style.fontWeight = '';
-
-                            const col = s.columns[e.col];
-                            if (!col) return;
-
-                            // 컬럼별 헤더 글자색
-                            switch (col.binding) {
-                                case 'order_qty':
-                                case 'cons_qty':
-                                    e.cell.style.color = '#0b6b3a';   // 어두운 초록
-                                    break;
-                                case 'good_qty':
-                                    e.cell.style.color = '#0b3d91';   // 어두운 파랑
-                                    break;
-                                case 'defect_qty':
-                                    e.cell.style.color = '#b3261e';   // 어두운 레드
-                                    break;
-                                default:
-                                    // 다른 헤더는 기본색
-                                    break;
-                            }
-
-                            // 굵게 보장(테마가 리셋할 수 있으니 보강)
-                            e.cell.style.setProperty('font-weight', '600', 'important');
                         }
                     },
                     isReadOnly: true,
                     showMarquee: true,
                     columns: [
-                        {binding: 'id', width: 130, visible:false},
-                        {binding: 'order_num', header: '작지번호', width: 130, align: 'center', visible: false},
-                        {binding: 'work_idx', header: '작업순서', width: 70, align: 'center'},
-                        {binding: 'prod_date', header: '생산일', width: 120, align: 'center'},
-                        {binding: 'process_name', header: '공정',  width: 120, align: 'center' },
-                        {binding: 'process_order', header: '공정순서', width: 70, align: 'center' },
+                        {binding: 'order_num', header: '작지번호', width: 130, align: 'center'},
+                        {binding: 'prod_date', header: '생산일', width: 100, align: 'center'},
                         {binding: 'mat_code', header: '품목코드', width: 90, align: 'center'},
                         {binding: 'mat_name', header: '품목', width: 200, align: 'left'},
                         {binding: 'order_qty', header: '지시량', width: 80, align: 'right'},
-                        {binding: 'cons_qty', header: '필요수량', width: 80, align: 'right'},
                         {binding: 'good_qty', header: '양품량', width: 80, align: 'right'},
                         {binding: 'defect_qty', header: '부적합량', width: 80, align: 'right'},
                         {binding: 'job_state', header: '상태', width: 100, align: 'center'},
                         {binding: 'mat_type', header: '품목구분', width: 100, align: 'center'},
                         {binding: 'unit', header: '단위', width: 80, align: 'center'},
+                        {binding: 'workcenter', header: '워크센터', width: 100, align: 'center'},
+                        {binding: 'work_idx', header: '작업순서', width: 100, align: 'center'},
                         {binding: 'description', header: '비고', width: 190, align: 'left'},
-                        {binding: 'process_id', visible: false },
-                        {binding: 'product_id', visible: false }
+                        {binding: 'routing_id', visible:false}
                     ],
                     itemsSource: new wijmo.collections.CollectionView([]),
                     itemFormatter: function (panel, row, col, cell) {
@@ -1067,119 +1041,48 @@
                                     cell.style.borderBottom = '';
                                 }
                             }
-                            if (column.binding === 'cons_qty') {
-                                const v = Number(item.cons_qty);
-                                if (!isFinite(v) || v === 0) {
-                                    cell.textContent = '';    // 화면만 빈칸
-                                }
-                            }
                             if (column.binding === 'order_qty') {
-                                const v = Number(item.order_qty);
-                                if (!isFinite(v) || v === 0) {
-                                    cell.textContent = '';    // 화면만 빈칸
-                                }
+                                cell.style.backgroundColor = '#00ff21';
                             }
-                            // if (column.binding === 'order_qty') {
-                            //     cell.style.backgroundColor = '#00ff21';
-                            // }
-                            // if (column.binding === 'good_qty') {
-                            //     cell.style.backgroundColor = '#dcf0f8';
-                            // }
-                            // if (column.binding === 'defect_qty') {
-                            //     cell.style.backgroundColor = '#f8d2cb';
-                            // }
+                            if (column.binding === 'good_qty') {
+                                cell.style.backgroundColor = '#dcf0f8';
+                            }
+                            if (column.binding === 'defect_qty') {
+                                cell.style.backgroundColor = '#f8d2cb';
+                            }
                         }
                     },
-                    selectionChanged: function () {
-                        const rowIndex = _this.grid.selection.row;
-                        const rowObj = _this.grid.rows[rowIndex];
-                        if (!rowObj || rowObj instanceof wijmo.grid.GroupRow) return;
+                    selectionChanged: function (e) {
+                        let selectedRow = _this.grid.selection.row;
 
-                        const item = rowObj.dataItem;
-                        if (!item) return;
+                        let dataSource = _this.grid.itemsSource instanceof wijmo.collections.CollectionView
+                            ? _this.grid.itemsSource.sourceCollection
+                            : _this.grid.itemsSource;
 
-                        _this.selectedIndex = rowIndex;
-                        _this.jobres = item;
+                        if (!dataSource || !Array.isArray(dataSource) || dataSource.length === 0) {
+                            return;
+                        }
 
-                        // 기본 정보 갱신(탭과 무관)
-                        _this.showBasicInfo(item.id);
-                        _this.showDefectList('total');
-                        _this.showChasuList(item.id);
+                        if (selectedRow >= 0) { // 선택된 행이 있을 때만 저장
+                            _this.selectedIndex = selectedRow;
+                        }
+                        let item = _this.grid.rows[selectedRow]?.dataItem; // 선택된 데이터 가져오기
+                        if (item) {
+                            _this._currentJrPk = item.id;
 
-                        // 현재 탭만 렌더
-                        _this.renderActiveTab();
-                    },
+                            _this.jobres = item;
+                            _this.showBasicInfo(item.id);
+                            _this.showDefectList('total');
+                            _this.showChasuList(item.id);
+                            // _this.showConsumedList(item.id);
+                        }
 
+
+                    }
                 });
                 new FlexGridContextMenu(this.grid);
                 this.grid.downloadFileName = '생산 내역';
 
-                // 컬럼 헤더 가운데 정렬(기존 유지)
-                this.grid.formatItem.addHandler(function (s, e) {
-                    if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
-                        e.cell.style.textAlign = 'center';
-                    }
-                });
-
-                // 그리드 옵션
-                this.grid.allowMerging = wijmo.grid.AllowMerging.Cells;
-                // 해당 컬럼만 머지 허용
-                this.grid.getColumn('work_idx').allowMerging = true;
-                this.grid.getColumn('work_idx').cssClass = 'col-work-idx';
-
-                this.grid.formatItem.addHandler((s, e) => {
-                    if (e.panel !== s.cells) return;
-
-                    const row = s.rows[e.row];
-                    const isGroup = row instanceof wijmo.grid.GroupRow;
-                    if (!isGroup) return;
-
-                    // 공통 배경/바닥선 등
-                    e.cell.style.background = '#f5f7ff';
-                    e.cell.style.border = 'none';                 // ← 그룹헤더 모든 셀의 경계선 제거
-                    e.cell.style.borderBottom = '1px solid #e3e6ff'; // Bottom만 살리고 싶으면 유지
-
-                    // 경계(seam) 보강 제거: 테마/버전에 따라 남을 수 있으므로 한 번 더 제거
-                    const { firstVisible, lastFrozen, firstScroll } = getFrozenBoundaryIndexes(s);
-                    if (e.col === lastFrozen) e.cell.style.borderRight = 'none';
-                    if (e.col === firstScroll) e.cell.style.borderLeft  = 'none';
-
-                    // 첫 보이는 컬럼만 내용 렌더(이미 쓰시는 방식 유지)
-                    if (e.col === firstVisible) {
-                        e.cell.querySelectorAll('span[class*="wj-glyph"]').forEach(el => el.remove());
-                        e.cell.innerHTML = '';
-                        const wrap = document.createElement('div');
-                        wrap.style.display = 'flex';
-                        wrap.style.alignItems = 'center';
-                        wrap.style.gap = '8px';
-                        wrap.style.width = '100%';
-
-                        const title = document.createElement('div');
-                        title.innerHTML = `<b>작업 지시 번호 : ${row.dataItem.name || ''}</b>`;
-                        title.style.setProperty('font-weight', '700', 'important');
-
-                        wrap.appendChild(title);
-                        e.cell.appendChild(wrap);
-                    } else {
-                        e.cell.innerHTML = '';
-                    }
-                });
-
-                function getFrozenBoundaryIndexes(grid) {
-                    let visibleCount = 0, lastFrozen = -1, firstScroll = -1, firstVisible = -1;
-                    for (let i = 0; i < grid.columns.length; i++) {
-                        const col = grid.columns[i];
-                        if (!col.visible) continue;
-                        if (firstVisible === -1) firstVisible = i;
-                        if (visibleCount < grid.frozenColumns) {
-                            lastFrozen = i;
-                        } else if (firstScroll === -1) {
-                            firstScroll = i;
-                        }
-                        visibleCount++;
-                    }
-                    return { firstVisible, lastFrozen, firstScroll };
-                }
 
                 this.chasuGrid = new wijmo.grid.FlexGrid('#chasu-grid', {
                     autoGenerateColumns: false,
@@ -1376,27 +1279,12 @@
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     allowSorting: true, // 모든 컬럼 정렬 가능
                     columns: [
-                        {binding: 'mpi_id', align: 'left', visible:false},
+                        {binding: 'mat_type_name', header: '제품구분', width: 100, align: 'left', isReadOnly: true},
                         {binding: 'mat_code', header: '품목코드', width: 100, align: 'left', isReadOnly: true},
                         {binding: 'mat_name', header: '품목', width: 250, align: 'left', isReadOnly: true},
-                        {
-                            binding: 'req_qty',
-                            header: '투입요청량',
-                            width: 100,
-                            align: 'right',
-                            format: 'n0',
-                            isReadOnly: true
-                        },
                         {binding: 'unit_name', header: '단위', width: 80, align: 'center', isReadOnly: true},
                         {binding: 'lot_number', header: '로트번호', width: 150, align: 'center', isReadOnly: true},
-                        {
-                            binding: 'consumed_qty',
-                            header: '생산소모량',
-                            width: 100,
-                            align: 'right',
-                            format: 'n0',
-                            isReadOnly: true
-                        },
+                        {binding: 'StoreHouseName', header: '창고', width: 150, align: 'left', isReadOnly: true},
                         {
                             binding: 'cur_stock',
                             header: '현재재고',
@@ -1405,8 +1293,22 @@
                             format: 'n0',
                             isReadOnly: true
                         },
-                        {binding: 'mat_type_name', header: '제품구분', width: 100, align: 'left', isReadOnly: true},
-                        {binding: 'StoreHouseName', header: '창고', width: 150, align: 'left', isReadOnly: true},
+                        {
+                            binding: 'req_qty',
+                            header: '투입요청량',
+                            width: 100,
+                            align: 'right',
+                            format: 'n0',
+                            isReadOnly: true
+                        },
+                        {
+                            binding: 'consumed_qty',
+                            header: '생산소모량',
+                            width: 100,
+                            align: 'right',
+                            format: 'n0',
+                            isReadOnly: true
+                        },
                         {binding: 'start_date', header: '투입일시', width: 200, align: 'center', isReadOnly: true}
                     ],
                     itemsSource: new wijmo.collections.CollectionView([]), // 빈 데이터로 초기화
@@ -1432,8 +1334,20 @@
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     allowSorting: true, // 모든 컬럼 정렬 가능
                     columns: [
+                        {binding: 'mat_type_name', header: '제품구분', width: 100, align: 'left', isReadOnly: true},
                         {binding: 'mat_code', header: '품목코드', width: 100, align: 'left', isReadOnly: true},
                         {binding: 'mat_name', header: '품목', width: 250, align: 'left', isReadOnly: true},
+                        {binding: 'unit', header: '단위', width: 80, align: 'center', isReadOnly: true},
+                        {binding: 'useyn', header: '사용중지여부', width: 100, align: 'center', isReadOnly: true},
+                        {binding: 'lotUseYn', header: 'LOT관리 유무', width: 120, align: 'center', isReadOnly: true},
+                        {
+                            binding: 'lot_size',
+                            header: '로트 size',
+                            width: 120,
+                            align: 'right',
+                            format: 'n0',
+                            isReadOnly: true
+                        },
                         {
                             binding: 'current_qty_sum',
                             header: '로트투입량',
@@ -1451,14 +1365,6 @@
                             isReadOnly: true
                         },
                         {
-                            binding: 'remain_input_qty',
-                            header: '잔여량',
-                            width: 100,
-                            align: 'right',
-                            format: 'n0',
-                            isReadOnly: true
-                        },
-                        {
                             binding: 'mc_qty',
                             header: '실생산소모량',
                             width: 120,
@@ -1470,18 +1376,6 @@
                             binding: 'currentStock',
                             header: '현재재고',
                             width: 100,
-                            align: 'right',
-                            format: 'n0',
-                            isReadOnly: true
-                        },
-                        {binding: 'mat_type_name', header: '제품구분', width: 100, align: 'center', isReadOnly: true},
-                        {binding: 'useyn', header: '사용중지여부', width: 100, align: 'center', isReadOnly: true},
-                        {binding: 'lotUseYn', header: 'LOT관리 유무', width: 120, align: 'center', isReadOnly: true},
-                        {binding: 'unit', header: '단위', width: 80, align: 'center', isReadOnly: true},
-                        {
-                            binding: 'lot_size',
-                            header: '로트 size',
-                            width: 120,
                             align: 'right',
                             format: 'n0',
                             isReadOnly: true
@@ -1507,18 +1401,12 @@
                 // 필터
                 AjaxUtil.fillSelectOptions($('#cboMaterialType'), 'system_code', 'all', false, 'mat_type');
                 AjaxUtil.fillSelectOptions($('#cboShift'), 'shift', 'choose', false); // 근무조
-                // AjaxUtil.fillSelectOptions($('#cboWorkCenter'), 'workcenter', 'choose', false); // 워크센터
+                AjaxUtil.fillSelectOptions($('#cboWorkCenter'), 'workcenter', 'choose', false); // 워크센터
 
                 // form내부
                 AjaxUtil.fillSelectOptions($('#shift_code'), 'shift', 'choose', false); // 근무조
                 // AjaxUtil.fillSelectOptions($('#workcenter_id'), 'workcenter', 'choose', false); // 워크센터
 
-                $('#workcenter_id').off('change').on('change', function () {
-                    if ($('#state').val() === 'ordered') {
-                        AjaxUtil.fillSelectOptions($('#equipment_id'), 'equipment_code', 'choose', false, '', $(this).val());
-                        _this.showDefectList('total');
-                    }
-                });
 
             }
 
@@ -1605,6 +1493,7 @@
                 }
                 if (pk) {
                     let state = $('#tabBasic').find('#state').val(); // ordered, working, finished
+                    $('#btnConsumedView').removeAttr('disabled');
                     if (state === 'ordered') {
                         $('#btnWorkStart').removeAttr('disabled');
                         $('#btnSave').removeAttr('disabled');
@@ -1616,6 +1505,9 @@
                         $('#btnDeleteChasu').attr('disabled', 'disabled');
                         $('#btnWorkStop').attr('disabled', 'disabled');
                         $('#btnWorkStop').text('일시중지');
+                        $('#process_id').removeAttr('disabled');
+                        $('#equipment_id').removeAttr('disabled');
+                        $('#shift_code').removeAttr('disabled');
                     } else if (state === 'stopped') {
                         $('#btnWorkStart').attr('disabled', 'disabled');
                         $('#btnSave').removeAttr('disabled');
@@ -1628,8 +1520,14 @@
                         $('#btnWorkFinish').attr('disabled', 'disabled');
                         $('#btnWorkStop').removeAttr('disabled');
                         $('#btnWorkStop').text('재가동');
+                        $('#process_id').removeAttr('disabled');
+                        $('#equipment_id').removeAttr('disabled');
+                        $('#shift_code').removeAttr('disabled');
                     } else if (state === 'working') {
                         $('#btnWorkStart').attr('disabled', 'disabled');
+                        $('#process_id').attr('disabled', 'disabled');
+                        $('#equipment_id').attr('disabled', 'disabled');
+                        $('#shift_code').attr('disabled', 'disabled');
                         $('#btnWorkStop').removeAttr('disabled');
                         $('#btnSave').removeAttr('disabled');
                         $('#btnTest').removeAttr('disabled');
@@ -1652,6 +1550,9 @@
                         $('#btnDel').attr('disabled', 'disabled');
                         $('#btnWorkFinish').attr('disabled', 'disabled');
                         $('#btnFinishCancel').removeAttr('disabled');
+                        $('#process_id').removeAttr('disabled');
+                        $('#equipment_id').removeAttr('disabled');
+                        $('#shift_code').removeAttr('disabled');
                     } else {
                         $('#btnWorkStart').removeAttr('disabled');
                         $('#btnSave').removeAttr('disabled');
@@ -1665,124 +1566,49 @@
                         $('#btnWorkStop').attr('disabled', 'disabled');
                         $('#btnWorkStop').text('일시중지');
                         $('#btnDefectSave').attr('disabled', 'disabled');
+                        $('#process_id').removeAttr('disabled');
+                        $('#equipment_id').removeAttr('disabled');
+                        $('#shift_code').removeAttr('disabled');
                     }
                 }
             }
-
-            renderActiveTab() {
-                const jr = this.jobres;
-                if (!jr) return;
-
-                const jr_pk    = jr.id;
-                const prod_pk  = jr.product_id ?? jr.Material_id; // 서버가 보완해주므로 없어도 OK
-                const proc_id  = jr.process_id;                   // ditto
-                const prodDate = jr.prod_date;
-
-                switch (this.currentTab) {
-                    case 'tabChasu': {
-                        const $tabChasu = $('#tabChasu');
-                        const parseNum = (v) => {
-                            if (v == null) return null;
-                            const n = Number(String(v).replace(/,/g, '').trim());
-                            return Number.isFinite(n) ? n : null;
-                        };
-                        const cons = parseNum(jr?.cons_qty);
-                        const ord  = parseNum(this.$tabBasic.find('#order_qty').val());
-                        const show = (cons == null || cons === 0) ? (ord ?? 0) : cons;
-
-                        $tabChasu.find('#chasuLotSize').val(this.$tabBasic.find('#lot_size').val());
-                        $tabChasu.find('#ordqty').text(show === 0 ? '' : show.toLocaleString());
-                        break;
-                    }
-
-                    case 'tabConsumed': {
-                        this.showInputLotList();
-                        //  jr_pk만 넘겨도 동작하게(백엔드 보완), 있으면 같이 전달
-                        this.showConsumedList(jr_pk, prod_pk, proc_id, prodDate);
-                        break;
-                    }
-
-                    case 'tabDefect': {
-                        this.showDefectList('total');
-                        break;
-                    }
-
-                    default:
-                        break;
-                }
-            }
-
 
             // 작업목록 조회
             searchMainData() {
-                const _this = this;
+                let _this = this;
 
-                const param = {
-                    date_from: $('#date_from').val(),
-                    date_to: $('#date_to').val(),
-                    shift_code: $('#cboShift').val(),
-                    mat_type: $('#cboMaterialType').val(),
-                    // 서버에서 "false" 문자열 비교 중이면 아래처럼 맞춰주는 게 안전
-                    is_include_comp: $('#chxCompYn').is(':checked') ? 'true' : 'false',
-                    spjangcd: sessionStorage.getItem('spjangcd')
+                let param = {
+                    'date_from': $('#date_from').val(),
+                    'date_to': $('#date_to').val(),
+                    'is_include_comp': $('#chxCompYn').is(':checked')
                 };
 
-                const result = AjaxUtil.getSyncData(this.baseUrl + '/read', param);
-                const data = (result && result.data) ? result.data : [];
+                let result = AjaxUtil.getSyncData(this.baseUrl + '/read', param);
+                if (result.data && _this.grid.itemsSource) {
+                    // 기존 sourceCollection 업데이트 (선택 유지됨)
 
-                if (!data.length) {
-                    this.grid.itemsSource = new wijmo.collections.CollectionView([]);
-                    $('#selected_order_num').val('');
-                    $('#basicForm')[0].reset();
-                    $('#basicForm').find('input, select, textarea').each(function () {
-                        if (!$(this).is(':disabled')) $(this).attr('disabled', 'disabled');
-                    });
-                    this.setButtonState();
-                    $('#svgBarcode').empty();
-                    return;
+                    let view = _this.grid.itemsSource;
+                    view.sourceCollection.splice(0, view.sourceCollection.length, ...result.data);
+                    view.refresh(); // 필터, 정렬, 페이징 적용
                 }
+                // if (result.data != null) {
+                //     _this.grid.itemsSource = result.data;
+                // }
 
-                // 클라이언트 보정: process_order_sort 없으면 생성(라우팅 없는 건 뒤로)
-                data.forEach(r => {
-                    if (r.process_order_sort == null) {
-                        r.process_order_sort = (r.process_order == null ? 999 : r.process_order);
-                    }
-                });
-
-                // 새 CollectionView: 정렬 + 그룹(작지번호)
-                const cv = new wijmo.collections.CollectionView(data, {
-                    sortDescriptions: [
-                        new wijmo.collections.SortDescription('order_num', true),
-                        new wijmo.collections.SortDescription('process_order_sort', true),
-                        new wijmo.collections.SortDescription('id', true),
-                    ]
-                });
-                cv.groupDescriptions.push(
-                    new wijmo.collections.PropertyGroupDescription('order_num')
-                );
-
-                // 그리드에 바인딩
-                _this.grid.itemsSource = cv;
-
-                // 그룹 펼치기(원하면 주석)
-                if (this.grid.rows) {
-                    for (let r = 0; r < this.grid.rows.length; r++) {
-                        const row = this.grid.rows[r];
-                        if (row instanceof wijmo.grid.GroupRow) row.isCollapsed = false;
-                    }
-                }
-
-                // 폼/버튼 초기화 (기존 로직 유지)
                 $('#selected_order_num').val('');
                 $('#basicForm')[0].reset();
+
+
                 $('#basicForm').find('input, select, textarea').each(function () {
-                    if (!$(this).is(':disabled')) $(this).attr('disabled', 'disabled');
+                    if (!$(this).is(':disabled')) {
+                        $(this).attr('disabled', 'disabled');
+                    }
                 });
-                _this.setButtonState();
+
+                this.setButtonState();
+
                 $('#svgBarcode').empty();
-
             }
-
 
             // 생산정보 조회
             showBasicInfo(jr_pk) {
@@ -1792,15 +1618,22 @@
                 };
 
                 let res = AjaxUtil.getSyncData(this.baseUrl + '/detail', param);
+
+                this._suppressProcessChange = true;
+
                 let result = res.data
                 if (result) {
                     $('#selected_order_num').val(result.order_num);
 
                     let workcenter_id = result.workcenter_id;
-                    AjaxUtil.fillSelectOptions($('#equipment_id'), 'equipment_code', 'choose', '', workcenter_id);
+                    let routing_id = result.routing_id;
+                    let process_id = result.process_id;
+                    let equipment_id = result.equipment_id;
 
+                    AjaxUtil.fillSelectOptions($('#process_id'), 'routing_mat', '', process_id, routing_id);
+                    AjaxUtil.fillSelectOptions($('#equipment_id'), 'equipment_code', 'choose', equipment_id, workcenter_id);
                     FormUtil.BindDataForm(result, $('#basicForm'));
-                    _this.updateQtyVisibility();
+
                     $('#bom_output_amount').val(result.bom_output_amount);
                     if (!result.end_time)
                         $('#end_date').val(page.today);
@@ -1817,151 +1650,90 @@
                         $('#job_state').addClass('stopped-status');
                     }
 
-                    // if (result.state === 'ordered') {
-                    //     $('#workcenter_id').prop('disabled', false);
-                    // } else {
-                    //     $('#workcenter_id').prop('disabled', true);
-                    // }
-                    let total_prod_qty = result.good_qty + result.defect_qty + result.loss_qty + result.scrap_qty;
-                    //$('#lblTotalOutput').text(total_prod_qty);
 
-                    // $('#ordqty').text(result.order_qty.toLocaleString());
+                    $('#ordqty').text(result.order_qty.toLocaleString());
                     $('#chasuLotSize').val(result.lot_size);
 
                     this.setButtonState();
-
-                    // 바코드 출력
-                    // 작업지시번호 바코드 설정
-                    //
-                    let wcontent = tmpl('workorder_table_tmpl', result);
-                    let $workOrderContainerDiv = $('#workOrderContainerDiv');
-                    let $wcontent = $(wcontent);
-                    $workOrderContainerDiv.html($wcontent);
-
-                    //order_num
-                    //let barcodeLabelText = result.lot_num + "(" + result.mat_name + ")";
-                    let barcodeLabelText = result.order_num + "(" + result.mat_name + ")";
-                    if (result.order_num) {
-                        JsBarcode("#svgBarcodeWorkOrderNumber", result.order_num, {
-                            format: 'code128', // 바코드 포맷 / default: code128 / options: EAN, UPC, CODE39, ITF-14, MSI, Pharmacode, Codabar (각 옵션들에 대한 설명은 사이트 참조)
-                            width: 2, // 너비 / default: 2
-                            height: 100, // 높이 / default: 100
-                            displayValue: true, // 텍스트 표시 여부 / default: true
-                            text: barcodeLabelText, // 데이터 대신 특정 텍스트 표시 / default: undefined
-                            fontOptions: '', // 폰트 설정 / default: '' / options: bold, italic, bold italic
-                            font: 'monospace', // 폰트 / default: monospace / options: fantasy, etc... 사이트 참조
-                            textAlign: 'center', // 텍스트 위치 / default: center / options: left, center, right
-                            textPosition: 'bottom', // 텍스트 위치 / default: bottom / options: top, bottom
-                            textMargin: 2, // 바코드와 텍스트 사이 여백 / default: 2
-                            fontSize: 12, // 폰트 크기 / default: 20
-                            background: '#ffffff', // 바코드 배경 색 / default: #ffffff
-                            lineColor: '#000000', // 바코드 라인 색 / default: #000000
-                            margin: 10, // 바코드 영역 주변 여백 / default: 10
-                        });
-
-                        $('#btnPrintWorkOrderBarcode').click(function (e) {
-                            let popupWindow = window.open("barcode_print", "_blank", "width=800px");
-                            let css = $('#print_css')[0].outerHTML;
-
-                            let html = $workOrderContainerDiv.html();
-                            popupWindow.document.write(css);
-                            popupWindow.document.write(html);
-                            popupWindow.print();
-                            return false;
-                        });
-
+                    if (!this._procCascadeBound) {
+                        this.initProcessCascade();
+                        this._procCascadeBound = true;
                     }
 
-                    let lcontent = tmpl('lotnumber_table_tmpl', result);
-                    let $lcontent = $(lcontent);
-                    let $LotNumberContainerDiv = $('#LotNumberContainerDiv');
-                    $LotNumberContainerDiv.html($lcontent);
-                    if (result.lot_num) {
-                        barcodeLabelText = result.lot_num + "(" + result.mat_name + ")";
-                        JsBarcode("#svgBarcodeLotNumber", result.lot_num, {
-                            format: 'code128', // 바코드 포맷 / default: code128 / options: EAN, UPC, CODE39, ITF-14, MSI, Pharmacode, Codabar (각 옵션들에 대한 설명은 사이트 참조)
-                            width: 2, // 너비 / default: 2
-                            height: 100, // 높이 / default: 100
-                            displayValue: true, // 텍스트 표시 여부 / default: true
-                            text: barcodeLabelText, // 데이터 대신 특정 텍스트 표시 / default: undefined
-                            fontOptions: '', // 폰트 설정 / default: '' / options: bold, italic, bold italic
-                            font: 'monospace', // 폰트 / default: monospace / options: fantasy, etc... 사이트 참조
-                            textAlign: 'center', // 텍스트 위치 / default: center / options: left, center, right
-                            textPosition: 'bottom', // 텍스트 위치 / default: bottom / options: top, bottom
-                            textMargin: 2, // 바코드와 텍스트 사이 여백 / default: 2
-                            fontSize: 12, // 폰트 크기 / default: 20
-                            background: '#ffffff', // 바코드 배경 색 / default: #ffffff
-                            lineColor: '#000000', // 바코드 라인 색 / default: #000000
-                            margin: 10, // 바코드 영역 주변 여백 / default: 10
-                        });
-
-                        $('#btnPrintLotNumberBarcode').click(function (e) {
-                            let popupWindow = window.open("barcode_print", "_blank", "width=800px");
-                            let css = $('#print_css')[0].outerHTML;
-
-                            let html = $LotNumberContainerDiv.html();
-                            popupWindow.document.write(css);
-                            popupWindow.document.write(html);
-                            popupWindow.print();
-                            return false;
-                        });
-                    }
+                    this._suppressProcessChange = false;
+                    this.onProcessChange();
                 }
             }
 
-            updateQtyVisibility() {
-                const toNum = (v) => {
-                    if (v == null) return 0;
-                    const n = Number(String(v).replace(/,/g, '').trim());
-                    return Number.isFinite(n) ? n : 0;
-                };
+            initProcessCascade() {
+                const $proc = $('#process_id');
+                $proc.off('change.prod').on('change.prod', () => {
+                    if (this._suppressProcessChange) return;  // 초기화 중엔 무시
+                    this.onProcessChange();
+                });
+            }
 
-                const ordVal  = toNum($('#order_qty').val());
-                const consVal = toNum($('#cons_qty').val());
+            onProcessChange() {
+                if (this._suppressProcessChange) return;
 
-                const $ordTd  = $('#order_qty').closest('td');
-                const $ordTh  = $ordTd.prev('th');
-                const $consTd = $('#cons_qty').closest('td');
-                const $consTh = $consTd.prev('th');
-                const $row    = $ordTh.closest('tr');
+                const processId = $('#tabBasic #process_id').val();
+                const routingId = this.jobres?.routing_id || $('#routing_id').val();
+                const materialId= $('#tabBasic #mat_pk').val();           // 최상위(작지 품목)
+                const orderQty  = parseFloat($('#tabBasic #order_qty').val()) || 1;
+                const prodDate  = $('#tabBasic #prod_date').val() || null;
+                const orderNum   = $('#tabBasic #order_num').val();
 
-                // colspan 초기화
-                $ordTd.removeAttr('colspan');
-                $consTd.removeAttr('colspan');
+                // 1) 공정→워크센터(단건) 조회 및 세팅
+                const wcRes = AjaxUtil.getSyncData('/api/definition/workcenter/of-process', {
+                    process_id: processId,
+                    routing_id: routingId
+                });
+                const wc = wcRes && wcRes.data ? wcRes.data : null;
+                $('#tabBasic #workcenter_id').val(wc.workcenter_id || '');
+                $('#tabBasic #workcenter_name').val(wc.workcenter_nm || '');
+                AjaxUtil.fillSelectOptions($('#tabBasic #equipment_id'), 'equipment_code', '', '', wc.workcenter_id);
 
-                const showPair = ($th, $td, show) => {
-                    $th.css('display', show ? 'table-cell' : 'none');
-                    $td.css('display', show ? 'table-cell' : 'none');
-                };
 
-                if (ordVal === 0 && consVal === 0) {
-                    // 둘 다 0 → 행 자체 숨김
-                    showPair($ordTh, $ordTd, false);
-                    showPair($consTh, $consTd, false);
-                    $row.css('display', 'none');
-                    return;
+                // 2) 공정별 BOM 메타(산출품/해당 BOM id) 조회
+                const metaRes = AjaxUtil.getSyncData(this.baseUrl + '/process-step-meta', {
+                    material_id: materialId, routing_id: routingId, process_id: processId, order_qty: orderQty, prod_date: prodDate
+                });
+
+                $('#tabBasic #prod_mat_id').removeAttr('disabled');
+                $('#tabBasic #need_pro_mat_qty').removeAttr('disabled');
+                $('#tabBasic #proc_jr_pk').removeAttr('disabled');
+                $('#tabBasic #consumed_mode').removeAttr('disabled');
+
+                const meta = metaRes?.data || {};
+                $('#tabBasic #prod_mat_id').val(meta.pro_mat_id || '');
+                $('#tabBasic #need_pro_mat_qty').val(meta.need_pro_mat_qty || '');
+
+
+                let found = null;
+                if (orderNum && meta.pro_mat_id && processId) {
+                    const findRes = AjaxUtil.getSyncData(this.baseUrl + '/find-by-order-process', {
+                        order_num: orderNum,
+                        process_id: processId,
+                        pro_mat_id: meta.pro_mat_id
+                    });
+                    found = findRes?.data || null; // { jr_pk: 123 } or null
                 }
 
-                // 먼저 행은 보이게
-                $row.css('display', 'table-row');
 
-                if (ordVal === 0 && consVal !== 0) {
-                    // 지시량만 0 → 지시량 쌍 숨김, 필요수량 쌍 표시 + colspan=3
-                    showPair($ordTh, $ordTd, false);
-                    showPair($consTh, $consTd, true);
-                    $consTd.attr('colspan', 3);
-                } else if (ordVal !== 0 && consVal === 0) {
-                    // 필요수량만 0 → 필요수량 쌍 숨김, 지시량 쌍 표시 + colspan=3
-                    showPair($consTh, $consTd, false);
-                    showPair($ordTh, $ordTd, true);
-                    $ordTd.attr('colspan', 3);
+                if (found?.jr_pk) {
+                    // ACTUAL 모드
+                    $('#tabBasic #id').val(found.jr_pk);
+                    $('#tabBasic #consumed_mode').val('ACTUAL');
                 } else {
-                    // 둘 다 값 있음 → 모두 표시 (colspan 없음)
-                    showPair($ordTh, $ordTd, true);
-                    showPair($consTh, $consTd, true);
+                    // PLAN 모드
+                    $('#tabBasic #consumed_mode').val('PLAN');
                 }
-            }
 
+                this.showConsumedList(this._currentJrPk);
+                this.showInputLotList();
+
+
+            }
 
             // 생산정보 저장
             saveBasicInfo() {
@@ -2058,6 +1830,8 @@
                         setTimeout(() => {
                             _this.grid.select(previousIndex, 0);
                         }, 100);
+
+                        $('#id').val(res.data.jr_pk);
                     } else {
                         Alert.alert('작업 시작 실패', res.message || '작업을 시작할 수 없습니다.');
                     }
@@ -2249,22 +2023,40 @@
 
 
                 let data = {jr_pk: jr_pk, good_qty: lotSize, defect_qty: 0, loss_qty: 0, scrap_qty: 0};
-                let addChasuCallbackSuccess = function (result) {
-                    if (result.success) {
-                        Notify.success('저장되었습니다.');
-                        _this.showChasuList(result.data.jr_pk);
-
-
-                        const r = _this.selectedIndex; // 현재 선택된 '뷰' 행 인덱스
-                        _this.grid.setCellData(r, 'good_qty', result.data.good_qty_sum, /*coerce*/ true);
-                        _this.grid.invalidate();
-
-                        _this.showBasicInfo(result.data.jr_pk);
-
-                    } else {
+                const addChasuCallbackSuccess = function (result) {
+                    if (!result.success) {
                         Alert.alert('차수 추가 오류', result.message);
+                        return;
                     }
-                }
+
+                    Notify.success('저장되었습니다.');
+                    _this.showChasuList(result.data.jr_pk);
+
+                    // 서버에서 온 품목코드
+                    const serverMatCode = (result.data?.prod_mat_cd ?? '').toString().trim();
+
+                    // 현재 그리드의 데이터 소스
+                    const dataSource = _this.grid.itemsSource instanceof wijmo.collections.CollectionView
+                        ? _this.grid.itemsSource.sourceCollection
+                        : _this.grid.itemsSource;
+
+                    // 선택된 행
+                    const idx = parseInt(_this.selectedIndex);
+                    const row = (Array.isArray(dataSource) && dataSource[idx]) ? dataSource[idx] : null;
+
+                    // 선택행의 품목코드
+                    const rowMatCode = (row?.mat_code ?? '').toString().trim();
+
+                    // 품목코드가 같은 경우에만 그리드 수량 업데이트
+                    if (serverMatCode && row && serverMatCode === rowMatCode) {
+                        row.good_qty = result.data.good_qty_sum;     // 누적 양품량 반영
+                        _this.grid.collectionView?.commitEdit?.();  // 커밋
+                        _this.grid.invalidate();                    // 리렌더
+                    }
+
+                    // detail은 항상 최신 jr_pk로 갱신
+                    _this.showBasicInfo(result.data.jr_pk);
+                };
                 let url = this.baseUrl + '/chasu_add';
                 AjaxUtil.postAsyncData(url, data, addChasuCallbackSuccess);
             }
@@ -2286,9 +2078,21 @@
                         Alert.alert('마지막 차수 삭제', '삭제되었습니다.');
                         _this.showChasuList(res.data.jr_pk);
 
-                        const r = _this.grid.selection.row; // 현재 선택된 '뷰' 행
-                        _this.grid.setCellData(r, 'good_qty',   res.data.good_qty_sum,  true);
-                        _this.grid.setCellData(r, 'defect_qty', res.data.defect_qty_sum, true);
+                        // Wijmo Grid에서 해당 행 찾기
+                        let dataSource = _this.grid.itemsSource instanceof wijmo.collections.CollectionView
+                            ? _this.grid.itemsSource.sourceCollection
+                            : _this.grid.itemsSource;
+                        let updatedItem = dataSource[parseInt(_this.selectedIndex)];
+
+                        if (updatedItem) {
+                            // `good_qty` 값 업데이트
+                            updatedItem.good_qty = res.data.good_qty_sum;
+                            updatedItem.defect_qty = res.data.defect_qty_sum;
+
+                            // 3. Wijmo Grid에 변경사항 반영
+                            _this.grid.collectionView.commitEdit(); // 데이터 변경 확정
+                            _this.grid.invalidate(); // 화면 다시 그림 (강제 새로고침 X)
+                        }
 
                         _this.showBasicInfo(res.data.jr_pk);
 
@@ -2357,10 +2161,20 @@
                         }
 
                         // Wijmo Grid에서 해당 행 찾기
-                        const r = _this.grid.selection.row; // 현재 선택된 '뷰' 행
-                        _this.grid.setCellData(r, 'good_qty',   res.data[0].good_qty_sum,  true);
-                        _this.grid.setCellData(r, 'defect_qty', res.data[0].defect_qty_sum, true);
+                        if (last) {
+                            let dataSource = _this.grid.itemsSource instanceof wijmo.collections.CollectionView
+                                ? _this.grid.itemsSource.sourceCollection
+                                : _this.grid.itemsSource;
+                            let updatedItem = dataSource[parseInt(_this.selectedIndex)];
 
+                            if (updatedItem) {
+                                updatedItem.good_qty = last.good_qty_sum;
+                                updatedItem.defect_qty = last.defect_qty_sum;
+
+                                _this.grid.collectionView.commitEdit();
+                                _this.grid.invalidate();
+                            }
+                        }
                     } else {
                         Alert.alert('', res.message);
                     }
@@ -2655,16 +2469,26 @@
 
 
             // 투입목록 조회
-            showConsumedList(jr_pk, prod_pk, proc_id, prodDate) {
-
+            showConsumedList(jr_pk, mat_pk, process_id, routing_id, prod_date, order_qty) {
                 let _this = this;
+                let consumed_mode = $('#tabBasic').find('#consumed_mode').val();
+                let prod_mat_id = $('#tabBasic').find('#prod_mat_id').val();
+                let need_pro_mat_qty = $('#tabBasic').find('#need_pro_mat_qty').val();
 
-                const param = {
-                    jr_pk: jr_pk,
-                    prod_pk: prod_pk,
-                    proc_id: proc_id,
-                    prod_date: prodDate
+
+                let param = {
+                    'jr_pk': jr_pk,
+                    'mat_pk': mat_pk,
+                    'process_id': process_id,
+                    'routing_id': routing_id,
+                    'prod_date': prod_date,
+                    'order_qty': order_qty,
+                    'consumed_mode': consumed_mode,
+                    'prod_mat_id': prod_mat_id,
+                    'need_pro_mat_qty': need_pro_mat_qty
                 };
+
+
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/consumed_list', param);
                 if (result.data != null) {
                     _this.consumedGrid.itemsSource = result.data;
@@ -3347,7 +3171,6 @@
             $('#btnToggle').click(function (e) {
                 $("#input_lot_div").toggle(300);
             });
-            // $("#input_lot_div").toggle(300);
 
             $('#btnTest').click(function (e) {
                 page.showInputTestPopup();
@@ -3364,12 +3187,28 @@
             });
 
             // tab클릭
-            $('.tab-links a').on('click', function (e) {
-                e.preventDefault();
-                const target = e.currentTarget.name;
+            let target;
+            $('.tab-links a').click(function (e) {
+                let jr_pk = $('#tabBasic').find('#id').val();
+                let workcenter_pk = $('#tabBasic').find('#workcenter_id').val();
+                let mat_pk = $('#tabBasic').find('#mat_pk').val();
+                let process_id = $('#tabBasic').find('#process_id').val();
+                let routing_id = $('#tabBasic').find('#routing_id').val();
+                let prod_date = $('#tabBasic').find('#prod_date').val();
+                let order_qty = $('#tabBasic').find('#order_qty').val();
+
+                target = e.currentTarget.name;
                 page.currentTab = target;
-                page.renderActiveTab();    // 선택된 행 기준으로 그 탭만 렌더
+
+                if (target === 'tabDefect') {
+                    if (workcenter_pk) page.showDefectList('total');
+                } else if (target === 'tabConsumed') {
+                    page.showInputLotList();
+                    page.showConsumedList(jr_pk, mat_pk, process_id, routing_id, prod_date, order_qty);
+
+                }
             });
+
 
             // 생산정보 저장
             $('#btnSave').click(function (e) {
@@ -3445,6 +3284,18 @@
             $('#btnAddMat').click(function (e) {
                 page.addMaterial();
             });
+
+            // 투입내역 조회
+            // $('#btnConsumedView').click(function (e) {
+            //     let jr_pk = $('#tabBasic').find('#id').val();
+            //     let mat_pk = $('#tabBasic').find('#mat_pk').val();
+            //     let process_id = $('#tabBasic').find('#process_id').val();
+            //     let routing_id = $('#tabBasic').find('#routing_id').val();
+            //
+            //
+            //     if (jr_pk)
+            //         page.showConsumedList(jr_pk, mat_pk, process_id, routing_id);
+            // });
 
             $('#defect_qty').click(function (e) {
                 $(".tab-wrap .tab-links [name='tabDefect']").trigger('click');

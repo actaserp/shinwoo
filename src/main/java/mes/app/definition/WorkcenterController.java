@@ -197,4 +197,14 @@ public class WorkcenterController {
 			return result;
 		}
 
+	@GetMapping("/of-process")
+	public AjaxResult getWorkcenterOfProcess(
+			@RequestParam Integer process_id,
+			@RequestParam Integer routing_id) {
+		AjaxResult result = new AjaxResult();
+        result.data= workcenterService.findByRoutingAndProcess(routing_id, process_id);
+		return result; // { id, name }
+	}
+
+
 }

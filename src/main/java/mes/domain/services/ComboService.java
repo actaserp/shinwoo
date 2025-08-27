@@ -65,6 +65,7 @@ public class ComboService {
 		this._dicFunc_.put("prod_week_term", this.prod_week_term);
 		this._dicFunc_.put("person", this.person);
 		this._dicFunc_.put("routing", this.routing);
+		this._dicFunc_.put("routing_mat", this.routing_mat);
 		this._dicFunc_.put("shift", this.shift);
 		this._dicFunc_.put("issuediv", this.issuediv);
 		this._dicFunc_.put("stop_cause", this.stop_cause); // 확인필요
@@ -552,6 +553,27 @@ public class ComboService {
         dicParam.addValue("cond2", cond2);
         dicParam.addValue("cond3", cond3);
         return this.sqlRunner.getRows(sql, dicParam);
+	};
+
+	ComboDataFunction routing_mat=(String cond1, String cond2, String cond3)-> {
+		String sql ="""
+				select r.id
+					, rp."Process_id" as value
+					, rp."ProcessOrder"
+					, p."Name" as text
+					from material m
+				left join routing r on r.id = m."Routing_id"
+				left join routing_proc rp on r.id = rp."Routing_id"
+				left join process p on rp."Process_id" = p.id
+				where m."Routing_id" = :cond1
+				order by rp."ProcessOrder";
+				""";
+
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("cond1", Integer.parseInt(cond1));
+		dicParam.addValue("cond2", cond2);
+		dicParam.addValue("cond3", cond3);
+		return this.sqlRunner.getRows(sql, dicParam);
 	};
 	
 	ComboDataFunction shift=(String cond1, String cond2, String cond3)-> { 

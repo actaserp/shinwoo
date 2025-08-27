@@ -177,57 +177,57 @@ public class ProdOrderAController {
 		header = jobResRepository.save(header); // 트리거가 헤더 번호 생성
 
 		// ===== 자식(전 공정들) 생성: 마지막 공정 제외 =====
-		for (int i = 0; i < steps.size() - 1; i++) {
-			RoutingProc step = steps.get(i);
-			Integer processId = step.getProcessId();
-
-			// 공정→워크센터
-			Workcenter wc = workcenterRepository.findByProcessId(processId);
-			Integer wcId = (wc != null ? wc.getId() : null);
-
-			// ★ 공정 대상(Product) 조회
-			List<Integer> prodIds = bomProcCompRepository
-					.findDistinctProductIdsByRoutingAndProcess(routingPk, processId);
-
-			Integer stepProductId = null;
-			if (prodIds != null && !prodIds.isEmpty()) {
-				// 다수면 헤더 품목과 일치하는 게 있으면 우선, 없으면 첫 번째
-				stepProductId = prodIds.contains(matPk) ? matPk : prodIds.get(0);
-			}
-			if (stepProductId == null) stepProductId = matPk; // fallback
-
-			JobRes child = new JobRes();
-			child.set_audit(user);
-
-			child.setProductionDate(prodDate);
-			child.setProductionPlanDate(prodDate);
-
-			// 자식 공정의 대상 품목으로 설정
-			child.setMaterialId(stepProductId);
-
-			// 자식 지시량을 넣게되면 생산해야할것 같아서 일단 뺌
-			// 자식 수량을 공정 대상에 맞춰 스케일링하려면 아래 참고 섹션 참조
-//			BigDecimal factor = bomRepository.findLevel1Factor(matPk, stepProductId); // 지붕→판넬 2
-//			float childQty = factor != null
-//					? factor.multiply(BigDecimal.valueOf(txtOrderQty)).floatValue()
-//					: (float) txtOrderQty;
-//			child.setOrderQty(childQty);
-			child.setOrderQty(null);
-
-			child.setDescription(txtDescription);
-			child.setParentId(header.getId());
-			child.setRouting_id(routingPk);
-			child.setProcessCount(1);
-			child.setWorkCenter_id(wcId);
-			child.setFirstWorkCenter_id(wcId);
-			child.setEquipment_id(null);
-			child.setShiftCode(cboShiftCode);
-			child.setStoreHouse_id(locPk);
-			child.setState("ordered");
-			child.setSpjangcd(spjangcd);
-
-			jobResRepository.save(child);
-		}
+//		for (int i = 0; i < steps.size() - 1; i++) {
+//			RoutingProc step = steps.get(i);
+//			Integer processId = step.getProcessId();
+//
+//			// 공정→워크센터
+//			Workcenter wc = workcenterRepository.findByProcessId(processId);
+//			Integer wcId = (wc != null ? wc.getId() : null);
+//
+//			// ★ 공정 대상(Product) 조회
+//			List<Integer> prodIds = bomProcCompRepository
+//					.findDistinctProductIdsByRoutingAndProcess(routingPk, processId);
+//
+//			Integer stepProductId = null;
+//			if (prodIds != null && !prodIds.isEmpty()) {
+//				// 다수면 헤더 품목과 일치하는 게 있으면 우선, 없으면 첫 번째
+//				stepProductId = prodIds.contains(matPk) ? matPk : prodIds.get(0);
+//			}
+//			if (stepProductId == null) stepProductId = matPk; // fallback
+//
+//			JobRes child = new JobRes();
+//			child.set_audit(user);
+//
+//			child.setProductionDate(prodDate);
+//			child.setProductionPlanDate(prodDate);
+//
+//			// 자식 공정의 대상 품목으로 설정
+//			child.setMaterialId(stepProductId);
+//
+//			// 자식 지시량을 넣게되면 생산해야할것 같아서 일단 뺌
+//			// 자식 수량을 공정 대상에 맞춰 스케일링하려면 아래 참고 섹션 참조
+////			BigDecimal factor = bomRepository.findLevel1Factor(matPk, stepProductId); // 지붕→판넬 2
+////			float childQty = factor != null
+////					? factor.multiply(BigDecimal.valueOf(txtOrderQty)).floatValue()
+////					: (float) txtOrderQty;
+////			child.setOrderQty(childQty);
+//			child.setOrderQty(null);
+//
+//			child.setDescription(txtDescription);
+//			child.setParentId(header.getId());
+//			child.setRouting_id(routingPk);
+//			child.setProcessCount(1);
+//			child.setWorkCenter_id(wcId);
+//			child.setFirstWorkCenter_id(wcId);
+//			child.setEquipment_id(null);
+//			child.setShiftCode(cboShiftCode);
+//			child.setStoreHouse_id(locPk);
+//			child.setState("ordered");
+//			child.setSpjangcd(spjangcd);
+//
+//			jobResRepository.save(child);
+//		}
 
 
 		result.success = true;

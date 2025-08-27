@@ -50,9 +50,12 @@ public class ProdOrderEditService {
 	                , fn_code_name('mat_type', mg."MaterialType") as mat_type_name
 	                , s."State"
 	                , s."Description" as description
+	                , m."Routing_id"
+					, r."Name" as routing_nm
 	                from suju s
 	                inner join material m on m.id = s."Material_id"
 	                inner join mat_grp mg on mg.id = m."MaterialGroup_id"
+	                inner join routing r on m."Routing_id" = r.id
 	                left join unit u on m."Unit_id" = u.id
 	                where 1 = 1 and mg."MaterialType"!='sangpum'
 	                and s.spjangcd = :spjangcd
@@ -109,6 +112,7 @@ public class ProdOrderEditService {
 	            , 0 as "AdditionalQty"
 	            , s.description
 	            , s."StateName", s."State"
+	            , s.routing_nm
 	            from s 
 	            left join q on q.suju_id = s.id
 	            where 1 = 1
