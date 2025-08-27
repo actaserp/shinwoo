@@ -33,68 +33,134 @@ public class BaljuOrderService {
 
     String sql = """
         WITH base_data AS (
-           SELECT
-             bh.id AS bh_id,
-             bh."Company_id",
-             b."CompanyName",
-             b."BaljuHead_id",
-             bh."JumunDate",
-             bh."JumunNumber",
-             mg."Name" AS "MaterialGroupName",
-             fn_code_name('Balju_type', bh."SujuType") AS "BaljuTypeName",
-             b.id AS balju_id,
-             m."Code" AS product_code,
-             m."Name" AS product_name,
-             u."Name" AS unit,
-             b."SujuQty",
-             b."UnitPrice",
-             b."Price",
-             b."Vat",
-             b."TotalAmount",
-             fn_code_name('balju_state', bh."State") AS "StateName",
-             mi."SujuQty2" AS "SujuQty2",
-             GREATEST((b."SujuQty" - mi."SujuQty2"), 0) AS "SujuQty3",
-             sh."Name" AS "ShipmentStateName",
-             bh."DeliveryDate",
-             b."Description",
-             (
-               SELECT
-                 CASE
-                   WHEN COUNT(*) FILTER (WHERE b2."State" = 'received') = COUNT(*) THEN 'received'
-                   WHEN COUNT(*) FILTER (WHERE b2."State" = 'draft') = COUNT(*) THEN 'draft'
-                   WHEN COUNT(*) FILTER (WHERE b2."State" = 'canceled') = COUNT(*) THEN 'canceled'
-                   ELSE 'partial'
-                 END
-               FROM balju b2
-               WHERE b2."BaljuHead_id" = bh.id
-             ) AS "BalJuHeadType",
-             fn_code_name(
-               'balju_state',
-               (
-                 SELECT
-                   CASE
-                     WHEN COUNT(*) FILTER (WHERE b2."State" = 'received') = COUNT(*) THEN 'received'
-                     WHEN COUNT(*) FILTER (WHERE b2."State" = 'draft') = COUNT(*) THEN 'draft'
-                     WHEN COUNT(*) FILTER (WHERE b2."State" = 'canceled') = COUNT(*) THEN 'canceled'
-                     ELSE 'partial'
-                   END
-                 FROM balju b2
-                 WHERE b2."BaljuHead_id" = bh.id
-               )
-             ) AS "bh_StateName",
-             ROW_NUMBER() OVER (PARTITION BY bh."JumunNumber" ORDER BY b.id ASC) AS rn
-           FROM balju_head bh
-           LEFT JOIN balju b ON b."BaljuHead_id" = bh.id AND b.spjangcd = bh.spjangcd AND b."JumunNumber" = bh."JumunNumber"
-           INNER JOIN material m ON m.id = b."Material_id" AND m.spjangcd = b.spjangcd
-           INNER JOIN mat_grp mg ON mg.id = m."MaterialGroup_id" AND mg.spjangcd = b.spjangcd
-           LEFT JOIN unit u ON m."Unit_id" = u.id AND u.spjangcd = b.spjangcd
-           LEFT JOIN store_house sh ON sh.id::varchar = b."ShipmentState" AND sh.spjangcd = b.spjangcd
-           LEFT JOIN (
-             SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
-             FROM mat_inout
-             WHERE "SourceTableName" = 'balju' AND COALESCE("_status", 'a') = 'a'
-             GROUP BY "SourceDataPk"
-           ) mi ON mi."SourceDataPk" = b.id
+                   SELECT
+                     bh.id AS bh_id,
+                     bh."Company_id",
+         b."CompanyName",
+         b."BaljuHead_id",
+         bh."JumunDate",
+         bh."JumunNumber",
+         mg."Name" AS "MaterialGroupName",
+         fn_code_name('Balju_type', bh."SujuType") AS "BaljuTypeName",
+         b.id AS balju_id,
+         m."Code" AS product_code,
+         m."Name" AS product_name,
+         u."Name" AS unit,
+         b."SujuQty",
+         b."UnitPrice",
+         b."Price",
+         b."Vat",
+         b."TotalAmount",
+         fn_code_name('balju_state', bh."State") AS "StateName",
+         mi."SujuQty2" AS "SujuQty2",
+        GREATEST((b."SujuQty" - mi."SujuQty2"), 0) AS "SujuQty3",
+         sh."Name" AS "ShipmentStateName",
+         bh."DeliveryDate",
+         b."Description",
+         (
+          SELECT
+            CASE
+              WHEN COUNT(*) FILTER (
+                WHERE
+                  CASE
+                    WHEN b2."State" IN ('canceled', 'force_completion') THEN b2."State"
+        WHEN COALESCE(mi2."SujuQty2", 0) = 0 AND b2."SujuQty" > 0 THEN 'draft'
+        WHEN COALESCE(mi2."SujuQty2", 0) >= b2."SujuQty" THEN 'received'
+        WHEN COALESCE(mi2."SujuQty2", 0) > 0 AND COALESCE(mi2."SujuQty2", 0) < b2."SujuQty" THEN 'partial'
+        ELSE 'draft'
+          END = 'received'
+          ) = COUNT(*) THEN 'received'
+          WHEN COUNT(*) FILTER (
+            WHERE
+              CASE
+                WHEN b2."State" IN ('canceled', 'force_completion') THEN b2."State"
+        WHEN COALESCE(mi2."SujuQty2", 0) = 0 AND b2."SujuQty" > 0 THEN 'draft'
+        WHEN COALESCE(mi2."SujuQty2", 0) >= b2."SujuQty" THEN 'received'
+        WHEN COALESCE(mi2."SujuQty2", 0) > 0 AND COALESCE(mi2."SujuQty2", 0) < b2."SujuQty" THEN 'partial'
+        ELSE 'draft'
+          END = 'draft'
+          ) = COUNT(*) THEN 'draft'
+          WHEN COUNT(*) FILTER (
+            WHERE
+              CASE
+                WHEN b2."State" IN ('canceled', 'force_completion') THEN b2."State"
+        WHEN COALESCE(mi2."SujuQty2", 0) = 0 AND b2."SujuQty" > 0 THEN 'draft'
+        WHEN COALESCE(mi2."SujuQty2", 0) >= b2."SujuQty" THEN 'received'
+        WHEN COALESCE(mi2."SujuQty2", 0) > 0 AND COALESCE(mi2."SujuQty2", 0) < b2."SujuQty" THEN 'partial'
+        ELSE 'draft'
+          END = 'canceled'
+          ) = COUNT(*) THEN 'canceled'
+          ELSE 'partial'
+            END
+          FROM balju b2
+          LEFT JOIN (
+            SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
+        FROM mat_inout
+        WHERE "SourceTableName" = 'balju' AND COALESCE("_status", 'a') = 'a'
+        GROUP BY "SourceDataPk"
+          ) mi2 ON mi2."SourceDataPk" = b2.id
+          WHERE b2."BaljuHead_id" = bh.id
+        ) AS "BalJuHeadType",
+        fn_code_name(
+          'balju_state',
+          (
+            SELECT
+              CASE
+                WHEN COUNT(*) FILTER (
+                  WHERE
+                    CASE
+                      WHEN b2."State" IN ('canceled', 'force_completion') THEN b2."State"
+          WHEN COALESCE(mi2."SujuQty2", 0) = 0 AND b2."SujuQty" > 0 THEN 'draft'
+          WHEN COALESCE(mi2."SujuQty2", 0) >= b2."SujuQty" THEN 'received'
+          WHEN COALESCE(mi2."SujuQty2", 0) > 0 AND COALESCE(mi2."SujuQty2", 0) < b2."SujuQty" THEN 'partial'
+          ELSE 'draft'
+        END = 'received'
+        ) = COUNT(*) THEN 'received'
+        WHEN COUNT(*) FILTER (
+          WHERE
+            CASE
+              WHEN b2."State" IN ('canceled', 'force_completion') THEN b2."State"
+          WHEN COALESCE(mi2."SujuQty2", 0) = 0 AND b2."SujuQty" > 0 THEN 'draft'
+          WHEN COALESCE(mi2."SujuQty2", 0) >= b2."SujuQty" THEN 'received'
+          WHEN COALESCE(mi2."SujuQty2", 0) > 0 AND COALESCE(mi2."SujuQty2", 0) < b2."SujuQty" THEN 'partial'
+          ELSE 'draft'
+        END = 'draft'
+        ) = COUNT(*) THEN 'draft'
+        WHEN COUNT(*) FILTER (
+          WHERE
+            CASE
+              WHEN b2."State" IN ('canceled', 'force_completion') THEN b2."State"
+          WHEN COALESCE(mi2."SujuQty2", 0) = 0 AND b2."SujuQty" > 0 THEN 'draft'
+          WHEN COALESCE(mi2."SujuQty2", 0) >= b2."SujuQty" THEN 'received'
+          WHEN COALESCE(mi2."SujuQty2", 0) > 0 AND COALESCE(mi2."SujuQty2", 0) < b2."SujuQty" THEN 'partial'
+          ELSE 'draft'
+        END = 'canceled'
+        ) = COUNT(*) THEN 'canceled'
+        ELSE 'partial'
+          END
+        FROM balju b2
+        LEFT JOIN (
+          SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
+          FROM mat_inout
+          WHERE "SourceTableName" = 'balju' AND COALESCE("_status", 'a') = 'a'
+          GROUP BY "SourceDataPk"
+        ) mi2 ON mi2."SourceDataPk" = b2.id
+        WHERE b2."BaljuHead_id" = bh.id
+          )
+          ) AS "bh_StateName",
+           ROW_NUMBER() OVER (PARTITION BY bh."JumunNumber" ORDER BY b.id ASC) AS rn
+             FROM balju_head bh
+             LEFT JOIN balju b ON b."BaljuHead_id" = bh.id AND b.spjangcd = bh.spjangcd AND b."JumunNumber" = bh."JumunNumber"
+             INNER JOIN material m ON m.id = b."Material_id" AND m.spjangcd = b.spjangcd
+             INNER JOIN mat_grp mg ON mg.id = m."MaterialGroup_id" AND mg.spjangcd = b.spjangcd
+             LEFT JOIN unit u ON m."Unit_id" = u.id AND u.spjangcd = b.spjangcd
+             LEFT JOIN store_house sh ON sh.id::varchar = b."ShipmentState" AND sh.spjangcd = b.spjangcd
+             LEFT JOIN (
+               SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
+           FROM mat_inout
+           WHERE "SourceTableName" = 'balju' AND COALESCE("_status", 'a') = 'a'
+           GROUP BY "SourceDataPk"
+             ) mi ON mi."SourceDataPk" = b.id
            WHERE bh.spjangcd = :spjangcd
         """;
 
@@ -127,7 +193,7 @@ public class BaljuOrderService {
           MAX("BalJuHeadType") AS "BalJuHeadType",
           MAX("bh_StateName") AS "bh_StateName",
           SUM("SujuQty2") AS "SujuQty2",
-          SUM("SujuQty3") AS "SujuQty3",
+          SUM(GREATEST("SujuQty" - COALESCE("SujuQty2", 0), 0)) AS "SujuQty3",
           MAX("ShipmentStateName") AS "ShipmentStateName",
           MAX("DeliveryDate") AS "DueDate",
           MAX("Description") AS "Description"
@@ -147,88 +213,169 @@ public class BaljuOrderService {
 
     String sql = """
         WITH balju_total AS (
-            SELECT 
-                "BaljuHead_id" AS bh_id,
-                SUM(COALESCE("TotalAmount", 0)) AS total_amount_sum
-            FROM balju
-            GROUP BY "BaljuHead_id"
-        )
-        SELECT
-            bh.id AS bh_id,
-            bh."Company_id",
-            c."Name" AS "CompanyName",
-            bh."JumunDate",
-            bh."DeliveryDate",
-            bh.special_note,
-            bh."JumunNumber",
-            b.id AS balju_id,
-            b."Material_id",
-            COALESCE(m."Code", '') AS product_code,
-            COALESCE(m."Name", '') AS product_name,
-            COALESCE(mg."Name", '') AS "MaterialGroupName",
-            COALESCE(mg.id, 0) AS "MaterialGroup_id",
-            fn_code_name('mat_type', mg."MaterialType") AS "MaterialTypeName",
-            s."Value" as "BaljuTypeName",
-            b."SujuQty",
-            u."Name" AS unit,
-            b."UnitPrice" AS "BaljuUnitPrice",
-            b."Price" AS "BaljuPrice",
-            b."Vat" AS "BaljuVat",
-            b."InVatYN",
-            b."TotalAmount" AS "LineTotalAmount",
-            COALESCE(bt.total_amount_sum, 0) AS "BaljuTotalPrice", 
-            TO_CHAR(b."ProductionPlanDate", 'yyyy-mm-dd') AS production_plan_date,
-            TO_CHAR(b."ShipmentPlanDate", 'yyyy-mm-dd') AS shiment_plan_date,
-            b."Description",
-            b."AvailableStock",
-            b."ReservationStock",
-            mi."SujuQty2",
-            -- 동적 계산된 Head 상태
-            (
-                SELECT
-                    CASE
-                        WHEN COUNT(*) FILTER (WHERE b2."State" = 'received') = COUNT(*) THEN 'received'
-                        WHEN COUNT(*) FILTER (WHERE b2."State" = 'draft') = COUNT(*) THEN 'draft'
-                        WHEN COUNT(*) FILTER (WHERE b2."State" = 'canceled') = COUNT(*) THEN 'canceled'
-                        ELSE 'partial'
-                    END
-                FROM balju b2
-                WHERE b2."BaljuHead_id" = bh.id
-            ) AS "BalJuHeadType",
-            -- Head 상태명
-            fn_code_name(
-                'balju_state',
-                (
-                    SELECT
-                        CASE
-                            WHEN COUNT(*) FILTER (WHERE b2."State" = 'received') = COUNT(*) THEN 'received'
-                            WHEN COUNT(*) FILTER (WHERE b2."State" = 'draft') = COUNT(*) THEN 'draft'
-                            WHEN COUNT(*) FILTER (WHERE b2."State" = 'canceled') = COUNT(*) THEN 'canceled'
-                            ELSE 'partial'
-                        END
-                    FROM balju b2
-                    WHERE b2."BaljuHead_id" = bh.id
-                )
-            ) AS "bh_StateName",
-            -- 개별 balju 상태
-            b."State" AS "BalJuType",
-            fn_code_name('balju_state', b."State") AS "balju_StateName",
-            TO_CHAR(b."_created", 'yyyy-mm-dd') AS create_date
-        FROM balju_head bh
-        LEFT JOIN balju b ON b."BaljuHead_id" = bh.id
-        LEFT JOIN material m ON m.id = b."Material_id" AND m.spjangcd = b.spjangcd
-        LEFT JOIN mat_grp mg ON mg.id = m."MaterialGroup_id" AND mg.spjangcd = b.spjangcd
-        LEFT JOIN unit u ON m."Unit_id" = u.id AND u.spjangcd = b.spjangcd
-        LEFT JOIN company c ON c.id = b."Company_id"
-        left join sys_code s on bh."SujuType" = s."Code" and s."CodeType" = 'Balju_type'
-        LEFT JOIN (
-            SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
-            FROM mat_inout
-            WHERE "SourceTableName" = 'balju' AND COALESCE("_status", 'a') = 'a'
-            GROUP BY "SourceDataPk"
-        ) mi ON mi."SourceDataPk" = b.id
-        LEFT JOIN balju_total bt ON bt.bh_id = bh.id
-        WHERE bh.id = :id
+         SELECT
+             "BaljuHead_id" AS bh_id,
+             SUM(COALESCE("TotalAmount", 0)) AS total_amount_sum
+         FROM balju
+         GROUP BY "BaljuHead_id"
+         )
+         SELECT
+             bh.id AS bh_id,
+             bh."Company_id",
+             c."Name" AS "CompanyName",
+             bh."JumunDate",
+             bh."DeliveryDate",
+             bh.special_note,
+             bh."JumunNumber",
+             b.id AS balju_id,
+             b."Material_id",
+             COALESCE(m."Code", '') AS product_code,
+             COALESCE(m."Name", '') AS product_name,
+             COALESCE(mg."Name", '') AS "MaterialGroupName",
+             COALESCE(mg.id, 0) AS "MaterialGroup_id",
+             fn_code_name('mat_type', mg."MaterialType") AS "MaterialTypeName",
+             s."Value" as "BaljuTypeName",
+             b."SujuQty",
+             u."Name" AS unit,
+             b."UnitPrice" AS "BaljuUnitPrice",
+             b."Price" AS "BaljuPrice",
+             b."Vat" AS "BaljuVat",
+             b."InVatYN",
+             b."TotalAmount" AS "LineTotalAmount",
+             COALESCE(bt.total_amount_sum, 0) AS "BaljuTotalPrice",
+             TO_CHAR(b."ProductionPlanDate", 'yyyy-mm-dd') AS production_plan_date,
+             TO_CHAR(b."ShipmentPlanDate", 'yyyy-mm-dd') AS shiment_plan_date,
+             b."Description",
+             b."AvailableStock",
+             b."ReservationStock",
+             mi."SujuQty2",
+             -- 동적 계산된 Head 상태
+             (
+           SELECT
+             CASE
+               WHEN COUNT(*) FILTER (
+                 WHERE
+                   CASE
+         WHEN b2."State" IN ('canceled', 'force_completion') THEN b2."State"
+         WHEN COALESCE(mi2."SujuQty2", 0) = 0 AND b2."SujuQty" > 0 THEN 'draft'
+         WHEN COALESCE(mi2."SujuQty2", 0) >= b2."SujuQty" THEN 'received'
+         WHEN COALESCE(mi2."SujuQty2", 0) > 0 AND COALESCE(mi2."SujuQty2", 0) < b2."SujuQty" THEN 'partial'
+         ELSE 'draft'
+           END = 'received'
+           ) = COUNT(*) THEN 'received'
+           WHEN COUNT(*) FILTER (
+             WHERE
+               CASE
+                 WHEN b2."State" IN ('canceled', 'force_completion') THEN b2."State"
+         WHEN COALESCE(mi2."SujuQty2", 0) = 0 AND b2."SujuQty" > 0 THEN 'draft'
+         WHEN COALESCE(mi2."SujuQty2", 0) >= b2."SujuQty" THEN 'received'
+         WHEN COALESCE(mi2."SujuQty2", 0) > 0 AND COALESCE(mi2."SujuQty2", 0) < b2."SujuQty" THEN 'partial'
+         ELSE 'draft'
+           END = 'draft'
+           ) = COUNT(*) THEN 'draft'
+           WHEN COUNT(*) FILTER (
+             WHERE
+               CASE
+                 WHEN b2."State" IN ('canceled', 'force_completion') THEN b2."State"
+         WHEN COALESCE(mi2."SujuQty2", 0) = 0 AND b2."SujuQty" > 0 THEN 'draft'
+         WHEN COALESCE(mi2."SujuQty2", 0) >= b2."SujuQty" THEN 'received'
+         WHEN COALESCE(mi2."SujuQty2", 0) > 0 AND COALESCE(mi2."SujuQty2", 0) < b2."SujuQty" THEN 'partial'
+         ELSE 'draft'
+           END = 'canceled'
+           ) = COUNT(*) THEN 'canceled'
+           ELSE 'partial'
+             END
+           FROM balju b2
+           LEFT JOIN (
+             SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
+         FROM mat_inout
+         WHERE "SourceTableName" = 'balju' AND COALESCE("_status", 'a') = 'a'
+         GROUP BY "SourceDataPk"
+           ) mi2 ON mi2."SourceDataPk" = b2.id
+           WHERE b2."BaljuHead_id" = bh.id
+         ) AS "BalJuHeadType",
+         fn_code_name(
+           'balju_state',
+           (
+             SELECT
+               CASE
+                 WHEN COUNT(*) FILTER (
+                   WHERE
+                     CASE
+                       WHEN b2."State" IN ('canceled', 'force_completion') THEN b2."State"
+           WHEN COALESCE(mi2."SujuQty2", 0) = 0 AND b2."SujuQty" > 0 THEN 'draft'
+           WHEN COALESCE(mi2."SujuQty2", 0) >= b2."SujuQty" THEN 'received'
+           WHEN COALESCE(mi2."SujuQty2", 0) > 0 AND COALESCE(mi2."SujuQty2", 0) < b2."SujuQty" THEN 'partial'
+           ELSE 'draft'
+         END = 'received'
+         ) = COUNT(*) THEN 'received'
+         WHEN COUNT(*) FILTER (
+           WHERE
+             CASE
+               WHEN b2."State" IN ('canceled', 'force_completion') THEN b2."State"
+           WHEN COALESCE(mi2."SujuQty2", 0) = 0 AND b2."SujuQty" > 0 THEN 'draft'
+           WHEN COALESCE(mi2."SujuQty2", 0) >= b2."SujuQty" THEN 'received'
+           WHEN COALESCE(mi2."SujuQty2", 0) > 0 AND COALESCE(mi2."SujuQty2", 0) < b2."SujuQty" THEN 'partial'
+           ELSE 'draft'
+         END = 'draft'
+         ) = COUNT(*) THEN 'draft'
+         WHEN COUNT(*) FILTER (
+           WHERE
+             CASE
+               WHEN b2."State" IN ('canceled', 'force_completion') THEN b2."State"
+           WHEN COALESCE(mi2."SujuQty2", 0) = 0 AND b2."SujuQty" > 0 THEN 'draft'
+           WHEN COALESCE(mi2."SujuQty2", 0) >= b2."SujuQty" THEN 'received'
+           WHEN COALESCE(mi2."SujuQty2", 0) > 0 AND COALESCE(mi2."SujuQty2", 0) < b2."SujuQty" THEN 'partial'
+           ELSE 'draft'
+         END = 'canceled'
+         ) = COUNT(*) THEN 'canceled'
+         ELSE 'partial'
+           END
+         FROM balju b2
+         LEFT JOIN (
+           SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
+           FROM mat_inout
+           WHERE "SourceTableName" = 'balju' AND COALESCE("_status", 'a') = 'a'
+           GROUP BY "SourceDataPk"
+         ) mi2 ON mi2."SourceDataPk" = b2.id
+         WHERE b2."BaljuHead_id" = bh.id
+           )
+           ) AS "bh_StateName",
+             -- 개별 balju 상태
+         CASE
+           WHEN b."State" IN ('canceled', 'force_completion') THEN b."State"
+           WHEN COALESCE(mi."SujuQty2", 0) = 0 AND b."SujuQty" > 0 THEN 'draft'
+           WHEN COALESCE(mi."SujuQty2", 0) >= b."SujuQty" THEN 'received'
+           WHEN COALESCE(mi."SujuQty2", 0) > 0 AND COALESCE(mi."SujuQty2", 0) < b."SujuQty" THEN 'partial'
+           ELSE 'draft'
+         END AS "BalJuType",
+         -- 코드 이름 매핑
+         fn_code_name(
+           'balju_state',
+           CASE
+             WHEN b."State" IN ('canceled', 'force_completion') THEN b."State"
+             WHEN COALESCE(mi."SujuQty2", 0) = 0 AND b."SujuQty" > 0 THEN 'draft'
+             WHEN COALESCE(mi."SujuQty2", 0) >= b."SujuQty" THEN 'received'
+             WHEN COALESCE(mi."SujuQty2", 0) > 0 AND COALESCE(mi."SujuQty2", 0) < b."SujuQty" THEN 'partial'
+             ELSE 'draft'
+           END
+         ) AS "balju_StateName",
+             TO_CHAR(b."_created", 'yyyy-mm-dd') AS create_date
+         FROM balju_head bh
+         LEFT JOIN balju b ON b."BaljuHead_id" = bh.id
+         LEFT JOIN material m ON m.id = b."Material_id" AND m.spjangcd = b.spjangcd
+         LEFT JOIN mat_grp mg ON mg.id = m."MaterialGroup_id" AND mg.spjangcd = b.spjangcd
+         LEFT JOIN unit u ON m."Unit_id" = u.id AND u.spjangcd = b.spjangcd
+         LEFT JOIN company c ON c.id = b."Company_id"
+         left join sys_code s on bh."SujuType" = s."Code" and s."CodeType" = 'Balju_type'
+         LEFT JOIN (
+             SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
+             FROM mat_inout
+             WHERE "SourceTableName" = 'balju' AND COALESCE("_status", 'a') = 'a'
+             GROUP BY "SourceDataPk"
+         ) mi ON mi."SourceDataPk" = b.id
+         LEFT JOIN balju_total bt ON bt.bh_id = bh.id
+         WHERE bh.id = :id
         """;
 //    log.info("발주상세 데이터 SQL: {}", sql);
 //    log.info("SQL Parameters: {}", paramMap.getValues());
