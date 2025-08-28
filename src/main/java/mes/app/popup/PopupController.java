@@ -798,7 +798,7 @@ public class PopupController {
             from company
             WHERE ("CompanyType" = 'purchase'
             OR "CompanyType" = 'sale-purchase')
-            and "relyn" = '0'
+            AND ("relyn" = '0' OR "relyn" IS NULL)
 			""";
 		//relyn = 거래중지 여부
 		

@@ -123,9 +123,10 @@
             {binding: 'material_name', header: '자재명', width: 300, align: 'left', isReadOnly: true},
             {binding: 'unit_name', header: '단위', width: 100, align: 'center', isReadOnly: true},
             {binding: 'order_qty', header: '수주량', width: 120, align: 'left', isReadOnly: true},
-            {binding: 'current_stock', header: '현재고', width: 120, align: 'left', isReadOnly: true},
-            {binding: 'optimal_stock', header: '적정재고', width: 120, align: 'left', isReadOnly: true},
-            {binding: 'need_more_qty', header: '필요수량', width: 120, align: 'left', isReadOnly: true},
+            {binding: 'incoming_qty', header: '미입고수량', width: 120, align: 'right', isReadOnly: true},
+            {binding: 'current_stock', header: '현재고', width: 120, align: 'right', isReadOnly: true},
+            {binding: 'optimal_stock', header: '적정재고', width: 120, align: 'right', isReadOnly: true},
+            {binding: 'need_more_qty', header: '필요수량', width: 120, align: 'right', isReadOnly: true},
             {binding: 'state', header: '상태', width: 120, align: 'center', isReadOnly: true},
           ],
           itemsSource: new wijmo.collections.CollectionView([]), // 빈 데이터로 초기화
