@@ -260,27 +260,6 @@
                                 <input type="date" id="DueDate" name="DueDate">
                             </td>
                         </tr>
-                        <tr>
-                            <th style="text-align: center">
-                                <label for="cboCompany">판매처*</label>
-                            </th>
-                            <td >
-                                <input id="cboCompany" name="Company_id" type="hidden">
-                                <input class="form-control2" type="text" id="CompanyName" name="CompanyName"
-                                placeholder="판매처 검색 버튼을 클릭하여 판매처를 검색하세요" readonly/>
-                                &nbsp;
-                                <a class="btn btn-delete" title="검색" id="btnCompanySearch">
-                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                    판매처 검색
-                                </a>
-                            </td>
-                            <th style="text-align: center">
-                                <label for="delivery">납품처*</label>
-                            </th>
-                            <td colspan="3">
-                                <input class="form-control2" type="text" id="DeliveryName" name="DeliveryName" placeholder="납품처"/>
-                            </td>
-                        </tr>
 <!--                        <tr>-->
 <!--                            <th style="text-align: center">-->
 <!--                                <label for="cboCompany">프로젝트</label>-->
@@ -319,6 +298,27 @@
                         </tr>
                         <tr>
                             <th style="text-align: center">
+                                <label for="cboCompany">판매처*</label>
+                            </th>
+                            <td >
+                                <input id="cboCompany" name="Company_id" type="hidden">
+                                <input class="form-control2" type="text" id="CompanyName" name="CompanyName"
+                                placeholder="판매처 검색 버튼을 클릭하여 판매처를 검색하세요" readonly/>
+                                &nbsp;
+                                <a class="btn btn-delete" title="검색" id="btnCompanySearch">
+                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    판매처 검색
+                                </a>
+                            </td>
+                            <th style="text-align: center">
+                                <label for="delivery">납품처*</label>
+                            </th>
+                            <td colspan="3">
+                                <input class="form-control2" type="text" id="DeliveryName" name="DeliveryName" placeholder="납품처"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center">
                                 <label for="Description">비고</label>
                             </th>
                             <td colspan="3">
@@ -348,12 +348,12 @@
                     <colgroup>
                         <col style="width: 6%">
                         <col style="width: 18%">
+                        <col style="width: 15%">
                         <col style="width: 5%">
                         <col style="width: 13%">
                         <col style="width: 9%">
                         <col style="width: 9%">
                         <col style="width: 9%">
-<!--                        <col style="width: 10%">-->
                         <col style="width: 11%">
                         <col style="width: 6%">
                         <col style="width: 4%">
@@ -362,12 +362,12 @@
                     <tr id="itemHeaderRow">
                         <th>코드</th>
                         <th>품목</th>
+                        <th>규격</th>
                         <th>수량</th>
                         <th>단가 <span style="font-size: 13px;">(선택시 부가세 포함)</span></th>
                         <th>공급가액</th>
                         <th>부가세</th>
                         <th>합계</th>
-<!--                        <th>프로젝트</th>-->
                         <th>비고</th>
                         <th>상태</th>
                         <th>
@@ -387,11 +387,13 @@
                                 <input type="text" name="txtProductName" placeholder="코드 또는 품명 입력 후 엔터" autocomplete="off" />
                                 <input type="hidden" name="MaterialGroupName" />
                                 <input type="hidden" name="Material_id" />
+                                <input type="hidden" name="unit_name" />
                                 <a class="btn in_btn" title="품목 검색" id="btnProductSearch" >
                                     <img src="/images/icon/btn-srch-black.svg" alt="검색 아이콘" />
                                 </a>
                             </div>
                         </td>
+                        <td><input type="text" name="standard" placeholder="규격" /></td>
                         <td><input type="text" name="quantity" placeholder="수량" /></td>
                         <td>
                             <div class="input-with-checkbox">
@@ -403,10 +405,6 @@
                         <td><input type="text" name="supplyAmount" placeholder="공급가액" /></td>
                         <td><input type="text" name="VatAmount" placeholder="부과세"/></td>
                         <td><input type="text" name="totalAmount" placeholder="합계" /></td>
-<!--                        <td>-->
-<!--                            <input name="projectHidden" type="hidden">-->
-<!--                            <input type="text" name="project" placeholder="입력 후 엔터">-->
-<!--                        </td>-->
                         <td><input type="text" name="description" placeholder="비고" /></td>
                          <td>
                             <input type="hidden" name="State"/>
@@ -632,7 +630,7 @@
                 } else {
                     modalContainer = new PopupDraggable('수정');
                 }
-                modalContainer.open({width: 1300, height: 600, $content});
+                modalContainer.open({width: 1350, height: 600, $content});
 
                 // 제품검색
                 let $btnProductSearch = $content.find('#btnProductSearch');
@@ -996,6 +994,8 @@
                     const $productId = $row.find('input[name^="Material_id_"]');
                     const $productCode = $row.find('input[name^="product_code_"]');
                     const $materialGroup = $row.find('input[name^="MaterialGroupName_"]');
+                    const $Standard = $row.find('input[name^="standard_"]');
+                    const $unit_name = $row.find('input[name^="unit_name_"]');
 
                     const pop = new PopMatComponent();
                     pop.material_type = 'product,sangpum';
@@ -1005,6 +1005,13 @@
                         $productId.val(item.id);
                         $productCode.val(item.Code);
                         $materialGroup.val(item.group_name);
+                        $unit_name.val(item.unit_name);
+                        $Standard.val(item.Spec);
+                        if (item.Spec) {
+                            $Standard.prop('readonly', true);   // 값이 있으면 readonly
+                        } else {
+                            $Standard.prop('readonly', false);  // 값이 없으면 해제
+                        }
                         tryShowPrice($row);
                     });
 
@@ -1022,6 +1029,8 @@
                     const $productInput = $row.find('input[name^="txtProductName_"]');
                     const $productId = $row.find('input[name^="Material_id_"]');
                     const $productCode = $row.find('input[name^="product_code_"]');
+                    const $Standard = $row.find('input[name^="standard_"]');
+                    const $unit_name = $row.find('input[name^="unit_name_"]');
 
                     const keyword = $field.val().trim();
                     const pop = new PopMatComponent();
@@ -1031,6 +1040,13 @@
                         $productId.val(item.id || '');
                         $productInput.val(item.Name || '');
                         $productCode.val(item.Code || '');
+                        $unit_name.val(item.unit_name || '');
+                        $Standard.val(item.Spec || '');
+                        if (item.Spec) {
+                            $Standard.prop('readonly', true);   // 값이 있으면 readonly
+                        } else {
+                            $Standard.prop('readonly', false);  // 값이 없으면 해제
+                        }
                         tryShowPrice($row);
                     };
 
@@ -1066,11 +1082,16 @@
 
                     const $productId = $row.find('input[name^="Material_id_"]');
                     const $productCode = $row.find('input[name^="product_code_"]');
+                    const $Standard = $row.find('input[name^="standard_"]');
+                    const $unit_name = $row.find('input[name^="unit_name_"]');
 
                     if ($field.val().trim() === '') {
                         // 값이 비었을 경우 연관된 필드 초기화
                         $productId.val('');
                         $productCode.val('');
+                        $Standard.val('');
+                        $unit_name.val('');
+                        $Standard.prop('readonly', false);
                     }
                 });
 
