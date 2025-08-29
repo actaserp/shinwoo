@@ -194,9 +194,10 @@ public class ProductionResultController {
 
     @GetMapping("/input_lot_list")
     public AjaxResult getInputLotList(
-            @RequestParam(value = "jr_pk", required = false) Integer jrPk) {
+            @RequestParam(value = "jr_pk", required = false) Integer jrPk,
+            @RequestParam(value = "mat_code", required = false) String mat_code) {
 
-        List<Map<String, Object>> items = this.productionResultService.getInputLotList(jrPk);
+        List<Map<String, Object>> items = this.productionResultService.getInputLotList(jrPk, mat_code);
 
         AjaxResult result = new AjaxResult();
         result.data = items;
@@ -371,7 +372,7 @@ public class ProductionResultController {
 
         JobRes target; // 실제로 start 상태로 저장할 대상(자식 또는 기존)
         if ("PLAN".equalsIgnoreCase(consumedMode)) {
-            // ✅ PLAN: 새 자식 job_res 생성
+            // PLAN: 새 자식 job_res 생성
             if (jrPk == null || prodMatId == null || needProMatQty == null) {
                 result.success = false;
                 result.message = "PLAN 모드에는 부모작지/공정산출품/지시수량이 필요합니다.";
@@ -585,53 +586,81 @@ public class ProductionResultController {
             @RequestParam(value = "scrap_qty", required = false) Float scrapQty,
             @RequestParam(value = "shift_code", required = false) String shiftCode,
             @RequestParam(value = "mat_pk", required = false) Integer materialId,
+            @RequestParam(value = "prod_mat_id", required = false) Integer prod_mat_id,
             @RequestParam(value = "workcenter_id", required = false) Integer workcenterId,
             @RequestParam(value = "equipment_id", required = false) Integer equipmentId,
             @RequestParam(value = "prod_date", required = false) String prodDate,
-            @RequestParam(value = "start_time", required = false) String startTime,
+            @RequestParam(value = "start_time", required = false) String startTime,   // ← 전달만 받되, DB의 startTime 우선
             @RequestParam(value = "end_date", required = false) String endDate,
             @RequestParam(value = "end_time", required = false) String endTime,
             @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "order_num", required = false) String order_num,
+            @RequestParam(value = "order_num", required = false) String orderNum,
             HttpServletRequest request,
             Authentication auth) {
 
         AjaxResult result = new AjaxResult();
-
         User user = (User) auth.getPrincipal();
 
-        // 현재 시간의 초를 가져옴
-        int currentSecond = LocalDateTime.now().getSecond();
-        String secondStr = String.format(":%02d", currentSecond);
+        JobRes jr = this.jobResRepository.getJobResById(jrPk);
+        if (jr == null) {
+            result.success = false;
+            result.message = "작업지를 찾을 수 없습니다.";
+            return result;
+        }
 
-        // start_time 조합
-        String startTimeStr = prodDate + " " + startTime + secondStr;
-        Timestamp start_time = Timestamp.valueOf(startTimeStr);
+        // 1) 포맷터
+        DateTimeFormatter dtm = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-        // end_time 조합
-        String endTimeStr = prodDate + " " + endTime + secondStr;
-        Timestamp end_time = Timestamp.valueOf(endTimeStr);
+        // 2) DB에 저장된 startTime을 기준으로 초(second) 확보 (없으면 0)
+        int sec = 0;
+        if (jr.getStartTime() != null) {
+            sec = jr.getStartTime().toLocalDateTime().getSecond();
+        }
 
-        Timestamp prod_date = CommonUtil.tryTimestamp(prodDate);
+        // 3) end_time = end_date + end_time (+ sec)
+        if (endDate == null || endDate.isBlank() || endTime == null || endTime.isBlank()) {
+            result.success = false;
+            result.message = "종료일/종료시간이 필요합니다.";
+            return result;
+        }
+        LocalDateTime endDt = LocalDateTime.parse(endDate + " " + endTime, dtm).withSecond(sec);
+        Timestamp end_time = Timestamp.valueOf(endDt);
 
+        // 4) startDt : DB값 우선. (없다면 form 값으로 보정, 그래도 없으면 오류)
+        LocalDateTime startDt = null;
+        if (jr.getStartTime() != null) {
+            startDt = jr.getStartTime().toLocalDateTime();
+        } else if (prodDate != null && !prodDate.isBlank() && startTime != null && !startTime.isBlank()) {
+            startDt = LocalDateTime.parse(prodDate + " " + startTime, dtm).withSecond(sec);
+        } else {
+            result.success = false;
+            result.message = "시작시간이 없습니다. (작업시작 후 완료해주세요)";
+            return result;
+        }
+
+        // 5) 백엔드에서도 시간 역전 검증
+        if (endDt.isBefore(startDt)) {
+            result.success = false;
+            result.message = "작업시간이 잘못되었습니다. (종료 < 시작)";
+            return result;
+        }
+
+        // 6) 생산/차수/투입 체크
         List<MaterialConsume> mcList = this.matConsuRepository.findByJobResponseId(jrPk);
-
-        if (mcList.size() == 0) {
+        if (mcList.isEmpty()) {
             result.success = false;
             result.message = "저장된 투입내역이 없습니다. \n 투입내역을 저장해주세요.";
             return result;
         }
-
-        List<MaterialProduce> mp = this.matProduceRepository.findByJobResponseIdAndMaterialId(jrPk, materialId);
-
-        if (mp.size() == 0) {
+        List<MaterialProduce> mp = this.matProduceRepository.findByJobResponseIdAndMaterialId(jrPk, prod_mat_id);
+        if (mp.isEmpty()) {
             result.success = false;
             result.message = "저장된 차수내역이 없습니다. \n 차수내역을 저장해주세요.";
             return result;
         }
 
-        JobRes jr = this.jobResRepository.getJobResById(jrPk);
-
+        // 7) JR 업데이트 (start_time 은 건드리지 않음!)
+        Timestamp prod_date = CommonUtil.tryTimestamp(prodDate);
         jr.set_audit(user);
         jr.setLotNumber(lotNum);
         jr.setGoodQty(goodQty);
@@ -639,8 +668,10 @@ public class ProductionResultController {
         jr.setLossQty(lossQty);
         jr.setScrapQty(scrapQty);
         jr.setProductionDate(prod_date);
-        jr.setEndDate(Date.valueOf(endDate));
-        jr.setStartTime(start_time);
+        if (endDate != null && !endDate.isBlank()) {
+            jr.setEndDate(Date.valueOf(endDate));
+        }
+        // jr.setStartTime(...)  ← 제거!
         jr.setEndTime(end_time);
         jr.setShiftCode(shiftCode);
         jr.setWorkCenter_id(workcenterId);
@@ -649,28 +680,26 @@ public class ProductionResultController {
         jr.setState("finished");
 
         this.productionResultService.add_jobres_defectqty_inout(jrPk, user.getId());
-
         jr = this.jobResRepository.save(jr);
-        System.out.println("jr data" + jr);
 
-        Optional<EquRun> runningRunOpt = equRunRepository.findLatestRunningByEquipmentAndOrder(equipmentId, order_num);
+        // 8) EquRun 종료 (가능하면 jr_pk로 귀속하여 조회/종료 권장)
+        Optional<EquRun> runningRunOpt =
+                equRunRepository.findLatestRunningByEquipmentAndOrder(equipmentId, orderNum);
         if (runningRunOpt.isPresent()) {
             EquRun equ = runningRunOpt.get();
-            equ.setEndDate(end_time); // 중지 시각
+            equ.setEndDate(end_time);
             equ.setRunState("complete");
             equ.set_audit(user);
-
             equRunRepository.save(equ);
         }
 
-        Map<String, Object> item = new HashMap<String, Object>();
+        Map<String, Object> item = new HashMap<>();
         item.put("jr_pk", jrPk);
-
         result.success = true;
         result.data = item;
-
         return result;
     }
+
 
     @PostMapping("/finish_cancel")
     @Transactional
@@ -1158,12 +1187,12 @@ public class ProductionResultController {
 
                 }
 
-                if (remainQty > 0) {
-                    result.message = "로트 수량이 부족합니다.(" + matName + ")";
-                    result.success = false;
-                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                    return result;
-                }
+//                if (remainQty > 0) {
+//                    result.message = "로트 수량이 부족합니다.(" + matName + ")";
+//                    result.success = false;
+//                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+//                    return result;
+//                }
             } else {
                 if ("1".equals(consMat.getUseyn())) {
                     result.message = "사용 불가능한 품목이 BOM에 등록되어 있습니다.(" + matName + ")";
@@ -1592,12 +1621,12 @@ public class ProductionResultController {
 
                 }
 
-                if (remainQty > 0) {
-                    result.message = "로트 수량이 부족합니다.(" + matName + ")";
-                    result.success = false;
-                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                    return result;
-                }
+//                if (remainQty > 0) {
+//                    result.message = "로트 수량이 부족합니다.(" + matName + ")";
+//                    result.success = false;
+//                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+//                    return result;
+//                }
             } else {
                 if ("1".equals(consMat.getUseyn())) {
                     result.message = "사용 불가능한 품목이 BOM에 등록되어 있습니다.(" + matName + ")";

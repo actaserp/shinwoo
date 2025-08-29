@@ -244,8 +244,8 @@ public class ProductionResultService {
 			WITH T AS (
 			  SELECT
 				  jr.id                              AS child_id,
-				  jr."Parent_id"                  AS parent_id,
-				  COALESCE(jr."Parent_id", jr.id) AS base_id,
+				  jr."Parent_id"                     AS parent_id,
+				  COALESCE(jr."Parent_id", jr.id)    AS base_id,
 				  CASE WHEN jr."State"='working' THEN 1 ELSE 0 END AS is_working
 			  FROM job_res jr
 			  WHERE jr."ProductionDate" BETWEEN CAST(:dateFrom AS date) AND CAST(:dateTo AS date)
@@ -254,63 +254,75 @@ public class ProductionResultService {
 			S AS (
 			  SELECT
 				  T.*,
-				  -- 체인(base_id) 내에서 working 우선, 그다음 최근 id로 대표행 선택
+				  -- 대표행 선택: working 우선, 다음 최근 id
 				  ROW_NUMBER() OVER (
 					PARTITION BY T.base_id
 					ORDER BY T.is_working DESC, T.child_id DESC
-				  ) AS rn
+				  ) AS rn,
+				  -- 체인에 working 있는지 (있으면 1)
+				  MAX(T.is_working) OVER (PARTITION BY T.base_id) AS any_working
 			  FROM T
+			),
+			F AS (
+			  SELECT
+				 S.child_id                                  AS id                         -- 대표행 id
+			   , C."WorkOrderNumber"                         AS order_num
+			   , TO_CHAR(B."ProductionDate",'yyyy-mm-dd')    AS prod_date                  -- 기본정보는 base(부모)
+			   , C."LotNumber"                               AS lot_num
+			   , TO_CHAR(B."StartTime",'hh24:mi')            AS start_time
+			   , TO_CHAR(B."EndTime",'hh24:mi')              AS end_time
+			   , WC.id                                       AS workcenter_id
+			   , WC."Name"                                   AS workcenter
+			   , C."ShiftCode"                                AS shift_code
+			   , SH."Name"                                    AS shift_name
+			   , B."WorkIndex"                                AS work_idx
+			
+			   -- 파생 상태: working 있으면 working, 아니면 부모 상태
+			   , CASE WHEN S.any_working = 1 THEN 'working' ELSE B."State" END            AS state
+			   , fn_code_name('job_state', CASE WHEN S.any_working = 1 THEN 'working' ELSE B."State" END)
+																						  AS job_state
+			
+			   , C."WorkerCount"                              AS worker_count
+			   , M.id                                         AS mat_pk
+			   , M."Code"                                     AS mat_code
+			   , M."Name"                                     AS mat_name
+			   , fn_code_name('mat_type', MG."MaterialType")  AS mat_type
+			   , M."LotSize"                                  AS lot_size
+			   , M."Weight"                                   AS weight
+			   , U."Name"                                     AS unit
+			   , E.id                                         AS equipment_id
+			   , E."Name"                                     AS equipment
+			   , C."Description"                              AS description
+			   , B."OrderQty"                                 AS order_qty
+			   , B."GoodQty"                                  AS good_qty
+			   , B."DefectQty"                                AS defect_qty
+			   , B."LossQty"                                  AS loss_qty
+			   , B."ScrapQty"                                 AS scrap_qty
+			   , TO_CHAR(B."ProductionDate" + M."ValidDays", 'yyyy-mm-dd') AS "ValidDays"
+			   , M."Routing_id"                               AS routing_id
+			  FROM S
+			  JOIN job_res       C  ON C.id = S.child_id              -- child = 대표행
+			  JOIN job_res       B  ON B.id = S.base_id               -- base = 부모
+			  LEFT JOIN work_center WC ON WC.id = C."WorkCenter_id"
+			  LEFT JOIN equ           E  ON E.id  = C."Equipment_id"
+			  LEFT JOIN shift         SH ON SH."Code" = C."ShiftCode"
+			  LEFT JOIN material      M  ON M.id = B."Material_id"
+			  LEFT JOIN routing       R  ON M."Routing_id" = R.id
+			  LEFT JOIN mat_grp       MG ON MG.id = M."MaterialGroup_id"
+			  LEFT JOIN unit          U  ON U.id = M."Unit_id"
+			  WHERE S.rn = 1
 			)
-			SELECT
-			   S.child_id                                  AS id                         -- ★ 대표행 id (working 자식이면 자식 id)
-			 , C."WorkOrderNumber"                         AS order_num
-			 , TO_CHAR(B."ProductionDate",'yyyy-mm-dd')    AS prod_date                   -- 기본정보는 base(부모 우선)
-			 , C."LotNumber"                               AS lot_num
-			 , TO_CHAR(B."StartTime",'hh24:mi')            AS start_time
-			 , TO_CHAR(B."EndTime",'hh24:mi')              AS end_time
-			 , WC.id                                       AS workcenter_id
-			 , WC."Name"                                   AS workcenter
-			 , C."ShiftCode"                                AS shift_code
-			 , SH."Name"                                    AS shift_name
-			 , B."WorkIndex"                                AS work_idx
-			 , fn_code_name('job_state', C."State")         AS job_state                  -- 상태/공정/설비는 child 기준
-			 , C."State"                                    AS state
-			 , C."WorkerCount"                              AS worker_count
-			 , M.id                                         AS mat_pk
-			 , M."Code"                                     AS mat_code
-			 , M."Name"                                     AS mat_name
-			 , fn_code_name('mat_type', MG."MaterialType")  AS mat_type
-			 , M."LotSize"                                  AS lot_size
-			 , M."Weight"                                   AS weight
-			 , U."Name"                                     AS unit
-			 , E.id                                         AS equipment_id
-			 , E."Name"                                     AS equipment
-			 , C."Description"                              AS description
-			 , B."OrderQty"                                 AS order_qty
-			 , B."GoodQty"                                  AS good_qty
-			 , B."DefectQty"                                AS defect_qty
-			 , B."LossQty"                                  AS loss_qty
-			 , B."ScrapQty"                                 AS scrap_qty
-			 , TO_CHAR(B."ProductionDate" + M."ValidDays", 'yyyy-mm-dd') AS "ValidDays"
-			 , M."Routing_id"                               AS routing_id
-			FROM S
-			JOIN job_res       C  ON C.id = S.child_id              -- child = 대표행
-			JOIN job_res       B  ON B.id = S.base_id               -- base = 부모 우선
-			LEFT JOIN work_center WC ON WC.id = C."WorkCenter_id"
-			LEFT JOIN equ           E  ON E.id  = C."Equipment_id"
-			LEFT JOIN shift         SH ON SH."Code" = C."ShiftCode"
-			LEFT JOIN material      M  ON M.id = B."Material_id"
-			LEFT JOIN routing       R  ON M."Routing_id" = R.id
-			LEFT JOIN mat_grp       MG ON MG.id = M."MaterialGroup_id"
-			LEFT JOIN unit          U  ON U.id = M."Unit_id"
-			WHERE S.rn = 1
-                	""";
+			SELECT *
+			FROM F
+			""";
 
 		if ("false".equalsIgnoreCase(isIncludeComp)) {
-			sql += " AND C.\"State\" != 'finished' ";
+			// ★ 파생 상태(state) 기준으로 완료 제외
+			sql += " WHERE F.state != 'finished' ";
 		}
 
-		sql += " ORDER BY B.\"ProductionDate\", C.\"WorkOrderNumber\", S.child_id ";
+		sql += " ORDER BY F.prod_date, F.order_num, F.id ";
+
 
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
 		return items;
@@ -452,10 +464,11 @@ public class ProductionResultService {
 		return items;
 	}
 
-	public List<Map<String, Object>> getInputLotList(Integer jrPk) {
+	public List<Map<String, Object>> getInputLotList(Integer jrPk, String mat_code) {
 
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("jrPk", jrPk);
+		dicParam.addValue("mat_code", mat_code);
 
 		String sql = """
                 with AA as (
@@ -496,6 +509,7 @@ public class ProductionResultService {
                              left join mat_lot ml on ml.id = mpi."MaterialLot_id"
                              left join store_house sh on sh.id=ml."StoreHouse_id"
                              where jr.id =  :jrPk
+                             and (:mat_code is null or :mat_code = '' or m."Code" = :mat_code)
                           )
                           select R.mat_pk, R.mat_type_name, R.mat_group_name, R.mat_code, R.mat_name
                           , R.mpir_id
@@ -622,10 +636,10 @@ public class ProductionResultService {
 						), BT as (
 						select 
 						bc."Material_id" as mat_pk
-						, bom1.produced_qty
-						, bc."Amount" as quantity 
-						, bc."Amount" / bom1.produced_qty as bom_ratio
-						, bc."Amount" / bom1.produced_qty * bom1.order_qty as bom_requ_qty 
+						, round(bom1.produced_qty::numeric, 0) as produced_qty
+				    	, round(bc."Amount"::numeric, 0) as quantity
+				    	, round((bc."Amount" / bom1.produced_qty)::numeric, 0) as bom_ratio
+				    	, round((bc."Amount" / bom1.produced_qty * bom1.order_qty)::numeric, 0) as bom_requ_qty 
 						from bom_comp bc 
 						inner join bom1 on bom1.bom_pk=bc."BOM_id"
 						where bom1.g_idx=1
@@ -646,8 +660,9 @@ public class ProductionResultService {
 							where mc."JobResponse_id"= :jrPk group by mc."Material_id"
 						), MMP as (
 							select 
-							sum(ml."CurrentStock") as current_qty_sum
+							sum(ml."OutQtySum") as current_qty_sum
 							, mpi."Material_id"
+							, sum(round(mpi."RequestQty"::numeric, 0)) as request_qty_sum
 							from mat_proc_input mpi
 							inner join job_res jr on jr."MaterialProcessInputRequest_id" = mpi."MaterialProcessInputRequest_id" 
 							inner join mat_lot ml on ml.id = mpi."MaterialLot_id"
@@ -665,12 +680,25 @@ public class ProductionResultService {
 						, mh."CurrentStock" as "currentStock"
 						, u."Name" as unit
 						, BT.bom_ratio
-						, round(BT.bom_requ_qty::numeric) as bom_consumed
+						, round(BT.bom_requ_qty::numeric, 4) as bom_consumed
 						, COALESCE(llc.consumed_qty,0) as consumed_qty
+						, MMP.request_qty_sum
+						,round(
+				  			(coalesce(round(BT.bom_requ_qty::numeric, 0), 0)   -- = bom_consumed과 동일
+				  			- coalesce(round(MMP.request_qty_sum::numeric, 0), 0)
+				  			)
+						, 4) as remain_input_qty
 						, sh."Name" as storehouse_name
 						, MCC.mc_qty
 						, COALESCE(MMP.current_qty_sum,0) as current_qty_sum
 						, coalesce(m."LotUseYN",'N') as "lotUseYn"
+						, MMP.request_qty_sum
+						,round(
+						   (
+							 coalesce(round(BT.bom_requ_qty::numeric, 0), 0)   -- = bom_consumed과 동일
+						   - coalesce(round(MMP.request_qty_sum::numeric, 0), 0)
+						   )
+						 , 3) as remain_input_qty
 						, CASE WHEN m."Useyn" = '1' THEN 'Y'
 							   WHEN m."Useyn" = '0' THEN 'N'
 							   ELSE NULL

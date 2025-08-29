@@ -557,16 +557,26 @@ public class ComboService {
 
 	ComboDataFunction routing_mat=(String cond1, String cond2, String cond3)-> {
 		String sql ="""
-				select r.id
-					, rp."Process_id" as value
-					, rp."ProcessOrder"
-					, p."Name" as text
-					from material m
-				left join routing r on r.id = m."Routing_id"
-				left join routing_proc rp on r.id = rp."Routing_id"
-				left join process p on rp."Process_id" = p.id
-				where m."Routing_id" = :cond1
-				order by rp."ProcessOrder";
+				WITH x AS (
+				  SELECT
+				      r.id
+				    , rp."Process_id"   AS value
+				    , rp."ProcessOrder"
+				    , p."Name"          AS text
+				    , ROW_NUMBER() OVER (
+				        PARTITION BY rp."Process_id"
+				        ORDER BY rp."ProcessOrder"  -- 가장 이른 공정 하나만 남김
+				      ) AS rn
+				  FROM routing r
+				  JOIN routing_proc rp ON r.id = rp."Routing_id"
+				  JOIN process p      ON rp."Process_id" = p.id
+				  WHERE r.id = :cond1
+				)
+				SELECT id, value, "ProcessOrder", text
+				FROM x
+				WHERE rn = 1
+				ORDER BY "ProcessOrder";
+				    
 				""";
 
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();

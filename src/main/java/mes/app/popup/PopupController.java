@@ -278,28 +278,155 @@ public class PopupController {
 
 	@RequestMapping("/pop_prod_input/lot_info")
 	public AjaxResult getLotInfo(
-			@RequestParam(value="lot_number", required=false) String lotNumber) {
+			@RequestParam(value="lot_number", required=false) String lotNumber,
+			@RequestParam(value="jr_pk", required=false) Integer jr_pk,
+			@RequestParam(value="mpi_id", required=false) Integer mpi_id) {
 
 		AjaxResult result = new AjaxResult();
 
-		String sql = """
-			select a.id
-			, mg."Name" as mat_grp_name
-			, m."Name" as mat_name
-	        , a."CurrentStock" as cur_stock
-	        , a."InputQty" as first_qty
-	        , sh."Name" as storehouse_name
-		    , to_char(a."EffectiveDate",'yyyy-mm-dd') as effective_date
-		    , to_char(a."InputDateTime",'yyyy-mm-dd') as create_date
-		    from mat_lot a
-		    inner join material m on m.id = a."Material_id" 
-		    left join store_house sh on sh.id = a."StoreHouse_id"
-		    left join mat_grp mg on mg.id = m."MaterialGroup_id" 
-		    where a."LotNumber" = :lotNumber
-			""";
+		String cte = """
+        with bom1 as (
+            select
+                b1.id as bom_pk
+              , b1."Material_id" as prod_pk
+              , b1."OutputAmount" as produced_qty
+              , jr."OrderQty" as order_qty
+              , row_number() over(partition by b1."Material_id" order by b1."Version" desc) as g_idx
+            from bom b1
+            inner join job_res jr
+                on jr."Material_id" = b1."Material_id"
+               and jr.id = :jr_pk
+            where b1."BOMType" = 'manufacturing'
+              and jr."ProductionDate" between b1."StartDate" and b1."EndDate"
+        ),
+        BT as (
+            select
+                bc."Material_id" as mat_pk
+              ,round(bc."Amount"::numeric, 0) as quantity
+			  ,round((bc."Amount" / bom1.produced_qty)::numeric, 4) as bom_ratio
+			  ,round((bc."Amount" / bom1.produced_qty * bom1.order_qty)::numeric, 4) as bom_requ_qty
+            from bom_comp bc
+            inner join bom1 on bom1.bom_pk = bc."BOM_id"
+            where bom1.g_idx = 1
+        ),
+        llc as (
+            select
+                sum(mlc."OutputQty") as consumed_qty
+              , ml."Material_id"
+            from job_res jr
+            inner join mat_produce mp
+                on mp."JobResponse_id" = jr.id
+               and jr.id = :jr_pk
+            inner join mat_lot_cons mlc
+                on mlc."SourceDataPk" = mp.id
+               and mlc."SourceTableName" = 'mat_produce'
+            inner join mat_lot ml
+                on ml.id = mlc."MaterialLot_id"
+            group by ml."Material_id"
+        ),
+        MCC as (
+            select
+                mc."Material_id" as mat_pk
+              , sum(mc."ConsumedQty") mc_qty
+            from mat_consu mc
+            where mc."JobResponse_id" = :jr_pk
+            group by mc."Material_id"
+        ),
+        MMP as (
+            select
+                sum(mpi."RequestQty") as request_qty_sum
+              , mpi."Material_id"
+            from mat_proc_input mpi
+            inner join job_res jr
+                on jr."MaterialProcessInputRequest_id" = mpi."MaterialProcessInputRequest_id"
+            where jr.id = :jr_pk
+            group by mpi."Material_id"
+        )
+    """;
+
+		// 2) 공통 SELECT (target_lot만 다르게 앞에 붙임)
+		String selectCommon = """
+        select
+            a.id
+          , mg."Name" as mat_grp_name
+          , m."Name" as mat_name
+          , round((a."CurrentStock")::numeric, 0) as cur_stock
+          , round((a."RequestQty")::numeric, 0) as input_stock
+          , round((a."InputQty")::numeric, 0) as first_qty
+          , sh."Name" as storehouse_name
+          , to_char(a."EffectiveDate",'yyyy-mm-dd') as effective_date
+          , to_char(a."InputDateTime",'yyyy-mm-dd') as create_date
+          	,round(
+				(
+				  coalesce(round(BT.bom_requ_qty::numeric, 0), 0)
+				- coalesce(round(MMP.request_qty_sum::numeric, 0), 0)
+				)
+			  , 4) as remain_input_qty
+          , a.mpi_id
+        from target_lot a
+        inner join material m on m.id = a."Material_id"
+        left join store_house sh on sh.id = a."StoreHouse_id"
+        left join mat_grp mg on mg.id = m."MaterialGroup_id"
+        left join BT  on BT.mat_pk = m.id
+        left join llc on llc."Material_id" = m.id
+        left join MCC on MCC.mat_pk = m.id
+        left join MMP on MMP."Material_id" = m.id
+    """;
+
+		// 3) 분기용 SQL
+		String sqlByMpi = cte + """
+        , target_lot as (
+            -- mpi_id가 jr_pk에 속하는지 검증 + LOT 선택
+            select
+                ml.id,
+                ml."Material_id",
+                ml."StoreHouse_id",
+                ml."InputQty",
+                ml."EffectiveDate",
+                ml."InputDateTime",
+                ml."LotNumber",
+                ml."CurrentStock",
+                mpi.id as mpi_id,
+                mpi."RequestQty"
+            from mat_proc_input mpi
+            inner join job_res jr2
+                on jr2."MaterialProcessInputRequest_id" = mpi."MaterialProcessInputRequest_id"
+               and jr2.id = :jr_pk
+            inner join mat_lot ml
+                on ml.id = mpi."MaterialLot_id"
+            where mpi.id = :mpi_id
+        )
+    """ + selectCommon;
+
+		String sqlByLot = cte + """
+        , target_lot as (
+            select
+                ml.id,
+                ml."Material_id",
+                ml."StoreHouse_id",
+                ml."CurrentStock",
+                ml."InputQty",
+                ml."EffectiveDate",
+                ml."InputDateTime",
+                ml."LotNumber",
+                null::int as mpi_id,
+                null::int as "RequestQty"
+            from mat_lot ml
+            where ml."LotNumber" = :lotNumber
+        )
+    """ + selectCommon;
 
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
-		paramMap.addValue("lotNumber", lotNumber);
+		paramMap.addValue("jr_pk", jr_pk);
+
+		String sql;
+		if (mpi_id != null) {
+			sql = sqlByMpi;
+			paramMap.addValue("mpi_id", mpi_id);
+		} else {
+			sql = sqlByLot;
+			paramMap.addValue("lotNumber", lotNumber);
+		}
 
 		result.data = this.sqlRunner.getRow(sql, paramMap);
 
