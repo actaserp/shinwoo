@@ -220,7 +220,7 @@ public class SujuService {
 				         s."ReservationStock",
 				         s."State" AS "original_state",
 				         COALESCE(sh.shipped_qty, -1) AS "shipped_qty",
-				         
+				          s."Standard" as  standard,
 				         CASE
 				             WHEN sh.shipped_qty = -1 THEN s."State"
 				             WHEN sh.shipped_qty = 0 THEN 'force_complement'
@@ -268,7 +268,8 @@ public class SujuService {
 				     s."create_date",
 				     s."projectHidden",
 				     s."project",
-				     s."description"
+				     s."description",
+				     s.standard
 				 
 				 FROM suju_with_state s
 				 LEFT JOIN sys_code sc_ship

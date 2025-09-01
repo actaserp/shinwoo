@@ -119,11 +119,12 @@
             }
           },
           columns: [
-            {binding: 'material_code', header: '자재코드', width: 100, align: 'left', isReadOnly: true},
+            {binding: 'material_code', header: '자재코드', width: 100, align: 'center',visible: false},
             {binding: 'material_name', header: '자재명', width: 300, align: 'left', isReadOnly: true},
             {binding: 'unit_name', header: '단위', width: 100, align: 'center', isReadOnly: true},
-            {binding: 'order_qty', header: '수주량', width: 120, align: 'left', isReadOnly: true},
-            {binding: 'incoming_qty', header: '미입고수량', width: 120, align: 'right', isReadOnly: true},
+            {binding: 'standard', header: '규격', width: 100, align: 'center', isReadOnly: true},
+            {binding: 'order_qty', header: '수주량', width: 120, align: 'right', isReadOnly: true},
+            //{binding: 'incoming_qty', header: '미입고수량', width: 120, align: 'right', isReadOnly: true},
             {binding: 'current_stock', header: '현재고', width: 120, align: 'right', isReadOnly: true},
             {binding: 'optimal_stock', header: '적정재고', width: 120, align: 'right', isReadOnly: true},
             {binding: 'need_more_qty', header: '필요수량', width: 120, align: 'right', isReadOnly: true},
@@ -186,15 +187,15 @@
 
       const today = new Date();
       const yyyy = today.getFullYear();
-      const mm = String(today.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작
-      const dd = String(today.getDate()).padStart(2, '0');
+      const mmNum = today.getMonth() + 1;                 // 1~12
+      const mm = String(mmNum).padStart(2, '0');
 
       const firstDay = `${yyyy}-${mm}-01`;
-      const currentDay = `${yyyy}-${mm}-${dd}`;
+      const lastDayNum = new Date(yyyy, mmNum, 0).getDate();
+      const endOfMonth = `${yyyy}-${mm}-${String(lastDayNum).padStart(2, '0')}`;
 
       $('#srchStartDt').val(firstDay);
-      $('#srchEndDt').val(currentDay);
-
+      $('#srchEndDt').val(endOfMonth);
 
       //AjaxUtil.fillSelectOptions($('#cboState'), 'system_code', 'all', false, 'Inventory_status') ;
 

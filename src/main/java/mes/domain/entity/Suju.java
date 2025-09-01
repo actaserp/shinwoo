@@ -108,4 +108,6 @@ public class Suju extends AbstractAuditModel {
 	@Column(name="confirm")
 	String confirm;
 
+	@Column(name="\"Standard\"")
+	String standard;
 }

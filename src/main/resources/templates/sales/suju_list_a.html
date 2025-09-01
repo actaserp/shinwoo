@@ -347,8 +347,8 @@
 
                     <colgroup>
                         <col style="width: 6%">
-                        <col style="width: 18%">
-                        <col style="width: 15%">
+                        <col style="width: 23%">
+                        <col style="width: 10%">
                         <col style="width: 5%">
                         <col style="width: 13%">
                         <col style="width: 9%">
@@ -387,7 +387,7 @@
                                 <input type="text" name="txtProductName" placeholder="코드 또는 품명 입력 후 엔터" autocomplete="off" />
                                 <input type="hidden" name="MaterialGroupName" />
                                 <input type="hidden" name="Material_id" />
-                                <input type="hidden" name="unit_name" />
+                                <input type="hidden" name="unit" />
                                 <a class="btn in_btn" title="품목 검색" id="btnProductSearch" >
                                     <img src="/images/icon/btn-srch-black.svg" alt="검색 아이콘" />
                                 </a>
@@ -515,15 +515,18 @@
                         }
                     },
                     columns: [
-                        {binding: 'CompanyName', header: '판매처', width: 150, align: 'center'},
-                        {binding: 'JumunDate', header: '수주일', width: 130, align: 'center'},
+                        {binding: 'CompanyName', header: '판매처', width: 150, align: 'left'},
+                        {binding: 'JumunDate', header: '수주일', width: 120, align: 'center'},
                         {binding: 'JumunNumber', header: '수주 번호', width: 150, align: 'center'},
                         {binding: 'product_name', header: '제품명', width: 400},
+                        // {binding: 'current_stock', header: '현재고', width: 120, align: 'right', isReadOnly: true},
+                        // {binding: 'optimal_stock', header: '적정재고', width: 120, align: 'right', isReadOnly: true},
+                        // {binding: 'need_more_qty', header: '필요수량', width: 120, align: 'right', isReadOnly: true},
                         {binding: 'TotalPrice', header: '총액', width: 120, align: 'right', format: 'n0'},
-                        {binding: 'DueDate', header: '납기일', width: 130, align: 'center'},
+                        {binding: 'DueDate', header: '납기일', width: 120, align: 'center'},
                         {binding: 'StateName', header: '작업상태', width: 100, align: 'center'},
                         {binding: 'ShipmentStateName', header: '출하상태', width: 100, align: 'center'},
-                        {binding: 'Description', header: '비고', width: '*'}
+                        {binding: 'Description', header: '비고', width: 200}
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
                 });
@@ -686,7 +689,15 @@
                             .val('N')
                             .trigger('change'); // 계산식 즉시 반영
                     }
-                    $content.find('tr:visible').each(function () {
+                    // ✅ 각 행 unitType 선세팅
+                    $content.find('.item-table tbody tr:visible').not('.item-template-row').each(function () {
+                        const $row = $(this);
+                        const unitRaw = ($row.find('input[name^="unit_"]').val() || '').toString().trim().toUpperCase();
+                        $row.data('unitType', unitRaw.startsWith('M') ? 'M' : 'EA');
+                    });
+
+                    // 최초 계산 수행
+                    $content.find('.item-table tbody tr:visible').not('.item-template-row').each(function () {
                         calculateAmounts($(this), 'unit');
                     });
                 }, 100);
@@ -767,7 +778,8 @@
                                     const ori = parseFloat(data[`originalUnitPrice_${i}`] || '0');
                                     const cur = parseFloat((data[`unitPrice_${i}`] || '0').replace(/,/g, ''));
                                     return ori !== cur;
-                                })()
+                                })(),
+                                standard : data[`standard_${i}`] || ''
                             });
                         }
 
@@ -831,7 +843,15 @@
                                 $row.find('input[name^="unitPrice"]').val('0');
                                 $row.find('input[name^="originalUnitPrice"]').val('0');
                             }
-                            calculateAmounts($row);
+                            // 🔧 unitType이 비어있으면 unit_에서 보정(EA/M만)
+                            if (!$row.data('unitType')) {
+                                const unitNameRaw = ($row.find('input[name^="unit_"]').val() || '')
+                                    .toString().trim().toUpperCase();
+                                $row.data('unitType', unitNameRaw.startsWith('M') ? 'M' : 'EA');
+                            }
+
+                            // ✅ 단가 반영 직후, 분기 계산 강제
+                            calculateAmounts($row, 'unit');
                         };
 
                         AjaxUtil.getAsyncData(url, data, fnsuccess);
@@ -850,6 +870,10 @@
 
                     const quantity = getNumericValue($row.find('input[name^="quantity_"]'));
                     const unitPrice = getNumericValue($row.find('input[name^="unitPrice_"]'));
+                    const standard   = Number(getNumericValue($row.find('input[name^="standard_"]')))   || 0; // 규격
+                    const unitTypeRaw = (($row.data('unitType') || 'EA').toString().trim().toUpperCase());
+                    const unitType    = unitTypeRaw.startsWith('M') ? 'M' : 'EA';
+
                     const isVatIncluded = $row.find('input[name^="VatIncluded_"]').is(':checked');
                     const isVatExempt = false;
 
@@ -858,8 +882,10 @@
                     const isSupplyEdited = $row.data('supplyEdited') === true;
                     const isVatEdited = $row.data('vatEdited') === true;
 
+                    const effectiveQty = (unitType === 'M') ? (standard * quantity) : quantity;
+
                     if (source === 'unit' && quantity > 0 && unitPrice >= 0) {
-                        const total = quantity * unitPrice;
+                        const total = effectiveQty * unitPrice;
 
                         if (!isSupplyEdited || !isVatEdited) {
                             if (isVatExempt) {
@@ -963,7 +989,7 @@
                 });
 
                 // 숫자 포맷 (input 중 formatting)
-                $content.on('input', 'input[name^="quantity_"], input[name^="unitPrice_"], input[name^="supplyAmount_"], input[name^="VatAmount_"], input[name^="totalAmount_"]', function () {
+                $content.on('input', 'input[name^="quantity_"], input[name^="unitPrice_"], input[name^="supplyAmount_"], input[name^="VatAmount_"], input[name^="totalAmount_"], input[name^="standard_"]', function () {
                     if (isInternalFormatting) return;
                     isInternalFormatting = true;
 
@@ -995,7 +1021,7 @@
                     const $productCode = $row.find('input[name^="product_code_"]');
                     const $materialGroup = $row.find('input[name^="MaterialGroupName_"]');
                     const $Standard = $row.find('input[name^="standard_"]');
-                    const $unit_name = $row.find('input[name^="unit_name_"]');
+                    const $unit_name = $row.find('input[name^="unit_"]');
 
                     const pop = new PopMatComponent();
                     pop.material_type = 'product,sangpum';
@@ -1012,6 +1038,10 @@
                         } else {
                             $Standard.prop('readonly', false);  // 값이 없으면 해제
                         }
+                        const unitRaw = ($unit_name.val() || '').toString().trim().toUpperCase();
+                        const normalized = unitRaw.startsWith('M') ? 'M' : 'EA';
+                        $row.data('unitType', normalized);
+
                         tryShowPrice($row);
                     });
 
@@ -1030,7 +1060,7 @@
                     const $productId = $row.find('input[name^="Material_id_"]');
                     const $productCode = $row.find('input[name^="product_code_"]');
                     const $Standard = $row.find('input[name^="standard_"]');
-                    const $unit_name = $row.find('input[name^="unit_name_"]');
+                    const $unit_name = $row.find('input[name^="unit_"]');
 
                     const keyword = $field.val().trim();
                     const pop = new PopMatComponent();
@@ -1047,6 +1077,10 @@
                         } else {
                             $Standard.prop('readonly', false);  // 값이 없으면 해제
                         }
+                        const unitRaw = ($unit_name.val() || '').toString().trim().toUpperCase();
+                        const normalized = unitRaw.startsWith('M') ? 'M' : 'EA';
+                        $row.data('unitType', normalized);
+
                         tryShowPrice($row);
                     };
 
@@ -1083,7 +1117,7 @@
                     const $productId = $row.find('input[name^="Material_id_"]');
                     const $productCode = $row.find('input[name^="product_code_"]');
                     const $Standard = $row.find('input[name^="standard_"]');
-                    const $unit_name = $row.find('input[name^="unit_name_"]');
+                    const $unit_name = $row.find('input[name^="unit_"]');
 
                     if ($field.val().trim() === '') {
                         // 값이 비었을 경우 연관된 필드 초기화
@@ -1170,6 +1204,7 @@
 
                     const focusOrder = [
                         'txtProductName_',
+                        'standard_',
                         'quantity_',
                         'unitPrice_',
                         'supplyAmount_',
@@ -1246,7 +1281,6 @@
                 });
 
             }
-
             deleteSujuData(id, state, ShipmentStateName) {
                 let _this = this;
                 let url = _this.url + '/delete';

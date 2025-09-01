@@ -192,7 +192,10 @@ public class SujuController {
 
 		for (Map<String, Object> item : items) {
 			Suju suju;
-
+			String standard = java.util.Objects.toString(
+					item.containsKey("Standard") ? item.get("Standard") : item.get("standard"),
+					""
+			);
 			// ✅ 수정인지 확인
 			if (item.containsKey("suju_id") && item.get("suju_id") != null && !item.get("suju_id").toString().isEmpty()) {
 				Integer sujuId = Integer.parseInt(item.get("suju_id").toString());
@@ -226,6 +229,7 @@ public class SujuController {
 			suju.setProject_id(item.get("projectHidden").toString());
 			suju.setInVatYN(invatyn);
 			suju.setDescription((String) item.get("description"));
+			suju.setStandard(standard);
 			suju.setConfirm("0");
 
 			// 단가 변경 시 처리
