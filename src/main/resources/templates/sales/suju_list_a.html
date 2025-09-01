@@ -347,8 +347,8 @@
 
                     <colgroup>
                         <col style="width: 6%">
-                        <col style="width: 23%">
-                        <col style="width: 10%">
+                        <col style="width: 25%">
+                        <col style="width: 9%">
                         <col style="width: 5%">
                         <col style="width: 13%">
                         <col style="width: 9%">
@@ -393,7 +393,10 @@
                                 </a>
                             </div>
                         </td>
-                        <td><input type="text" name="standard" placeholder="규격" /></td>
+                        <td>
+                            <input type="hidden" name="standard_locked">
+                            <input type="text" name="standard" placeholder="규격" />
+                        </td>
                         <td><input type="text" name="quantity" placeholder="수량" /></td>
                         <td>
                             <div class="input-with-checkbox">
@@ -519,14 +522,11 @@
                         {binding: 'JumunDate', header: '수주일', width: 120, align: 'center'},
                         {binding: 'JumunNumber', header: '수주 번호', width: 150, align: 'center'},
                         {binding: 'product_name', header: '제품명', width: 400},
-                        // {binding: 'current_stock', header: '현재고', width: 120, align: 'right', isReadOnly: true},
-                        // {binding: 'optimal_stock', header: '적정재고', width: 120, align: 'right', isReadOnly: true},
-                        // {binding: 'need_more_qty', header: '필요수량', width: 120, align: 'right', isReadOnly: true},
                         {binding: 'TotalPrice', header: '총액', width: 120, align: 'right', format: 'n0'},
                         {binding: 'DueDate', header: '납기일', width: 120, align: 'center'},
                         {binding: 'StateName', header: '작업상태', width: 100, align: 'center'},
                         {binding: 'ShipmentStateName', header: '출하상태', width: 100, align: 'center'},
-                        {binding: 'Description', header: '비고', width: 200}
+                        {binding: 'Description', header: '비고', width: 250}
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
                 });
@@ -689,6 +689,31 @@
                             .val('N')
                             .trigger('change'); // 계산식 즉시 반영
                     }
+                    // ✅ 규격 잠금 적용
+                    $content.find('.item-table tbody tr:visible').not('.item-template-row').each(function (i) {
+                        const $row = $(this);
+                        const $standard = $row.find('input[name^="standard_"]');
+
+                        // 1) hidden 필드가 있으면 그 값 우선(Y/N)
+                        const hidden = ($row.find('input[name^="standard_locked_"]').val() || '').toString().toUpperCase();
+                        // 2) 없으면 서버 응답 순서 매칭(초기 로딩 시에만 안전)
+                        const fromData = (data.sujuList?.[i]?.standard_locked || '').toString().toUpperCase();
+
+                        let locked = (hidden === 'Y') || (hidden === '' && fromData === 'Y');
+
+                        // 신규 모드라면 무조건 해제
+                        if (data.mode === 'new') locked = false;
+
+                        // 적용 + 표시용 속성 유지(저장 시 같이 보낼 수 있음)
+                        $standard.prop('readOnly', locked)
+                            .toggleClass('readonly', locked)
+                            .attr('data-locked', locked ? 'Y' : 'N');
+
+                        // hidden 필드가 있다면 값 동기화
+                        const $lockedHidden = $row.find('input[name^="standard_locked_"]');
+                        if ($lockedHidden.length) $lockedHidden.val(locked ? 'Y' : 'N');
+                    });
+
                     // ✅ 각 행 unitType 선세팅
                     $content.find('.item-table tbody tr:visible').not('.item-template-row').each(function () {
                         const $row = $(this);
@@ -701,8 +726,6 @@
                         calculateAmounts($(this), 'unit');
                     });
                 }, 100);
-
-
 
                 if (data.StateName && data.StateName !== '수주') {
                     $('#btnPopSujuSave').hide();
@@ -989,7 +1012,7 @@
                 });
 
                 // 숫자 포맷 (input 중 formatting)
-                $content.on('input', 'input[name^="quantity_"], input[name^="unitPrice_"], input[name^="supplyAmount_"], input[name^="VatAmount_"], input[name^="totalAmount_"], input[name^="standard_"]', function () {
+                $content.on('input', 'input[name^="quantity_"], input[name^="unitPrice_"], input[name^="supplyAmount_"], input[name^="VatAmount_"], input[name^="totalAmount_"]', function () {
                     if (isInternalFormatting) return;
                     isInternalFormatting = true;
 

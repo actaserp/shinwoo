@@ -226,6 +226,16 @@ public class SujuService {
 				         s."State" AS "original_state",
 				         COALESCE(sh.shipped_qty, -1) AS "shipped_qty",
 				          s."Standard" as  standard,
+				          NULLIF(btrim(
+										COALESCE(m."Standard1",'') || ' ' || COALESCE(m."Standard2",'')
+									),'') AS spec_master,
+									-- 잠금 여부(마스터 규격이 존재하면 Y, 없으면 N)
+									CASE
+										WHEN NULLIF(btrim(
+													 COALESCE(m."Standard1",'') || ' ' || COALESCE(m."Standard2",'')
+												 ),'') IS NOT NULL THEN 'Y'
+										ELSE 'N'
+									END AS standard_locked,
 				         CASE
 				             WHEN sh.shipped_qty = -1 THEN s."State"
 				             WHEN sh.shipped_qty = 0 THEN 'force_complement'
@@ -274,14 +284,15 @@ public class SujuService {
 				     s."projectHidden",
 				     s."project",
 				     s."description",
-				     s.standard
-				 
+				     s.standard,
+				  		s.spec_master,
+				     s.standard_locked
 				 FROM suju_with_state s
 				 LEFT JOIN sys_code sc_ship
 				     ON sc_ship."Code" = s.final_state AND sc_ship."CodeType" = 'shipment_state'
 				 LEFT JOIN sys_code sc_suju
 				     ON sc_suju."Code" = s.final_state AND sc_suju."CodeType" = 'suju_state'
-				 ORDER BY s."JumunDate";
+				 ORDER BY s."JumunDate",s."SujuQty2" ;
 				 
 		""";
 

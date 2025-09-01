@@ -44,6 +44,7 @@ public class BalJuOptimalStockService {
           LEFT JOIN unit u ON u.id = m."Unit_id"
           WHERE m.spjangcd = :spjangcd
             AND m."Useyn" = '0'
+            AND m."Mtyn" ='1'
         ),
         -- 1) 수주 집계(납품예정일 기준: head.DeliveryDate 우선, 없으면 line.DueDate)
         orders AS (
