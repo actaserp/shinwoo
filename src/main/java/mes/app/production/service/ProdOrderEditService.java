@@ -37,6 +37,7 @@ public class ProdOrderEditService {
 	                select s.id, s."JumunDate", s."DueDate", s."JumunNumber"
 	                , s."CompanyName"
 	                , s."Material_id"
+	                , s."Standard"
 	                , mg."Name" as "MaterialGroupName"
 	                , mg.id as "MaterialGroup_id"
 	                , m."Code" as mat_code
@@ -97,6 +98,7 @@ public class ProdOrderEditService {
 	            , to_char(s."JumunDate", 'yyyy-mm-dd') as "JumunDate"
 	            , to_char(s."DueDate", 'yyyy-mm-dd') as "DueDate"
 	            , s."CompanyName"
+	            , s."Standard"
 	            , s.mat_type_name
 	            , s."MaterialGroupName"
 	            , s.mat_code

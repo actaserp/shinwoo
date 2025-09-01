@@ -367,6 +367,7 @@
 
     $(document).ready(function () {
 
+
         $(".left").click(function () {
             nthTabs.delAllTab();
             // window.location.reload();
@@ -522,7 +523,9 @@
             loadMenu(FrontFolderId, $(dep2Mappings[FrontFolderId]));
         });
 
-
+        $(function () {
+            $('#navbarBarMenu2 .open_menu').trigger('click');
+        });
 
         $('#navbarBarMenu2 .open_menu').click(function () {
             $(this).toggleClass('menu_open'); // 메뉴 숨김 토글
@@ -772,35 +775,35 @@
     });
 
     //메뉴 검색창 이벤트 등록
-    document.addEventListener('input', function(event){
-        if(event.target){
-            const ele = event.target;
-
-            if(ele.id === 'searchkeyword'){
-                initializeAutocomplete('searchkeyword', 'searchkeyword-box', menuName_list, menu_arr)
-            }
-        }
-    });
+    // document.addEventListener('input', function(event){
+    //     if(event.target){
+    //         const ele = event.target;
+    //
+    //         if(ele.id === 'searchkeyword'){
+    //             initializeAutocomplete('searchkeyword', 'searchkeyword-box', menuName_list, menu_arr)
+    //         }
+    //     }
+    // });
 
     //메뉴 검색바 엔터시 발동함수
-    document.getElementById('searchkeyword').addEventListener("keydown", (e) => {
-        if(e.key === 'Enter'){
-            e.preventDefault();
-
-            const inputValue = $('#searchkeyword').val();
-
-            const matchedItem = menu_arr.find(obj => {
-                const key = Object.keys(obj)[0];
-                return key.trim() === inputValue;
-            })
-
-            if(matchedItem) {
-                const url = matchedItem[inputValue];
-                const target = url.substring(url.lastIndexOf("/")+1);
-                document.querySelector(`[data-objid="${target}"]`)?.click();
-            }
-        }
-    });
+    // document.getElementById('searchkeyword').addEventListener("keydown", (e) => {
+    //     if(e.key === 'Enter'){
+    //         e.preventDefault();
+    //
+    //         const inputValue = $('#searchkeyword').val();
+    //
+    //         const matchedItem = menu_arr.find(obj => {
+    //             const key = Object.keys(obj)[0];
+    //             return key.trim() === inputValue;
+    //         })
+    //
+    //         if(matchedItem) {
+    //             const url = matchedItem[inputValue];
+    //             const target = url.substring(url.lastIndexOf("/")+1);
+    //             document.querySelector(`[data-objid="${target}"]`)?.click();
+    //         }
+    //     }
+    // });
 </script>
 
 <script type="text/javascript">

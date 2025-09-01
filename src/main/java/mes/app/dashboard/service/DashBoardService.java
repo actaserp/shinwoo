@@ -1,9 +1,10 @@
 package mes.app.dashboard.service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.Timestamp;
+import java.util.*;
 
+import mes.app.balju.service.BaljuOrderService;
+import mes.app.sales.service.SujuService;
 import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -17,7 +18,86 @@ public class DashBoardService {
 
 	@Autowired
 	SqlRunner sqlRunner;
-	
+
+	@Autowired
+	BaljuOrderService baljuOrderService;
+
+	@Autowired
+	SujuService sujuService;
+
+	public List<Map<String, Object>> getOverview(Timestamp start, Timestamp end, String spjangcd) {
+		// 1) 각각 조회
+		List<Map<String, Object>> balju = baljuOrderService.getBaljuList("sales", start, end, spjangcd);
+		List<Map<String, Object>> suju  = sujuService.getSujuList("sales", start, end, spjangcd);
+
+		// 2) 구분(division) 부여 + 키 표준화(필요 시)
+		balju.forEach(m -> {
+			m.put("division", "발주");
+			normalizeBaljuRow(m); // 아래 예시 참고
+		});
+		suju.forEach(m -> {
+			m.put("division", "수주");
+			normalizeSujuRow(m);  // 아래 예시 참고
+		});
+
+		// 3) 병합 + 정렬(납기일 우선, 없으면 주문일)
+		List<Map<String, Object>> merged = new ArrayList<>(balju.size() + suju.size());
+		merged.addAll(balju);
+		merged.addAll(suju);
+
+//		System.out.println("balju : " + balju);
+//		System.out.println("suju : " + suju);
+
+		// due_date, order_date 모두 'YYYY-MM-DD' 문자열이라고 가정
+		Comparator<Map<String, Object>> byJumunDateDesc =
+				Comparator.comparing(
+						(Map<String, Object> m) -> Optional.ofNullable(m.get("JumunDate"))
+								.map(Object::toString)
+								.orElse(""),
+						Comparator.nullsLast(String::compareTo)
+				).reversed();
+
+		merged.sort(byJumunDateDesc);
+
+		return merged;
+	}
+
+	// 발주 행 표준화
+	private void normalizeBaljuRow(Map<String, Object> m) {
+		// 컬럼 리네이밍 예시 (이미 alias를 맞췄다면 생략 가능)
+		m.putIfAbsent("head_id", m.remove("bh_id"));
+		m.putIfAbsent("company_id", m.remove("Company_id"));
+		m.putIfAbsent("company_name", m.remove("CompanyName"));
+		m.putIfAbsent("type_name", m.remove("BaljuTypeName"));
+		m.putIfAbsent("shipment_state_name", m.remove("ShipmentStateName"));
+		m.putIfAbsent("product_name", m.remove("product_name"));
+		m.putIfAbsent("price", m.remove("BaljuPrice"));
+		m.putIfAbsent("vat", m.remove("BaljuVat"));
+		m.putIfAbsent("total_price", m.remove("BaljuTotalPrice"));
+		m.putIfAbsent("state_name", m.remove("bh_StateName"));
+	}
+
+	// 수주 행 표준화
+	private void normalizeSujuRow(Map<String, Object> m) {
+		m.putIfAbsent("head_id", m.remove("id"));
+		m.putIfAbsent("company_id", m.remove("Company_id"));
+		m.putIfAbsent("company_name", m.remove("CompanyName"));
+		m.putIfAbsent("type_name", m.remove("SujuTypeName"));
+		m.putIfAbsent("product_name", m.remove("product_name"));
+		m.putIfAbsent("price", m.remove("sujuPrice"));
+		m.putIfAbsent("vat", m.remove("sujuVat"));
+		m.putIfAbsent("total_price", m.remove("TotalPrice"));
+		m.putIfAbsent("state_name", m.remove("StateName"));
+
+	}
+
+	private Number asNum(Object o) {
+		if (o instanceof Number n) return n;
+		if (o instanceof String s && !s.isBlank()) try { return new java.math.BigDecimal(s); } catch (Exception ignore) {}
+		return null;
+	}
+
+
 	public List<Map<String, Object>> todayWeekProd(String spjangcd) {
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("spjangcd", spjangcd);

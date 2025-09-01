@@ -37,6 +37,7 @@ public class BaljuOrderService {
                      bh.id AS bh_id,
                      bh."Company_id",
          b."CompanyName",
+         c."BusinessNumber",
          b."BaljuHead_id",
          bh."JumunDate",
          bh."JumunNumber",
@@ -56,7 +57,7 @@ public class BaljuOrderService {
         GREATEST((b."SujuQty" - mi."SujuQty2"), 0) AS "SujuQty3",
          sh."Name" AS "ShipmentStateName",
          bh."DeliveryDate",
-         b."Description",
+         bh."Description",
          (
           SELECT
             CASE
@@ -151,6 +152,7 @@ public class BaljuOrderService {
            ROW_NUMBER() OVER (PARTITION BY bh."JumunNumber" ORDER BY b.id ASC) AS rn
              FROM balju_head bh
              LEFT JOIN balju b ON b."BaljuHead_id" = bh.id AND b.spjangcd = bh.spjangcd AND b."JumunNumber" = bh."JumunNumber"
+             left join company c on bh."Company_id" = c.id
              INNER JOIN material m ON m.id = b."Material_id" AND m.spjangcd = b.spjangcd
              INNER JOIN mat_grp mg ON mg.id = m."MaterialGroup_id" AND mg.spjangcd = b.spjangcd
              LEFT JOIN unit u ON m."Unit_id" = u.id AND u.spjangcd = b.spjangcd
@@ -177,6 +179,7 @@ public class BaljuOrderService {
           "JumunNumber",
           MAX("Company_id") AS "Company_id",
           MAX("CompanyName") AS "CompanyName",
+          MAX("BusinessNumber") AS "BusinessNumber",
           MAX("BaljuHead_id") AS "BaljuHead_id",
           MAX("JumunDate") AS "JumunDate",
           MAX("MaterialGroupName") AS "MaterialGroupName",

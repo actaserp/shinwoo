@@ -1,152 +1,490 @@
 <html layout:decorate="~{layout_page}">
-
 <head>
     <style>
-        .greenText span {
-            color: #66DA26;
+        #work-table td{
+            text-align: left !important;
+            width: 100%;
         }
 
-        .redText span {
-            color: #FF0000;
-        }
-
-        .grayText span {
-            color: #8C8C8C;
-        }
-
-        .blueText span {
-            color: #4374D9;
-        }
-
-        .yellowText span {
-            color: #FFE400;
-        }
-
-        [data-ax5grid] [data-ax5grid-container="root"] [data-ax5grid-container="body"] [data-ax5grid-panel] table tr td [data-ax5grid-cellHolder] {
-            font-size: 14px;
+        #work-table td input{
+            width: 100%;
         }
     </style>
 </head>
+
 <th:block layout:fragment="content">
     <div class="layout-contents">
-        <div class="page-title-wrap">
-            <div class="left">
-                <h2>수주 진행 현황</h2>
-                <a title="북마크" class="bookmark toggle">
-                    내 메뉴
-                </a>
-            </div>
-            <ul class="page-navi">
-                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>대시보드</li>
-                <li>수주 진행 현황</li>
-            </ul>
-        </div>
-        <div class="tab-wrap" style="height: 100%;">
-            <div class="tab-contents" style="height: 100%;">
-                <!-- Section -->
-                <div class="row" style="margin-bottom: 0; height: 100%;">
-                    <section class="wp100" style="margin-right: 10px; border-radius:15px; display: flex; flex-direction: column; height: 100%;">
-                        <div class="title-wrap">
-                            <h3>수주현황</h3>
-                        </div>
-                        <div class="content-wrap" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
-                            <p class="card-text">금년 수주액 크기순으로 10개 표시합니다.</p>
 
-                            <div style="flex: 3; min-height: 0;">
-                                <div id="suju-grid" class="wj-flexgrid" style="height: 100%;"></div>
+<!--        <div class="page-title-wrap">-->
+<!--            <div class="left">-->
+<!--                <h2>진행 현황</h2>-->
+<!--                &lt;!&ndash;                <small2>라우팅이 없는 품목에 대한 실적 입력. 로트투입 가능</small2>&ndash;&gt;-->
+<!--                <a title="북마크" class="bookmark toggle">-->
+<!--                    내 메뉴-->
+<!--                </a>-->
+<!--            </div>-->
+<!--            <ul class="page-navi">-->
+<!--                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>-->
+<!--                <li>대시보드</li>-->
+<!--                <li>진행 현황</li>-->
+<!--            </ul>-->
+<!--        </div>-->
+        <div style="display: flex; gap: 5px;">
+            <section class="section" style="flex: 2;">
+                <div class="section-top">
+                    <div class="search-wrap">
+                        <dl>
+                            <dt>
+                                생산일<span class="eq">*</span>
+                            </dt>
+                            <dd>
+                                <ul class="date-box">
+                                    <li>
+                                        <input type="date" id="date_from" name="date_from">
+                                        <label for="date_from" class="hide">시작일</label>
+                                    </li>
+                                    <li>
+                                        <input type="date" id="date_to" name="date_to">
+                                        <label for="date_to" class="hide">종료일</label>
+                                    </li>
+                                </ul>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>&nbsp;</dt>
+                            <dd>
+                                <li>
+                                    <a class="btn btn-search" title="검색" id="btnMainSearch">
+                                        <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        검색
+                                    </a>
+                                </li>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+                <div class="container-fluid">
+                    <div id="prod-result-grid" style="height: 250px;"></div>
+                </div>
+                <div class="container-fluid">
+                    <div id="result-grid"></div>
+                </div>
+            </section>
+
+            <div class="tab-wrap" style="flex: 1; min-width: 0;">
+
+                <ul class="tab-links">
+                    <li><a href="#tabHistory" name="tabHistory">이력</a></li>
+                    <li><a href="#tabCompany" name="tabCompany">거래처</a></li>
+
+                </ul>
+                <div>
+                    <section class="tab-item" id="tabHistory" style="border-top-left-radius: 0;">
+                        <div class="grid_box">
+                            <div class="container-fluid">
+                                <div id="history-grid"></div>
                             </div>
+                        </div>
 
-                            <div style="flex: 2; margin-top: 10px;">
-                                <canvas id="suju-chart" class="chart-canvas" style="width: 100%; height: 100%;"></canvas>
+                    </section>
+                    <section class="tab-item" id="tabCompany" style="border-top-left-radius: 0;">
+                        <div class="section-top">
+
+                            <div class="table-wrap">
+                                <form id="basicForm">
+                                    <input type="hidden" id="id" name="id"/>
+                                    <input type="hidden" id="parent_jr_pk" name="parent_jr_pk"/>
+                                    <input type="hidden" id="routing_id" name="routing_id"/>
+                                    <input type="hidden" id="mp_id" name="mp_id"/>
+                                    <input type="hidden" id="mat_pk" name="mat_pk"/>
+                                    <input type="hidden" id="prod_mat_id" name="prod_mat_id"/>
+                                    <input type="hidden" id="need_pro_mat_qty" name="need_pro_mat_qty"/>
+                                    <input type="hidden" id="consumed_mode" name="consumed_mode"/>
+                                    <input type="hidden" id="state" name="state"/>
+                                    <table id="work-table">
+                                        <caption>작업 지시 테이블</caption>
+                                        <colgroup>
+                                            <col style="width: 40%;">
+                                            <col style="width: 60%;">
+                                        </colgroup>
+                                        <tbody>
+                                        <tr>
+                                            <th><label for="order_num">회사명</label></th>
+                                            <td><input type="text" id="order_num" name="order_num" readonly/></td>
+                                        </tr>
+                                        <tr>
+                                            <th><label for="mat_name">사업자 번호</label></th>
+                                            <td><input type="text" id="mat_name" name="mat_name" readonly/></td>
+                                        </tr>
+                                        <tr>
+                                            <th><label for="job_state">대표자명</label></th>
+                                            <td><input type="text" id="job_state" name="job_state" readonly/></td>
+                                        </tr>
+                                        <tr>
+                                            <th><label for="workcenter_id">사업장 주소</label></th>
+                                            <td>
+                                                <input id="workcenter_id" name="workcenter_id" readonly />
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th><label for="shift_code">업태</label></th>
+                                            <td ><input type="text" id="shift_code" name="shift_code" readonly/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th><label for="prod_date">업종</label></th>
+                                            <td>
+                                                <input type="text" id="prod_date" name="prod_date" readonly/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th><label for="prod_date">연락처</label></th>
+                                            <td >
+                                                <input type="text" id="end_date" name="end_date" readonly/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th><label for="order_qty">이메일</label></th>
+                                            <td><input type="number" id="order_qty" name="order_qty" readonly/></td>
+                                        </tr>
+                                        <tr>
+                                            <th><label for="good_qty">팩스</label></th>
+                                            <td><input type="number" id="good_qty" name="good_qty" readonly /></td>
+                                        </tr>
+                                        <tr>
+                                            <th><label for="description">설명</label></th>
+                                            <td><textarea id="description" name="description" disabled></textarea></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </form>
                             </div>
                         </div>
                     </section>
                 </div>
+
             </div>
         </div>
-
     </div>
+
 </th:block>
+
+
 <th:block layout:fragment="scripts">
-    <script src="/resource/apexcharts/apexcharts.3.26.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="text/javascript">
-        class CustomOrderPage {
+
+        class DashCustomPage {
             constructor() {
+                this.grid = null;
+                this.resultGrid = null;
+                this.historyGrid = null;
+                this.$tabCompany = $('#tabCompany');
+                this.baseUrl = '/api/dashboard';
                 this.init();
-                this.setData();
             }
 
             init() {
-                this.initGrids();
-                this.initCharts();
-            }
+                let _this = this;
 
-            initGrids() {
-                this.sujuGrid = new wijmo.grid.FlexGrid('#suju-grid', {
+                this.grid = new wijmo.grid.FlexGrid('#prod-result-grid', {
                     autoGenerateColumns: false,
+                    selectionMode: wijmo.grid.SelectionMode.Row,
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    formatItem: (sender, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
+                        }
+                    },
                     isReadOnly: true,
-                    formatItem: (s, e) => {
+                    showMarquee: true,
+                    columns: [
+                        {binding: 'head_id', visible: false},
+                        {binding: 'division', header: '구분', width: 70, align: 'center'},
+                        {binding: 'JumunDate', header: '작성일자', width: 100, align: 'center'},
+                        {binding: 'state_name', header: '상태', width: 100, align: 'center'},
+                        {binding: 'JumunNumber', header: '번호', width: 120, align: 'center'},
+                        {binding: 'company_name', header: '거래처명', width: 120, align: 'center'},
+                        {binding: 'BusinessNumber', header: '사업자번호', width: 120, align: 'center'},
+                        {binding: 'product_name', header: '제품명', width: 200, align: 'left'},
+                        {binding: 'price', header: '공급가액', width: 80, align: 'right'},
+                        {binding: 'vat', header: '세액', width: 80, align: 'right'},
+                        {binding: 'total_price', header: '합계', width: 100, align: 'right'},
+                        {binding: 'Description', header: '메모', width: 200, align: 'left'},
+                    ],
+                    itemsSource: new wijmo.collections.CollectionView([]),
+                    selectionChanged: function (e) {
+                        let selectedRow = _this.grid.selection.row;
+
+                        let dataSource = _this.grid.itemsSource instanceof wijmo.collections.CollectionView
+                            ? _this.grid.itemsSource.sourceCollection
+                            : _this.grid.itemsSource;
+
+                        if (!dataSource || !Array.isArray(dataSource) || dataSource.length === 0) {
+                            return;
+                        }
+
+                        if (selectedRow >= 0) { // 선택된 행이 있을 때만 저장
+                            _this.selectedIndex = selectedRow;
+                        }
+                        let item = _this.grid.rows[selectedRow]?.dataItem; // 선택된 데이터 가져오기
+                        if (item) {
+
+                        }
+
+                    }
+                });
+                new FlexGridContextMenu(this.grid);
+                this.grid.downloadFileName = '진행 내역';
+
+                this.resultGrid = new wijmo.grid.FlexGrid('#result-grid', {
+                    autoGenerateColumns: false,
+                    selectionMode: wijmo.grid.SelectionMode.ListBox,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    selectionChanged: (e) => {
+                        // FlexGrid가 초기화되고 itemsSource가 설정되었는지 확인
+                        if (this.chasuGrid && this.chasuGrid.selectedRows) {
+                            const selectedRows = this.chasuGrid.selectedRows;
+                            if (selectedRows.length > 0) {
+                                const item = selectedRows[0].dataItem;
+                                // 클래스 메서드 호출
+                                this.showDefectList('chasu');
+                                this.setButtonState();
+                            }
+                        }
+                    },
+
+                    formatItem: (sender, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
                     },
                     columns: [
-                        { header: '제품그룹', binding: 'prod_grp', width: 200, align: 'center' },
-                        { header: '품목구분', binding: 'mat_type_name', width: 200, align: 'center' },
-                        { header: '품목코드', binding: 'prod_code', width: 200, align: 'center' },
-                        { header: '제품', binding: 'prod', width: 500, align: 'center' },
-                        { header: '수주액', binding: 'sujup', width: '*', align: 'right', format: 'n0' }
-                    ]
-                });
-            }
+                        {binding: 'chasu', header: '일자', width: 100, align: 'center', isReadOnly: true},
+                        {binding: 'lot_no', header: '제품명', width: 200, align: 'center', isReadOnly: true},
+                        {binding: 'lot_no1', header: '규격', width: 80, align: 'center', isReadOnly: true},
+                        {binding: 'lot_no2', header: '수량', width: 80, align: 'center', isReadOnly: true},
+                        {binding: 'lot_no3', header: '단가', width: 80, align: 'center', isReadOnly: true},
+                        {binding: 'lot_no4', header: '공급가액', width: 80, align: 'center', isReadOnly: true},
+                        {binding: 'lot_no5', header: '세액', width: 80, align: 'center', isReadOnly: true},
+                        {binding: 'lot_no5', header: '합계', width: 80, align: 'center', isReadOnly: true},
+                        {binding: 'lot_no5', header: '비고', width: 100, align: 'center', isReadOnly: true},
+                        {binding: 'lot_no5', header: '메모', width: '*', align: 'center', isReadOnly: true},
 
-            initCharts() {
-                this.sujuChart = new Chart(document.getElementById('suju-chart'), {
-                    type: 'bar',
-                    data: { labels: [], datasets: [{ label: '수주액', data: [], backgroundColor: '#36A2EB' }] },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: { ticks: { autoSkip: false } },
-                            y: { title: { display: true, text: '₩' } }
-                        },
-                        plugins: {
-                            tooltip: {
-                                callbacks: {
-                                    label: function (tooltipItem) {
-                                        return tooltipItem.raw.toLocaleString() + " 원";
-                                    }
-                                }
-                            },
-                            legend: { display: false }
+                    ],
+                    itemsSource: new wijmo.collections.CollectionView([]),
+                });
+
+                // 하단 합계 행 추가
+                this.resultGrid.columnFooters.rows.push(new wijmo.grid.GroupRow());
+
+                // 데이터 변경 시 합계 업데이트
+                this.resultGrid.collectionView.collectionChanged.addHandler(() => {
+                    _this.updateFooter();
+                });
+
+                // Context Menu 추가
+                new FlexGridContextMenu(this.resultGrid);
+                this.resultGrid.downloadFileName = '품목 내역';
+
+
+                this.historyGrid = new wijmo.grid.FlexGrid('#history-grid', {
+                    autoGenerateColumns: false,
+                    selectionMode: wijmo.grid.SelectionMode.ListBox,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    formatItem: (sender, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
                         }
+                    },
+                    columns: [
+                        {binding: 'chasu', header: '일자', width: 100, align: 'center', isReadOnly: true},
+                        {binding: 'lot_no', header: '상태', width: 200, align: 'center', isReadOnly: true},
+                        {
+                            binding: 'good_qty',
+                            header: '승인자',
+                            width: 100,
+                            align: 'right',
+                            format: 'n0',
+                            isReadOnly: false,
+                            cssClass: 'background-blue'
+                        }
+                    ],
+                    itemsSource: new wijmo.collections.CollectionView([]),
+                });
+
+                // 하단 합계 행 추가
+                this.historyGrid.columnFooters.rows.push(new wijmo.grid.GroupRow());
+
+                // 데이터 변경 시 합계 업데이트
+                this.historyGrid.collectionView.collectionChanged.addHandler(() => {
+                    _this.updateFooter();
+                });
+
+                this.historyGrid.beginningEdit.addHandler(function (s, e) {
+                    const col = s.columns[e.col];
+                    const editedRow = s.rows[e.row];
+                    const item = editedRow.dataItem;
+
+                    if (col.binding === 'defect_qty') {
+                        item._prev_defect_qty = parseInt(item.defect_qty) || 0;
                     }
                 });
+
+                this.historyGrid.cellEditEnded.addHandler(function (s, e) {
+                    const col = s.columns[e.col];
+                    const editedRow = s.rows[e.row];
+                    const item = editedRow.dataItem;
+
+                    if (col.binding === 'defect_qty') {
+                        // 기존 양품량 저장 안돼있으면 최초값 저장
+                        if (!item.original_good_qty) {
+                            item.original_good_qty = item.good_qty || 0;
+                        }
+
+                        let prevDefectQty = item._prev_defect_qty || 0;
+                        let newDefectQty = parseInt(item.defect_qty) || 0;
+
+                        // 기존과 새 defect_qty 차이만큼 good_qty 보정
+                        let diff = prevDefectQty - newDefectQty;
+                        item.good_qty = Math.max(0, item.good_qty + diff);
+
+                        // 수정된 값 저장
+                        item._prev_defect_qty = newDefectQty;
+
+                        s.collectionView.commitEdit();
+                        s.invalidate();
+                    }
+                });
+
+                // Context Menu 추가
+                new FlexGridContextMenu(this.historyGrid);
+                this.historyGrid.downloadFileName = '차수별 생산 내역';
+
             }
 
-            setData(_pageNo) {
-                let sujuData = AjaxUtil.getSyncData('/api/dashboard/custom_order');
-                this.sujuGrid.itemsSource = sujuData.data;
-                this.updateChart(this.sujuChart, sujuData.data, 'prod', 'sujup');
+            // 하단 합계 업데이트 함수
+            updateFooter() {
+                let goodQtySum = 0;
+                let defectQtySum = 0;
+
+                let totalDefectQty = 0;
+
+                let totalCurStock = 0;
+                let totalReqQty = 0;
+                let totalConsumedQty = 0;
+
+                // historyGrid 합계 계산 (양품량 & 부적합량)
+                if (this.historyGrid && this.historyGrid.collectionView) {
+                    this.historyGrid.collectionView.items.forEach(item => {
+                        goodQtySum += item.good_qty || 0; // undefined일 경우 0 처리
+                        defectQtySum += item.defect_qty || 0; // undefined일 경우 0 처리
+                    });
+
+                    // columnFooters의 첫 번째 행을 가져와 합계 업데이트
+                    let footerRow = this.historyGrid.columnFooters.rows[0];
+
+                    this.historyGrid.columnFooters.setCellData(footerRow.index, 'lot_no', '합계');
+                    this.historyGrid.columnFooters.setCellData(footerRow.index, 'good_qty', goodQtySum);
+                    this.historyGrid.columnFooters.setCellData(footerRow.index, 'defect_qty', defectQtySum);
+                }
+
+                // defectGrid 합계 계산
+                if (this.defectGrid && this.defectGrid.collectionView) {
+                    this.defectGrid.collectionView.items.forEach(item => {
+                        totalDefectQty += item.defect_qty || 0;
+                    });
+
+                    let footerRow = this.defectGrid.columnFooters.rows[0];
+
+                    this.defectGrid.columnFooters.setCellData(footerRow.index, 'defect_type', '합계');
+                    this.defectGrid.columnFooters.setCellData(footerRow.index, 'defect_qty', totalDefectQty);
+                }
+
+                // inputLotGrid 합계 계산 (현재재고, 투입요청량, 생산소모량)
+                if (this.inputLotGrid && this.inputLotGrid.collectionView) {
+                    this.inputLotGrid.collectionView.items.forEach(item => {
+                        totalCurStock += item.cur_stock || 0;
+                        totalReqQty += item.req_qty || 0;
+                        totalConsumedQty += item.consumed_qty || 0;
+                    });
+
+                    let footerRow = this.inputLotGrid.columnFooters.rows[0];
+
+                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'mat_name', '합계');
+                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'cur_stock', totalCurStock);
+                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'req_qty', totalReqQty);
+                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'consumed_qty', totalConsumedQty);
+                }
             }
 
-            updateChart(chart, data, labelKey, valueKey) {
-                let labels = data.map(item => item[labelKey]);
-                let values = data.map(item => item[valueKey]);
-                chart.data.labels = labels;
-                chart.data.datasets[0].data = values;
-                chart.update();
+            // 작업목록 조회
+            searchMainData() {
+                let _this = this;
+
+                let param = {
+                    'date_from': $('#date_from').val(),
+                    'date_to': $('#date_to').val(),
+                };
+
+                let result = AjaxUtil.getSyncData(this.baseUrl + '/read', param);
+                if (result.data && _this.grid.itemsSource) {
+
+                    _this.grid.itemsSource = result.data;
+                }
+            }
+
+            // 부적합목록 조회
+            showDefectList(type) {
+                let _this = this;
+
+                let jr_pk = $('#tabCompany').find('#id').val();
+                let workcenter_id = $('#tabCompany').find('#workcenter_id').val();
+
+                let param = {
+                    'jr_pk': jr_pk,
+                    'workcenter_id': workcenter_id,
+                    'type': type
+                }
+
+                if (type === 'chasu') {
+                    param['chasu'] = _this.historyGrid.selectedItems[0].chasu
+                }
+
+                let result = AjaxUtil.getSyncData(this.baseUrl + '/defect_list', param);
+                if (result.data) {
+                    let count = result.data.length;
+
+                    _this.defectGrid.itemsSource = result.data;
+                    let chasu_def_qty = 0;
+                    for (let i = 0; i < count; i++) {
+                        if (_this.defectGrid.selectedItems[i]) { // 선택된 아이템이 있는 경우만
+                            chasu_def_qty += parseFloat(_this.defectGrid.selectedItems[i].defect_qty || 0);
+                        }
+                    }
+                }
             }
         }
 
         let page = null;
 
         $(document).ready(function (e) {
-            page = new CustomOrderPage();
+            page = new DashCustomPage();
+
+            let date_from = CommonUtil.getYYYYMMDD(-7);
+            let today = CommonUtil.getYYYYMMDD();
+            page.today = today;
+
+            $('#date_from').val(date_from);
+            $('#date_to').val(today);
+
+
+            page.searchMainData();
+
+            $('#btnMainSearch').click(function (e) {
+                page.searchMainData();
+            });
+
         });
     </script>
 </th:block>

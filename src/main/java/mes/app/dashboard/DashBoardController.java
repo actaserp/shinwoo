@@ -1,5 +1,6 @@
 package mes.app.dashboard;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +22,28 @@ public class DashBoardController {
 	
 	@Autowired
 	private DashBoardService dashBoardService;
-	
+
+	@GetMapping("/read")
+	public AjaxResult getSujuList(
+			@RequestParam(value="date_from", required=false) String start_date,
+			@RequestParam(value="date_to", required=false) String end_date,
+			@RequestParam(value="spjangcd") String spjangcd,
+			HttpServletRequest request) {
+
+		start_date = start_date + " 00:00:00";
+		end_date = end_date + " 23:59:59";
+
+		Timestamp start = Timestamp.valueOf(start_date);
+		Timestamp end = Timestamp.valueOf(end_date);
+
+		List<Map<String, Object>> items = this.dashBoardService.getOverview(start, end, spjangcd);
+
+		AjaxResult result = new AjaxResult();
+		result.data = items;
+
+		return result;
+	}
+
 	@GetMapping("/today_week_prod")
 	private AjaxResult todayWeekProd(
 			@RequestParam("spjangcd") String spjangcd
