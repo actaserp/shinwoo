@@ -388,13 +388,13 @@
                                 <input type="hidden" name="MaterialGroupName" />
                                 <input type="hidden" name="Material_id" />
                                 <input type="hidden" name="unit" />
+                                <input type="hidden" name="standard_locked">
                                 <a class="btn in_btn" title="품목 검색" id="btnProductSearch" >
                                     <img src="/images/icon/btn-srch-black.svg" alt="검색 아이콘" />
                                 </a>
                             </div>
                         </td>
                         <td>
-                            <input type="hidden" name="standard_locked">
                             <input type="text" name="standard" placeholder="규격" />
                         </td>
                         <td><input type="text" name="quantity" placeholder="수량" /></td>
@@ -689,11 +689,11 @@
                             .val('N')
                             .trigger('change'); // 계산식 즉시 반영
                     }
+
                     // ✅ 규격 잠금 적용
                     $content.find('.item-table tbody tr:visible').not('.item-template-row').each(function (i) {
                         const $row = $(this);
-                        const $standard = $row.find('input[name^="standard_"]');
-
+                        const $standard = $row.find('input[type="text"][name^="standard_"]');
                         // 1) hidden 필드가 있으면 그 값 우선(Y/N)
                         const hidden = ($row.find('input[name^="standard_locked_"]').val() || '').toString().toUpperCase();
                         // 2) 없으면 서버 응답 순서 매칭(초기 로딩 시에만 안전)
@@ -704,21 +704,27 @@
                         // 신규 모드라면 무조건 해제
                         if (data.mode === 'new') locked = false;
 
-                        // 적용 + 표시용 속성 유지(저장 시 같이 보낼 수 있음)
+                        // ✅ 규격 잠금 적용 블록 내
                         $standard.prop('readOnly', locked)
                             .toggleClass('readonly', locked)
                             .attr('data-locked', locked ? 'Y' : 'N');
+
+                        // ← 여기가 중요
+                        if (locked) $standard.attr('readonly', 'readonly');
+                        else        $standard.removeAttr('readonly');   // ✨ 추가: attr까지 제거
 
                         // hidden 필드가 있다면 값 동기화
                         const $lockedHidden = $row.find('input[name^="standard_locked_"]');
                         if ($lockedHidden.length) $lockedHidden.val(locked ? 'Y' : 'N');
                     });
 
-                    // ✅ 각 행 unitType 선세팅
-                    $content.find('.item-table tbody tr:visible').not('.item-template-row').each(function () {
+                    // ✅ 각 행 unitType 선세팅 (Bind 직후)
+                    $content.find('.item-table tbody tr:visible').not('.item-template-row').each(function (i) {
                         const $row = $(this);
                         const unitRaw = ($row.find('input[name^="unit_"]').val() || '').toString().trim().toUpperCase();
-                        $row.data('unitType', unitRaw.startsWith('M') ? 'M' : 'EA');
+                        const fallback = (data.sujuList?.[i]?.unit || data.sujuList?.[i]?.unit_name || '').toString().trim().toUpperCase();
+                        const base = unitRaw || fallback;
+                        $row.data('unitType', base.startsWith('M') ? 'M' : 'EA');
                     });
 
                     // 최초 계산 수행
@@ -747,6 +753,14 @@
                     let data = FormUtil.extractForm($sujuForm);
                     console.log('데이터 확인:', data);
 
+                    if (!$('#SuJuOrderName').val()) {
+                        Alert.alert('', '수주처를 선택하세요.');
+                        return;
+                    }
+                    if (!$('#DeliveryName').val()) {
+                        Alert.alert('', '납품처를 입력하세요.');
+                        return;
+                    }
                     if (!$('#cboCompany').val()) {
                         Alert.alert('', '판매처를 선택하세요.');
                         return;
@@ -881,78 +895,86 @@
                     }
                 }
 
-                function getNumericValue($input) {
-                    if ($input.length === 0) return '';
-                    const val = ($input.val() || '').replace(/[^0-9.]/g, '').trim();
-                    return val ? parseFloat(val) : '';
+                // 빈 값은 항상 숫자 0으로 처리
+                function getNumericValue($input, def = 0) {
+                    if ($input.length === 0) return def;
+                    const raw = (($input.val() || '') + '').replace(/[^0-9.]/g, '').trim();
+                    if (raw === '') return def;
+                    const n = parseFloat(raw);
+                    return Number.isFinite(n) ? n : def;
                 }
+
+                let isInternalFormatting = false;
 
                 function calculateAmounts($row, source = null) {
                     if (isInternalFormatting) return;
                     isInternalFormatting = true;
 
-                    const quantity = getNumericValue($row.find('input[name^="quantity_"]'));
-                    const unitPrice = getNumericValue($row.find('input[name^="unitPrice_"]'));
-                    const standard   = Number(getNumericValue($row.find('input[name^="standard_"]')))   || 0; // 규격
-                    const unitTypeRaw = (($row.data('unitType') || 'EA').toString().trim().toUpperCase());
-                    const unitType    = unitTypeRaw.startsWith('M') ? 'M' : 'EA';
+                    try {
+                        const quantity   = getNumericValue($row.find('input[name^="quantity_"]'), 0);
+                        const unitPrice  = getNumericValue($row.find('input[name^="unitPrice_"]'), 0);
+                        const $standard = $row.find('input[type="text"][name^="standard_"]');
+                        const standard  = getNumericValue($standard, 0); // ← 숫자(미터)
 
-                    const isVatIncluded = $row.find('input[name^="VatIncluded_"]').is(':checked');
-                    const isVatExempt = false;
+                        // 단위 판정: "M(미터)" / "m" / "미터" 모두 허용
+                        const unitFieldRaw = (($row.find('input[name^="unit_"]').val() || '') + '').trim();
+                        const unitType = (/^M(\b|\()|미터/i).test(unitFieldRaw) ? 'M' : 'EA';
+                        /*console.table([{
+                            unitField: (($row.find('input[name^="unit_"]').val() || '') + '').trim(),
+                            unitType,
+                            standard,
+                            quantity,
+                            unitPrice,
+                            effectiveQty: (unitType === 'M') ? (standard * quantity) : quantity
+                        }]);*/
 
-                    let supplyAmount = getNumericValue($row.find('input[name^="supplyAmount_"]'));
-                    let vatAmount = getNumericValue($row.find('input[name^="VatAmount_"]'));
-                    const isSupplyEdited = $row.data('supplyEdited') === true;
-                    const isVatEdited = $row.data('vatEdited') === true;
+                        // M인데 규격이 비었거나 0이면 1로 간주(원치 않으면 경고 후 return 처리)
+                        const stdForCalc = (unitType === 'M') ? (standard > 0 ? standard : 1) : 1;
 
-                    const effectiveQty = (unitType === 'M') ? (standard * quantity) : quantity;
+                        const isVatIncluded = $row.find('input[name^="VatIncluded_"]').is(':checked');
+                        const isVatExempt   = false;
 
-                    if (source === 'unit' && quantity > 0 && unitPrice >= 0) {
-                        const total = effectiveQty * unitPrice;
+                        let supplyAmount = getNumericValue($row.find('input[name^="supplyAmount_"]'), 0);
+                        let vatAmount    = getNumericValue($row.find('input[name^="VatAmount_"]'), 0);
+                        const isSupplyEdited = $row.data('supplyEdited') === true;
+                        const isVatEdited    = $row.data('vatEdited') === true;
 
-                        if (!isSupplyEdited || !isVatEdited) {
+                        // ✅ 핵심: M → (규격 × 수량) × 단가, EA → (수량 × 단가)
+                        const effectiveQty = (unitType === 'M') ? (stdForCalc * quantity) : quantity;
+
+                        // 자동계산: 단가/수량/규격/부가세체크 변경 or 사용자가 금액칸 직접 수정 안했을 때
+                        const shouldAuto = (source === 'unit') || (!isSupplyEdited && !isVatEdited);
+                        if (shouldAuto) {
+                            const total = effectiveQty * unitPrice;
+
                             if (isVatExempt) {
-                                supplyAmount = total;
+                                supplyAmount = total;            // 면세
                                 vatAmount = 0;
                             } else if (isVatIncluded) {
-                                supplyAmount = Math.round(total / 1.1);
+                                supplyAmount = Math.round(total / 1.1); // 부가세 포함가 → 공급가 역산
                                 vatAmount = total - supplyAmount;
                             } else {
-                                supplyAmount = total;
+                                supplyAmount = total;                  // 부가세 별도
                                 vatAmount = Math.floor(supplyAmount * 0.1);
                             }
 
-                            if (!isSupplyEdited) {
-                                $row.find('input[name^="supplyAmount_"]').val(
-                                    supplyAmount === 0 ? '' : supplyAmount.toLocaleString()
-                                );
-                            }
-                            if (!isVatEdited) {
-                                $row.find('input[name^="VatAmount_"]').val(
-                                    vatAmount === 0 ? '' : (isVatExempt ? '면세' : vatAmount.toLocaleString())
-                                );
-
-                            }
+                            if (!isSupplyEdited) $row.find('input[name^="supplyAmount_"]').val(supplyAmount.toLocaleString());
+                            if (!isVatEdited)    $row.find('input[name^="VatAmount_"]').val(isVatExempt ? '면세' : vatAmount.toLocaleString());
                         }
-                    }
 
-                    if (!isNaN(supplyAmount) && !isNaN(vatAmount)) {
-                        const total = supplyAmount + vatAmount;
-                        $row.find('input[name^="totalAmount_"]').val(
-                            total === 0 ? '' : total.toLocaleString()
-                        );
+                        // 합계(0도 "0"으로 표시)
+                        const sNum = getNumericValue($row.find('input[name^="supplyAmount_"]'), 0);
+                        const vNum = getNumericValue($row.find('input[name^="VatAmount_"]'), 0);
+                        $row.find('input[name^="totalAmount_"]').val((sNum + vNum).toLocaleString());
 
-                    }
-
-                    if (quantity !== '') {
+                        // 표시 포맷(수량/단가)
                         $row.find('input[name^="quantity_"]').val(quantity.toLocaleString());
-                    }
-                    if (unitPrice !== '') {
                         $row.find('input[name^="unitPrice_"]').val(unitPrice.toLocaleString());
-                    }
 
-                    calculateTotalSum();
-                    isInternalFormatting = false;
+                        calculateTotalSum();
+                    } finally {
+                        isInternalFormatting = false; // 에러 나도 플래그 복구
+                    }
                 }
 
                 function calculateTotalSum() {
@@ -1009,6 +1031,12 @@
                     $row.removeData('supplyEdited');
                     $row.removeData('vatEdited');
                     calculateAmounts($row, 'unit');
+                });
+
+                // 표준 변경 시 즉시 재계산
+                $content.on('input change', 'input[name^="standard_"]', function () {
+                    const $row = $(this).closest('tr');
+                    calculateAmounts($row, 'unit'); // ← 'standard-change' 말고 'unit'으로
                 });
 
                 // 숫자 포맷 (input 중 formatting)
