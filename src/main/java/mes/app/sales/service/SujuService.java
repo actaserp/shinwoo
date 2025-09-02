@@ -238,7 +238,7 @@ public class SujuService {
 									END AS standard_locked,
 				         CASE
 				             WHEN sh.shipped_qty = -1 THEN s."State"
-				             WHEN sh.shipped_qty = 0 THEN 'force_complement'
+				             WHEN sh.shipped_qty = 0 THEN 'force_completion'
 				             WHEN sh.shipped_qty >= s."SujuQty" THEN 'shipped'
 				             WHEN sh.shipped_qty < s."SujuQty" THEN 'partial'
 				             ELSE s."State"

@@ -228,7 +228,7 @@ public class BaljuOrderService {
              c."Name" AS "CompanyName",
              bh."JumunDate",
              bh."DeliveryDate",
-             bh.special_note,
+             bh."Description",
              bh."JumunNumber",
              b.id AS balju_id,
              b."Material_id",
@@ -398,7 +398,7 @@ public class BaljuOrderService {
     header.put("DeliveryDate", first.get("DeliveryDate"));
     header.put("State", first.get("BalJuHeadType"));
     header.put("StateName", first.get("bh_StateName"));
-    header.put("special_note", first.get("special_note"));
+    header.put("Description", first.get("Description"));
     header.put("JumunNumber", first.get("JumunNumber"));
 
     List<Map<String, Object>> items = new ArrayList<>();

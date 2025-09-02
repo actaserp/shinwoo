@@ -1,6 +1,7 @@
 package mes.domain.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -63,8 +64,8 @@ public class BaljuHead {
   @Column(name = "spjangcd")
   private String spjangcd;
 
-  @Column(name = "special_note")
-  private String specialNote;
+  @Column(name="\"Description\"")
+  String Description;
 
   @Column(name ="\"SujuType\"")
   String sujuType;

@@ -59,7 +59,7 @@ public class ProdPlanController {
   }
 
   //수주확정
-  @PostMapping("/plane_confirm")
+  @PostMapping("/plan_confirm")
   @Transactional
   public AjaxResult SujuConfirm(@RequestParam(value = "suju_id", required = false) Integer sujuId,
                                 Authentication auth) {

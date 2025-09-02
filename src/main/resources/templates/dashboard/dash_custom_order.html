@@ -14,23 +14,8 @@
 
 <th:block layout:fragment="content">
     <div class="layout-contents">
-
-<!--        <div class="page-title-wrap">-->
-<!--            <div class="left">-->
-<!--                <h2>진행 현황</h2>-->
-<!--                &lt;!&ndash;                <small2>라우팅이 없는 품목에 대한 실적 입력. 로트투입 가능</small2>&ndash;&gt;-->
-<!--                <a title="북마크" class="bookmark toggle">-->
-<!--                    내 메뉴-->
-<!--                </a>-->
-<!--            </div>-->
-<!--            <ul class="page-navi">-->
-<!--                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>-->
-<!--                <li>대시보드</li>-->
-<!--                <li>진행 현황</li>-->
-<!--            </ul>-->
-<!--        </div>-->
         <div style="display: flex; gap: 5px;">
-            <section class="section" style="flex: 2;">
+            <section class="section" style="flex: 2.5;">
                 <div class="section-top">
                     <div class="search-wrap">
                         <dl>
@@ -65,9 +50,9 @@
                     </div>
                 </div>
                 <div class="container-fluid">
-                    <div id="prod-result-grid" style="height: 250px;"></div>
+                    <div id="prod-result-grid"></div>
                 </div>
-                <div class="container-fluid">
+                <div class="container-fluid" style="margin-top: 5px; height: 20vh;">
                     <div id="result-grid"></div>
                 </div>
             </section>
@@ -92,69 +77,61 @@
                         <div class="section-top">
 
                             <div class="table-wrap">
-                                <form id="basicForm">
+                                <form id="companyForm">
                                     <input type="hidden" id="id" name="id"/>
-                                    <input type="hidden" id="parent_jr_pk" name="parent_jr_pk"/>
-                                    <input type="hidden" id="routing_id" name="routing_id"/>
-                                    <input type="hidden" id="mp_id" name="mp_id"/>
-                                    <input type="hidden" id="mat_pk" name="mat_pk"/>
-                                    <input type="hidden" id="prod_mat_id" name="prod_mat_id"/>
-                                    <input type="hidden" id="need_pro_mat_qty" name="need_pro_mat_qty"/>
-                                    <input type="hidden" id="consumed_mode" name="consumed_mode"/>
-                                    <input type="hidden" id="state" name="state"/>
                                     <table id="work-table">
-                                        <caption>작업 지시 테이블</caption>
+                                        <caption>거래처 테이블</caption>
                                         <colgroup>
                                             <col style="width: 40%;">
                                             <col style="width: 60%;">
                                         </colgroup>
                                         <tbody>
                                         <tr>
-                                            <th><label for="order_num">회사명</label></th>
-                                            <td><input type="text" id="order_num" name="order_num" readonly/></td>
+                                            <th><label for="name">회사명</label></th>
+                                            <td><input type="text" id="name" name="name" readonly/></td>
                                         </tr>
                                         <tr>
-                                            <th><label for="mat_name">사업자 번호</label></th>
-                                            <td><input type="text" id="mat_name" name="mat_name" readonly/></td>
+                                            <th><label for="business_number">사업자 번호</label></th>
+                                            <td><input type="text" id="business_number" name="business_number" readonly/></td>
                                         </tr>
                                         <tr>
-                                            <th><label for="job_state">대표자명</label></th>
-                                            <td><input type="text" id="job_state" name="job_state" readonly/></td>
+                                            <th><label for="ceo_name">대표자명</label></th>
+                                            <td><input type="text" id="ceo_name" name="ceo_name" readonly/></td>
                                         </tr>
                                         <tr>
-                                            <th><label for="workcenter_id">사업장 주소</label></th>
+                                            <th><label for="address">사업장 주소</label></th>
                                             <td>
-                                                <input id="workcenter_id" name="workcenter_id" readonly />
+                                                <input id="address" name="address" readonly />
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th><label for="shift_code">업태</label></th>
-                                            <td ><input type="text" id="shift_code" name="shift_code" readonly/>
+                                            <th><label for="business_type">업태</label></th>
+                                            <td ><input type="text" id="business_type" name="business_type" readonly/>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th><label for="prod_date">업종</label></th>
+                                            <th><label for="business_item">업종</label></th>
                                             <td>
-                                                <input type="text" id="prod_date" name="prod_date" readonly/>
+                                                <input type="text" id="business_item" name="business_item" readonly/>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th><label for="prod_date">연락처</label></th>
+                                            <th><label for="tel_number">연락처</label></th>
                                             <td >
-                                                <input type="text" id="end_date" name="end_date" readonly/>
+                                                <input type="text" id="tel_number" name="tel_number" readonly/>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th><label for="order_qty">이메일</label></th>
-                                            <td><input type="number" id="order_qty" name="order_qty" readonly/></td>
+                                            <th><label for="email">이메일</label></th>
+                                            <td><input type="text" id="email" name="email" readonly/></td>
                                         </tr>
                                         <tr>
-                                            <th><label for="good_qty">팩스</label></th>
-                                            <td><input type="number" id="good_qty" name="good_qty" readonly /></td>
+                                            <th><label for="fax_number">팩스</label></th>
+                                            <td><input type="text" id="fax_number" name="fax_number" readonly /></td>
                                         </tr>
                                         <tr>
                                             <th><label for="description">설명</label></th>
-                                            <td><textarea id="description" name="description" disabled></textarea></td>
+                                            <td><textarea id="description" name="description" readonly></textarea></td>
                                         </tr>
                                         </tbody>
                                     </table>
@@ -179,7 +156,6 @@
                 this.grid = null;
                 this.resultGrid = null;
                 this.historyGrid = null;
-                this.$tabCompany = $('#tabCompany');
                 this.baseUrl = '/api/dashboard';
                 this.init();
             }
@@ -191,9 +167,35 @@
                     autoGenerateColumns: false,
                     selectionMode: wijmo.grid.SelectionMode.Row,
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
-                    formatItem: (sender, e) => {
+                    formatItem: (s, e) => {
+                        // 헤더 가운데 정렬
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
+                            const binding = s.columns[e.col].binding;
+                            if (binding === 'Description') {
+                                e.cell.style.color = '#5567ff'; // 글자 색 적용
+                            }
+                            return;
+                        }
+
+                        // 본문 셀 색상 처리
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            const col = s.columns[e.col];
+                            const item = s.rows[e.row]?.dataItem;
+
+                            // 재활용 셀 초기화(중요)
+                            e.cell.style.color = '';
+                            e.cell.style.fontWeight = '';
+
+                            if (col && col.binding === 'division' && item) {
+                                if (item.division === '매출') {          // 수주 → 파란색
+                                    e.cell.style.color = '#1d4ed8';
+                                    e.cell.style.fontWeight = '600';
+                                } else if (item.division === '매입') {  // 발주 → 빨간색
+                                    e.cell.style.color = '#dc2626';
+                                    e.cell.style.fontWeight = '600';
+                                }
+                            }
                         }
                     },
                     isReadOnly: true,
@@ -202,74 +204,75 @@
                         {binding: 'head_id', visible: false},
                         {binding: 'division', header: '구분', width: 70, align: 'center'},
                         {binding: 'JumunDate', header: '작성일자', width: 100, align: 'center'},
-                        {binding: 'state_name', header: '상태', width: 100, align: 'center'},
-                        {binding: 'JumunNumber', header: '번호', width: 120, align: 'center'},
+                        {binding: 'state_name', header: '상태', width: 80, align: 'center'},
+                        // {binding: 'JumunNumber', header: '번호', width: 120, align: 'center'},
                         {binding: 'company_name', header: '거래처명', width: 120, align: 'center'},
                         {binding: 'BusinessNumber', header: '사업자번호', width: 120, align: 'center'},
                         {binding: 'product_name', header: '제품명', width: 200, align: 'left'},
-                        {binding: 'price', header: '공급가액', width: 80, align: 'right'},
+                        {binding: 'price', header: '공급가액', width: 100, align: 'right'},
                         {binding: 'vat', header: '세액', width: 80, align: 'right'},
                         {binding: 'total_price', header: '합계', width: 100, align: 'right'},
-                        {binding: 'Description', header: '메모', width: 200, align: 'left'},
+                        {binding: 'Description', header: '메모', width: '*', align: 'left'},
                     ],
                     itemsSource: new wijmo.collections.CollectionView([]),
-                    selectionChanged: function (e) {
-                        let selectedRow = _this.grid.selection.row;
-
-                        let dataSource = _this.grid.itemsSource instanceof wijmo.collections.CollectionView
-                            ? _this.grid.itemsSource.sourceCollection
-                            : _this.grid.itemsSource;
-
-                        if (!dataSource || !Array.isArray(dataSource) || dataSource.length === 0) {
-                            return;
-                        }
-
-                        if (selectedRow >= 0) { // 선택된 행이 있을 때만 저장
-                            _this.selectedIndex = selectedRow;
-                        }
-                        let item = _this.grid.rows[selectedRow]?.dataItem; // 선택된 데이터 가져오기
-                        if (item) {
-
-                        }
-
-                    }
                 });
                 new FlexGridContextMenu(this.grid);
                 this.grid.downloadFileName = '진행 내역';
 
+                // 더블클릭: Description 셀에서는 스티커, 그 외에는 기존 동작
+                this.grid.hostElement.addEventListener('dblclick', (e) => {
+                    const grid = this.grid;                           // 안전하게 참조
+                    const ht = grid.hitTest(e);
+
+                    if (ht.cellType === wijmo.grid.CellType.Cell) {   // ← CellType 참조 수정
+                        const col  = grid.columns[ht.col];
+                        const item = grid.rows[ht.row]?.dataItem;
+
+                        if (col && col.binding === 'Description' && item) {
+                            const rect = grid.getCellBoundingRect(ht.row, ht.col, true);
+                            openMemoSticker(grid, rect, item, this.baseUrl); // 스티커 오픈
+                            return; // 메모 셀일 땐 기본 동작 막기
+                        }
+                    }
+
+                    // (기존 동작) Description 외 더블클릭 시
+                    const items = grid.selectedItems;
+                    if (!items || items.length === 0) return;
+                    this.getDetail();
+                    this.getHistory();
+                    this.getCompany();
+                });
+
+
                 this.resultGrid = new wijmo.grid.FlexGrid('#result-grid', {
                     autoGenerateColumns: false,
-                    selectionMode: wijmo.grid.SelectionMode.ListBox,
+                    selectionMode: wijmo.grid.SelectionMode.Row,
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
-                    selectionChanged: (e) => {
-                        // FlexGrid가 초기화되고 itemsSource가 설정되었는지 확인
-                        if (this.chasuGrid && this.chasuGrid.selectedRows) {
-                            const selectedRows = this.chasuGrid.selectedRows;
-                            if (selectedRows.length > 0) {
-                                const item = selectedRows[0].dataItem;
-                                // 클래스 메서드 호출
-                                this.showDefectList('chasu');
-                                this.setButtonState();
-                            }
-                        }
-                    },
-
-                    formatItem: (sender, e) => {
+                    showMarquee: true,
+                    formatItem: (s, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnFooter) {
+                            const col = s.columns[e.col];
+                            if (col.binding === 'product_name') {
+                                e.cell.textContent = '합계';
+                                e.cell.style.textAlign = 'center';
+                            }
+                        }
                     },
                     columns: [
-                        {binding: 'chasu', header: '일자', width: 100, align: 'center', isReadOnly: true},
-                        {binding: 'lot_no', header: '제품명', width: 200, align: 'center', isReadOnly: true},
-                        {binding: 'lot_no1', header: '규격', width: 80, align: 'center', isReadOnly: true},
-                        {binding: 'lot_no2', header: '수량', width: 80, align: 'center', isReadOnly: true},
-                        {binding: 'lot_no3', header: '단가', width: 80, align: 'center', isReadOnly: true},
-                        {binding: 'lot_no4', header: '공급가액', width: 80, align: 'center', isReadOnly: true},
-                        {binding: 'lot_no5', header: '세액', width: 80, align: 'center', isReadOnly: true},
-                        {binding: 'lot_no5', header: '합계', width: 80, align: 'center', isReadOnly: true},
-                        {binding: 'lot_no5', header: '비고', width: 100, align: 'center', isReadOnly: true},
-                        {binding: 'lot_no5', header: '메모', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'id', visible:false},
+                        {binding: 'JumunDate', header: '일자', width: 100, align: 'center', isReadOnly: true},
+                        {binding: 'state_name', header: '상태', width: 80, align: 'center'},
+                        {binding: 'product_name', header: '제품명', width: 200, align: 'left', isReadOnly: true},
+                        {binding: 'standard', header: '규격', width: 80, align: 'center', isReadOnly: true},
+                        {binding: 'quantity', header: '수량', width: 80, align: 'right', isReadOnly: true, aggregate: wijmo.Aggregate.Sum},
+                        {binding: 'unit_price', header: '단가', width: 80, align: 'right', isReadOnly: true},
+                        {binding: 'supply_amount', header: '공급가액', width: 100, align: 'right', isReadOnly: true, aggregate: wijmo.Aggregate.Sum},
+                        {binding: 'vat_amount', header: '세액', width: 100, align: 'right', isReadOnly: true, aggregate: wijmo.Aggregate.Sum},
+                        {binding: 'total_amount', header: '합계', width: 100, align: 'right', isReadOnly: true, aggregate: wijmo.Aggregate.Sum},
+                        {binding: 'description', header: '비고', width: '*', align: 'left', isReadOnly: true},
 
                     ],
                     itemsSource: new wijmo.collections.CollectionView([]),
@@ -278,11 +281,6 @@
                 // 하단 합계 행 추가
                 this.resultGrid.columnFooters.rows.push(new wijmo.grid.GroupRow());
 
-                // 데이터 변경 시 합계 업데이트
-                this.resultGrid.collectionView.collectionChanged.addHandler(() => {
-                    _this.updateFooter();
-                });
-
                 // Context Menu 추가
                 new FlexGridContextMenu(this.resultGrid);
                 this.resultGrid.downloadFileName = '품목 내역';
@@ -290,71 +288,21 @@
 
                 this.historyGrid = new wijmo.grid.FlexGrid('#history-grid', {
                     autoGenerateColumns: false,
-                    selectionMode: wijmo.grid.SelectionMode.ListBox,
+                    selectionMode: wijmo.grid.SelectionMode.Row,
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    showMarquee: true,
                     formatItem: (sender, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
                     },
                     columns: [
-                        {binding: 'chasu', header: '일자', width: 100, align: 'center', isReadOnly: true},
-                        {binding: 'lot_no', header: '상태', width: 200, align: 'center', isReadOnly: true},
-                        {
-                            binding: 'good_qty',
-                            header: '승인자',
-                            width: 100,
-                            align: 'right',
-                            format: 'n0',
-                            isReadOnly: false,
-                            cssClass: 'background-blue'
-                        }
+                        {binding: 'product_name', header: '제품명', width: 170, align: 'left', isReadOnly: true},
+                        {binding: 'standard', header: '규격', width: 70, align: 'center', isReadOnly: true},
+                        {binding: 'state_name', header: '상태', width: 70, align: 'center', isReadOnly: true},
+                        {binding: 'event_time', header: '생성시간', width: 170, align: 'center', isReadOnly: true},
                     ],
                     itemsSource: new wijmo.collections.CollectionView([]),
-                });
-
-                // 하단 합계 행 추가
-                this.historyGrid.columnFooters.rows.push(new wijmo.grid.GroupRow());
-
-                // 데이터 변경 시 합계 업데이트
-                this.historyGrid.collectionView.collectionChanged.addHandler(() => {
-                    _this.updateFooter();
-                });
-
-                this.historyGrid.beginningEdit.addHandler(function (s, e) {
-                    const col = s.columns[e.col];
-                    const editedRow = s.rows[e.row];
-                    const item = editedRow.dataItem;
-
-                    if (col.binding === 'defect_qty') {
-                        item._prev_defect_qty = parseInt(item.defect_qty) || 0;
-                    }
-                });
-
-                this.historyGrid.cellEditEnded.addHandler(function (s, e) {
-                    const col = s.columns[e.col];
-                    const editedRow = s.rows[e.row];
-                    const item = editedRow.dataItem;
-
-                    if (col.binding === 'defect_qty') {
-                        // 기존 양품량 저장 안돼있으면 최초값 저장
-                        if (!item.original_good_qty) {
-                            item.original_good_qty = item.good_qty || 0;
-                        }
-
-                        let prevDefectQty = item._prev_defect_qty || 0;
-                        let newDefectQty = parseInt(item.defect_qty) || 0;
-
-                        // 기존과 새 defect_qty 차이만큼 good_qty 보정
-                        let diff = prevDefectQty - newDefectQty;
-                        item.good_qty = Math.max(0, item.good_qty + diff);
-
-                        // 수정된 값 저장
-                        item._prev_defect_qty = newDefectQty;
-
-                        s.collectionView.commitEdit();
-                        s.invalidate();
-                    }
                 });
 
                 // Context Menu 추가
@@ -363,60 +311,108 @@
 
             }
 
-            // 하단 합계 업데이트 함수
-            updateFooter() {
-                let goodQtySum = 0;
-                let defectQtySum = 0;
+            getDetail () {
+                let _this = this;
 
-                let totalDefectQty = 0;
+                const it = _this.grid.selectedItems && _this.grid.selectedItems[0];
+                let data = {
+                    id: it.head_id,
+                    division: it.division,
+                };
+                let result = AjaxUtil.getSyncData(this.baseUrl + '/detail', data);
+                if (result.data && _this.grid.itemsSource) {
 
-                let totalCurStock = 0;
-                let totalReqQty = 0;
-                let totalConsumedQty = 0;
-
-                // historyGrid 합계 계산 (양품량 & 부적합량)
-                if (this.historyGrid && this.historyGrid.collectionView) {
-                    this.historyGrid.collectionView.items.forEach(item => {
-                        goodQtySum += item.good_qty || 0; // undefined일 경우 0 처리
-                        defectQtySum += item.defect_qty || 0; // undefined일 경우 0 처리
-                    });
-
-                    // columnFooters의 첫 번째 행을 가져와 합계 업데이트
-                    let footerRow = this.historyGrid.columnFooters.rows[0];
-
-                    this.historyGrid.columnFooters.setCellData(footerRow.index, 'lot_no', '합계');
-                    this.historyGrid.columnFooters.setCellData(footerRow.index, 'good_qty', goodQtySum);
-                    this.historyGrid.columnFooters.setCellData(footerRow.index, 'defect_qty', defectQtySum);
+                    _this.resultGrid.itemsSource = result.data;
                 }
 
-                // defectGrid 합계 계산
-                if (this.defectGrid && this.defectGrid.collectionView) {
-                    this.defectGrid.collectionView.items.forEach(item => {
-                        totalDefectQty += item.defect_qty || 0;
-                    });
+            };
 
-                    let footerRow = this.defectGrid.columnFooters.rows[0];
+            getHistory () {
+                let _this = this;
 
-                    this.defectGrid.columnFooters.setCellData(footerRow.index, 'defect_type', '합계');
-                    this.defectGrid.columnFooters.setCellData(footerRow.index, 'defect_qty', totalDefectQty);
+                const it = _this.grid.selectedItems && _this.grid.selectedItems[0];
+                let data = {
+                    id: it.head_id,
+                    division: it.division,
+                };
+                // 1) 데이터 로드
+                let result = AjaxUtil.getSyncData(this.baseUrl + '/history', data);
+                if (result.data) {
+                    const rows = result.data.map(r => ({
+                        ...r,
+                        event_time: new Date(r.event_time) // ISO → Date
+                    }));
+
+                    // 2) 그룹/정렬 설정
+                    const labelMap = { suju: '수주', job: '생산', shipment: '출고', balju: '발주', input: '입고' };
+
+                    const cv = new wijmo.collections.CollectionView(rows);
+                    // event_type으로 그룹 (정렬 키를 접두로 붙여 순서 고정)
+                    cv.groupDescriptions.push(new wijmo.collections.PropertyGroupDescription(
+                        'event_type',
+                        item => {
+                            const t = item.event_type;
+                            const label = labelMap[t] ?? t;  // '수주' 등
+                            return `${label}`;      // 그룹 값(value)이 됨
+                        }
+                    ));
+                    // 그룹 내 시간순 정렬
+                    cv.sortDescriptions.push(new wijmo.collections.SortDescription('event_time', true));
+
+                    this.historyGrid.itemsSource = cv;
+
+                    // 3) 컬럼 타입/포맷(선택)
+                    const col = this.historyGrid.columns.getColumn('event_time');
+                    if (col) {
+                        col.dataType = wijmo.DataType.Date;
+                        col.format = 'yyyy-MM-dd HH:mm:ss';
+                    }
+
+                    // 4) 그룹 헤더 표시 예쁘게 (접두 "1:" 제거 + 건수 표시)
+                    this.historyGrid.groupHeaderFormat = '{value} ';
+                    this.historyGrid.formatItem = (s, e) => {
+                        // 기존 헤더 가운데 정렬 유지
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
+                        }
+                        // 그룹 헤더 꾸미기
+                        if (e.panel === s.cells) {
+                            const row = s.rows[e.row];
+                            if (row instanceof wijmo.grid.GroupRow) {
+                                const g = row.dataItem; // CollectionViewGroup
+                                if (e.col === 0) {
+                                    const raw = String(g.name);            // "1:수주" 같은 문자열
+                                    const label = raw.replace(/^\d+:/, ''); // "수주"만 추출
+                                    e.cell.textContent = `${label} (${g.items.length}건)`;
+                                    e.cell.style.fontWeight = '600';
+                                } else {
+                                    // 그룹 헤더의 나머지 칼럼은 비우기
+                                    e.cell.textContent = '';
+                                }
+                            }
+                        }
+                    };
+                }
+            };
+
+
+            getCompany () {
+                let _this = this;
+
+                const it = _this.grid.selectedItems && _this.grid.selectedItems[0];
+                let data = {
+                    company_id: it.company_id
+                };
+                let result = AjaxUtil.getSyncData('/api/definition/company/detail', data);
+                if (result.data) {
+                    const d = { ...result.data };
+                    d.business_number = formatBizNo(d.business_number);
+                    d.tel_number      = formatPhone(d.tel_number);
+                    d.fax_number      = formatPhone(d.fax_number);
+                    FormUtil.BindDataForm(d, $('#companyForm'));
                 }
 
-                // inputLotGrid 합계 계산 (현재재고, 투입요청량, 생산소모량)
-                if (this.inputLotGrid && this.inputLotGrid.collectionView) {
-                    this.inputLotGrid.collectionView.items.forEach(item => {
-                        totalCurStock += item.cur_stock || 0;
-                        totalReqQty += item.req_qty || 0;
-                        totalConsumedQty += item.consumed_qty || 0;
-                    });
-
-                    let footerRow = this.inputLotGrid.columnFooters.rows[0];
-
-                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'mat_name', '합계');
-                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'cur_stock', totalCurStock);
-                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'req_qty', totalReqQty);
-                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'consumed_qty', totalConsumedQty);
-                }
-            }
+            };
 
             // 작업목록 조회
             searchMainData() {
@@ -434,37 +430,124 @@
                 }
             }
 
-            // 부적합목록 조회
-            showDefectList(type) {
-                let _this = this;
-
-                let jr_pk = $('#tabCompany').find('#id').val();
-                let workcenter_id = $('#tabCompany').find('#workcenter_id').val();
-
-                let param = {
-                    'jr_pk': jr_pk,
-                    'workcenter_id': workcenter_id,
-                    'type': type
-                }
-
-                if (type === 'chasu') {
-                    param['chasu'] = _this.historyGrid.selectedItems[0].chasu
-                }
-
-                let result = AjaxUtil.getSyncData(this.baseUrl + '/defect_list', param);
-                if (result.data) {
-                    let count = result.data.length;
-
-                    _this.defectGrid.itemsSource = result.data;
-                    let chasu_def_qty = 0;
-                    for (let i = 0; i < count; i++) {
-                        if (_this.defectGrid.selectedItems[i]) { // 선택된 아이템이 있는 경우만
-                            chasu_def_qty += parseFloat(_this.defectGrid.selectedItems[i].defect_qty || 0);
-                        }
-                    }
-                }
-            }
         }
+
+        // 공통: 숫자만 남기기
+        const digits = v => String(v || '').replace(/\D/g, '');
+
+        // 사업자번호: 10자리 → 000-00-00000
+        const formatBizNo = v => {
+            const d = digits(v);
+            return d.length === 10 ? `${d.slice(0,3)}-${d.slice(3,5)}-${d.slice(5)}` : v || '';
+        };
+
+        // 전화/팩스
+        const formatPhone = v => {
+            const d = digits(v);
+            if (!d) return '';
+
+            if (d.startsWith('02')) { // 서울
+                return d.length >= 10
+                    ? `02-${d.slice(2, d.length-4)}-${d.slice(-4)}`
+                    : `02-${d.slice(2,5)}-${d.slice(5)}`;
+            }
+            if (/^01[016789]/.test(d)) { // 휴대폰
+                return d.length === 11
+                    ? `${d.slice(0,3)}-${d.slice(3,7)}-${d.slice(7)}`
+                    : `${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6)}`;
+            }
+            if (d.startsWith('070')) {
+                return `070-${d.slice(3, d.length-4)}-${d.slice(-4)}`;
+            }
+            if (d.startsWith('050')) {
+                return `${d.slice(0,4)}-${d.slice(4,8)}-${d.slice(8)}`;
+            }
+            // 일반 지역번호(3자리 가정)
+            return d.length >= 9
+                ? `${d.slice(0,3)}-${d.slice(3, d.length-4)}-${d.slice(-4)}`
+                : v || '';
+        };
+
+        function ensureMemoSticker() {
+            let sticker = document.getElementById('memo-sticker');
+            if (sticker) return sticker;
+
+            sticker = document.createElement('div');
+            sticker.id = 'memo-sticker';
+            sticker.style.cssText = `
+    position:absolute; display:none; z-index:10000;
+    width:320px; background:#d1d5db; border:1px solid #d1d5db;
+    box-shadow:0 8px 20px rgba(0,0,0,.15); border-radius:10px; padding:10px;
+  `;
+            sticker.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <strong>메모</strong>
+      <button type="button" id="memoCloseBtn" style="border:none;background:transparent;font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    <textarea id="memoText" rows="6" style="width:100%;box-sizing:border-box;resize:vertical;"></textarea>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
+      <button type="button" id="memoSaveBtn"   style="padding:6px 10px;border-radius:6px;border:1px solid #d1d5db;cursor:pointer;">저장</button>
+      <button type="button" id="memoCancelBtn" style="padding:6px 10px;border-radius:6px;border:1px solid #d1d5db;background:#fff;cursor:pointer;">취소</button>
+    </div>
+  `;
+            document.body.appendChild(sticker);
+            return sticker;
+        }
+
+        function openMemoSticker(grid, rect, item, baseUrl) {
+            const sticker = ensureMemoSticker();
+            const txt = sticker.querySelector('#memoText');
+            const btnSave = sticker.querySelector('#memoSaveBtn');
+            const btnCancel = sticker.querySelector('#memoCancelBtn');
+            const btnClose = sticker.querySelector('#memoCloseBtn');
+
+            // 위치(셀 아래쪽), 화면 밖 방지
+            sticker.style.display = 'block';
+            const left = Math.min(rect.left, window.innerWidth - sticker.offsetWidth - 16);
+            const top  = Math.min(rect.top + rect.height + 8, window.innerHeight - sticker.offsetHeight - 16);
+            sticker.style.left = `${Math.max(8, left)}px`;
+            sticker.style.top  = `${Math.max(8, top)}px`;
+
+            txt.value = item.Description || '';
+            setTimeout(() => txt.focus(), 0);
+
+            const close = () => { sticker.style.display = 'none'; };
+
+            btnCancel.onclick = btnClose.onclick = close;
+            // ESC 닫기, Ctrl/Cmd+Enter 저장
+            const keyHandler = (e) => {
+                if (sticker.style.display !== 'block') return;
+                if (e.key === 'Escape') close();
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') btnSave.click();
+            };
+            document.addEventListener('keydown', keyHandler, { once: true });
+
+            btnSave.onclick = () => {
+                const newMemo = txt.value;
+                const payload = { head_id: item.head_id, division: item.division, description: newMemo };
+
+                const res = AjaxUtil.postSyncData(baseUrl + '/memo/save', payload);
+
+                if (res && res.success === false) {
+                    alert(res.message || '저장 실패');
+                    return;
+                }
+                // 로컬 데이터 반영 및 그리드 갱신
+                item.Description = newMemo;
+                grid.collectionView.refresh();
+                close();
+            };
+
+            // 바깥 클릭 시 닫기
+            const outsideClose = (e) => {
+                if (sticker.style.display === 'block' && !sticker.contains(e.target)) {
+                    close();
+                    document.removeEventListener('mousedown', outsideClose);
+                }
+            };
+            document.addEventListener('mousedown', outsideClose);
+        }
+
 
         let page = null;
 

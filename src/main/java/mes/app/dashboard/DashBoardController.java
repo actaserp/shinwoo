@@ -3,15 +3,20 @@ package mes.app.dashboard;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
+import mes.app.balju.service.BaljuOrderService;
+import mes.app.sales.service.SujuService;
+import mes.domain.entity.BaljuHead;
+import mes.domain.entity.SujuHead;
+import mes.domain.repository.BalJuHeadRepository;
+import mes.domain.repository.SujuHeadRepository;
+import mes.domain.repository.SujuRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import mes.app.dashboard.service.DashBoardService;
 import mes.domain.model.AjaxResult;
@@ -22,6 +27,18 @@ public class DashBoardController {
 	
 	@Autowired
 	private DashBoardService dashBoardService;
+
+	@Autowired
+	BaljuOrderService baljuOrderService;
+
+	@Autowired
+	SujuService sujuService;
+
+	@Autowired
+	SujuHeadRepository sujuHeadRepository;
+
+	@Autowired
+	BalJuHeadRepository balJuHeadRepository;
 
 	@GetMapping("/read")
 	public AjaxResult getSujuList(
@@ -40,6 +57,81 @@ public class DashBoardController {
 
 		AjaxResult result = new AjaxResult();
 		result.data = items;
+
+		return result;
+	}
+
+	@GetMapping("/detail")
+	public AjaxResult getDetail(
+			@RequestParam("id") int id,
+			@RequestParam("division") String division,
+			HttpServletRequest request) {
+
+		List<Map<String, Object>> item = null;
+		if ("매입".equals(division)) {
+			item = dashBoardService.getBaljuDetail(id);
+		} else{
+			item = dashBoardService.getSujuDetail(id);
+		}
+
+		AjaxResult result = new AjaxResult();
+		result.data = item;
+
+		return result;
+	}
+
+	@GetMapping("/history")
+	public AjaxResult getHistory(
+			@RequestParam("id") int id,
+			@RequestParam("division") String division,
+			HttpServletRequest request) {
+
+		List<Map<String, Object>> item = null;
+		if ("매입".equals(division)) {
+			item = dashBoardService.getBaljuHistory(id);
+		} else{
+			item = dashBoardService.getSujuHistory(id);
+		}
+
+		AjaxResult result = new AjaxResult();
+		result.data = item;
+
+		return result;
+	}
+
+	@GetMapping("/company")
+	public AjaxResult getCompany(
+			@RequestParam("comp_id") int comp_id,
+			HttpServletRequest request) {
+
+		Map<String, Object> item = dashBoardService.getCompany(comp_id);
+
+		AjaxResult result = new AjaxResult();
+		result.data = item;
+
+		return result;
+	}
+
+	@PostMapping("/memo/save")
+	public AjaxResult memoSave(
+			@RequestParam("head_id") int id,
+			@RequestParam("division") String division,
+			@RequestParam("description") String description,
+			HttpServletRequest request) {
+
+		AjaxResult result = new AjaxResult();
+		if ("매입".equals(division)) {
+			BaljuHead baljuHead = balJuHeadRepository.findById(id).orElseThrow(() -> new RuntimeException("발주 헤더 없음"));;
+			baljuHead.setDescription(description);
+			balJuHeadRepository.save(baljuHead);
+		} else{
+			SujuHead sujuHead = sujuHeadRepository.findById(id).orElseThrow(() -> new RuntimeException("수주 헤더 없음"));;
+			sujuHead.setDescription(description);
+			sujuHeadRepository.save(sujuHead);
+		}
+
+		result.success = true;
+		result.message = "저장을 성공했습니다.";
 
 		return result;
 	}
