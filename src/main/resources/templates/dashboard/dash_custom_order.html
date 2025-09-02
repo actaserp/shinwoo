@@ -188,10 +188,10 @@
                             e.cell.style.fontWeight = '';
 
                             if (col && col.binding === 'division' && item) {
-                                if (item.division === '매출') {          // 수주 → 파란색
+                                if (item.division === '수주') {          // 수주 → 파란색
                                     e.cell.style.color = '#1d4ed8';
                                     e.cell.style.fontWeight = '600';
-                                } else if (item.division === '매입') {  // 발주 → 빨간색
+                                } else if (item.division === '발주') {  // 발주 → 빨간색
                                     e.cell.style.color = '#dc2626';
                                     e.cell.style.fontWeight = '600';
                                 }
@@ -247,9 +247,13 @@
                 this.resultGrid = new wijmo.grid.FlexGrid('#result-grid', {
                     autoGenerateColumns: false,
                     selectionMode: wijmo.grid.SelectionMode.Row,
-                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    headersVisibility: wijmo.grid.HeadersVisibility.All,
                     showMarquee: true,
                     formatItem: (s, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.RowHeader) {
+                            // 헤더에 순번
+                            e.cell.textContent = (e.row + 1).toString();
+                        }
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
@@ -425,8 +429,11 @@
 
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/read', param);
                 if (result.data && _this.grid.itemsSource) {
-
-                    _this.grid.itemsSource = result.data;
+                    const rows = result.data.map(r => ({
+                        ...r,
+                        BusinessNumber: formatBizNo(r.BusinessNumber) // ← 각 항목에 하이픈 적용
+                    }));
+                    _this.grid.itemsSource = new wijmo.collections.CollectionView(rows);
                 }
             }
 
@@ -484,7 +491,7 @@
       <strong>메모</strong>
       <button type="button" id="memoCloseBtn" style="border:none;background:transparent;font-size:18px;cursor:pointer;">✕</button>
     </div>
-    <textarea id="memoText" rows="6" style="width:100%;box-sizing:border-box;resize:vertical;"></textarea>
+    <textarea id="memoText" rows="6" style="width:100%;height:180px;box-sizing:border-box;resize:vertical;"></textarea>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
       <button type="button" id="memoSaveBtn"   style="padding:6px 10px;border-radius:6px;border:1px solid #d1d5db;cursor:pointer;">저장</button>
       <button type="button" id="memoCancelBtn" style="padding:6px 10px;border-radius:6px;border:1px solid #d1d5db;background:#fff;cursor:pointer;">취소</button>

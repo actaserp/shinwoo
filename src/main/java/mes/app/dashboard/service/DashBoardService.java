@@ -32,11 +32,11 @@ public class DashBoardService {
 
 		// 2) 구분(division) 부여 + 키 표준화(필요 시)
 		balju.forEach(m -> {
-			m.put("division", "매입");
+			m.put("division", "발주");
 			normalizeBaljuRow(m); // 아래 예시 참고
 		});
 		suju.forEach(m -> {
-			m.put("division", "매출");
+			m.put("division", "수주");
 			normalizeSujuRow(m);  // 아래 예시 참고
 		});
 

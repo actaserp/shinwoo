@@ -523,8 +523,10 @@
             loadMenu(FrontFolderId, $(dep2Mappings[FrontFolderId]));
         });
 
-        $(function () {
-            $('#navbarBarMenu2 .open_menu').trigger('click');
+        $(window).on('load', function () {
+            setTimeout(() => {
+                $('#navbarBarMenu2 .open_menu').trigger('click');
+            }, 100); // ← 원하는 만큼 늘리세요 (ms)
         });
 
         $('#navbarBarMenu2 .open_menu').click(function () {

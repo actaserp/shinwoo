@@ -68,7 +68,7 @@ public class DashBoardController {
 			HttpServletRequest request) {
 
 		List<Map<String, Object>> item = null;
-		if ("매입".equals(division)) {
+		if ("발주".equals(division)) {
 			item = dashBoardService.getBaljuDetail(id);
 		} else{
 			item = dashBoardService.getSujuDetail(id);
@@ -87,7 +87,7 @@ public class DashBoardController {
 			HttpServletRequest request) {
 
 		List<Map<String, Object>> item = null;
-		if ("매입".equals(division)) {
+		if ("발주".equals(division)) {
 			item = dashBoardService.getBaljuHistory(id);
 		} else{
 			item = dashBoardService.getSujuHistory(id);
@@ -120,7 +120,7 @@ public class DashBoardController {
 			HttpServletRequest request) {
 
 		AjaxResult result = new AjaxResult();
-		if ("매입".equals(division)) {
+		if ("발주".equals(division)) {
 			BaljuHead baljuHead = balJuHeadRepository.findById(id).orElseThrow(() -> new RuntimeException("발주 헤더 없음"));;
 			baljuHead.setDescription(description);
 			balJuHeadRepository.save(baljuHead);

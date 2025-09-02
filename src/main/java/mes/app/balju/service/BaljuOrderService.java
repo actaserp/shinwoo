@@ -248,7 +248,7 @@ public class BaljuOrderService {
              COALESCE(bt.total_amount_sum, 0) AS "BaljuTotalPrice",
              TO_CHAR(b."ProductionPlanDate", 'yyyy-mm-dd') AS production_plan_date,
              TO_CHAR(b."ShipmentPlanDate", 'yyyy-mm-dd') AS shiment_plan_date,
-             b."Description",
+             b."Description" as b_description,
              b."AvailableStock",
              b."ReservationStock",
              mi."SujuQty2",
@@ -414,7 +414,7 @@ public class BaljuOrderService {
       item.put("supply_price", row.get("BaljuPrice"));
       item.put("vat", row.get("BaljuVat"));
       item.put("total_price", row.get("LineTotalAmount"));
-      item.put("description", row.get("Description"));
+      item.put("description", row.get("b_description"));
       item.put("vatIncluded", row.get("InVatYN"));
       item.put("State", row.get("BalJuType"));
       item.put("balju_StateName", row.get("balju_StateName"));
