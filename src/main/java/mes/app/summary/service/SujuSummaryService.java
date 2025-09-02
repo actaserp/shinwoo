@@ -28,7 +28,8 @@ public class SujuSummaryService {
 		
 		String sql ="""
 				 with A as (
-	        select s."Material_id" as mat_pk, s."CompanyName" as company_name
+	        select s."Material_id" as mat_pk, s."CompanyName" as company_name,
+	         s."Standard" as standard 
 	        , sum(s."SujuQty") as suju_sum
 	        , sum(s."Price" + coalesce(s."Vat", 0)) as price_sum
 	        from suju s
@@ -56,10 +57,11 @@ public class SujuSummaryService {
 		}
 		
 		sql += """
-				group by s."Material_id", s."CompanyName" 
+				group by s."Material_id", s."CompanyName" ,s."Standard"
             )
 	        select mg."Name" as mat_grp_name, m."Code" as mat_code, m."Name" as mat_name, A.mat_pk
-            , u."Name" as unit_name
+          , A.standard   
+          , u."Name" as unit_name
 	        , sum(A.suju_sum) over(partition by A.mat_pk) as tot_suju_sum
 	        , sum(A.price_sum) over(partition by A.mat_pk) as tot_price_sum
 	        , A.company_name, A.suju_sum, A.price_sum
