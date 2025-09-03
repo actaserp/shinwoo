@@ -232,13 +232,15 @@ public class ProductionResultService {
 		this.sqlRunner.execute(sql, dicParam);
 	}
 
-	public List<Map<String, Object>> getProdResult(String dateFrom, String dateTo, String isIncludeComp, String spjangcd) {
+	public List<Map<String, Object>> getProdResult(String dateFrom, String dateTo, String isIncludeComp, String spjangcd, String choMat) {
 
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("dateFrom", dateFrom);
 		dicParam.addValue("dateTo", dateTo);
 		dicParam.addValue("isIncludeComp", isIncludeComp);
 		dicParam.addValue("spjangcd", spjangcd);
+		String pattern = (choMat == null || choMat.isBlank()) ? "%" : "%" + choMat + "%";
+		dicParam.addValue("choMat", pattern);
 
 		String sql = """
 			WITH T AS (
@@ -316,11 +318,13 @@ public class ProductionResultService {
 			)
 			SELECT *
 			FROM F
+			where  1=1
+			and F.mat_name like :choMat
 			""";
 
 		if ("false".equalsIgnoreCase(isIncludeComp)) {
 			// ★ 파생 상태(state) 기준으로 완료 제외
-			sql += " WHERE F.state != 'finished' ";
+			sql += " and F.state != 'finished' ";
 		}
 
 		sql += " ORDER BY F.prod_date, F.order_num, F.id ";

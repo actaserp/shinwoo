@@ -251,47 +251,15 @@
                                 </ul>
                             </dd>
                         </dl>
-
                         <dl>
                             <dt>
-                                <label for="cboMaterialType">
-                                    품목 구분<span class="eq"></span>
+                                <label for="choMat">
+                                    품목<span class="eq"></span>
                                 </label>
                             </dt>
                             <dd>
                                 <div class="srch-box">
-                                    <select id="cboMaterialType" name="cboMaterialType">
-                                    </select>
-                                </div>
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt>
-                                <label for="cboShift">
-                                    근무조<span class="eq"></span>
-                                </label>
-                            </dt>
-                            <dd>
-                                <div class="srch-box">
-                                    <select id="cboShift" name="cboShift">
-                                    </select>
-                                </div>
-                            </dd>
-                        </dl>
-                    </div>
-                </div>
-                <div class="section-top" id="prodResultList">
-                    <div class="search-wrap">
-                        <dl>
-                            <dt>
-                                <label for="cboWorkCenter">
-                                    워크센터<span class="eq"></span>
-                                </label>
-                            </dt>
-                            <dd>
-                                <div class="srch-box">
-                                    <select id="cboWorkCenter" name="cboWorkCenter">
-                                    </select>
+                                    <input id="choMat" name="choMat" style="width: 160px;"/>
                                 </div>
                             </dd>
                         </dl>
@@ -322,21 +290,9 @@
                                 </li>
                             </dd>
                         </dl>
-                        <dl>
-                            <dt>
-                                선택한 작지번호
-                            </dt>
-                            <dd>
-                                <ul class="date-box">
-                                    <li>
-                                        <input type="text" id="selected_order_num" name="selected_order_num" readonly>
-                                        <label for="selected_order_num" class="hide">생산일</label>
-                                    </li>
-                                </ul>
-                            </dd>
-                        </dl>
                     </div>
                 </div>
+
                 <div class="container-fluid">
                     <div id="prod-result-grid"></div>
                 </div>
@@ -422,7 +378,7 @@
                                         </tr>
                                         <tr>
                                             <th><label for="mat_name">제품</label></th>
-                                            <td><input type="text" id="mat_name" name="mat_name" readonly/></td>
+                                            <td><input type="text" id="mat_name" name="mat_name" style="width: 200px;" readonly/></td>
                                             <th><label for="unit">단위</label></th>
                                             <td><input type="text" id="unit" name="unit" readonly/></td>
                                         </tr>
@@ -448,6 +404,12 @@
                                             <th><label for="shift_code">근무조</label></th>
                                             <td colspan="3"><select id="shift_code" name="shift_code" disabled></select>
                                             </td>
+                                        </tr>
+                                        <tr>
+                                            <th><label for="equ_temp">온도</label></th>
+                                            <td><input type="text" id="equ_temp" name="equ_temp" readonly/></td>
+                                            <th><label for="equ_pres">압력</label></th>
+                                            <td><input type="text" id="equ_pres" name="equ_pres" readonly/></td>
                                         </tr>
                                         <tr>
                                             <th><label for="prod_date">생산 시작시간</label></th>
@@ -489,8 +451,9 @@
                                         </tr>
                                         <tr>
                                             <th><label for="description">비고</label></th>
-                                            <td colspan="3"><textarea id="description" name="description"
-                                                                      disabled></textarea></td>
+                                            <td colspan="3">
+                                                <textarea id="description" name="description" style="height:60px;"disabled></textarea>
+                                            </td>
                                         </tr>
                                         </tbody>
                                     </table>
@@ -1468,9 +1431,9 @@
                 });
 
                 // 필터
-                AjaxUtil.fillSelectOptions($('#cboMaterialType'), 'system_code', 'all', false, 'mat_type');
-                AjaxUtil.fillSelectOptions($('#cboShift'), 'shift', 'choose', false); // 근무조
-                AjaxUtil.fillSelectOptions($('#cboWorkCenter'), 'workcenter', 'choose', false); // 워크센터
+                // AjaxUtil.fillSelectOptions($('#cboMaterialType'), 'system_code', 'all', false, 'mat_type');
+                // AjaxUtil.fillSelectOptions($('#cboShift'), 'shift', 'choose', false); // 근무조
+                // AjaxUtil.fillSelectOptions($('#cboWorkCenter'), 'workcenter', 'choose', false); // 워크센터
 
                 // form내부
                 AjaxUtil.fillSelectOptions($('#shift_code'), 'shift', 'choose', false); // 근무조
@@ -1655,6 +1618,7 @@
                 let param = {
                     'date_from': $('#date_from').val(),
                     'date_to': $('#date_to').val(),
+                    'choMat': $('#choMat').val(),
                     'is_include_comp': $('#chxCompYn').is(':checked')
                 };
 
@@ -1670,7 +1634,7 @@
                 //     _this.grid.itemsSource = result.data;
                 // }
 
-                $('#selected_order_num').val('');
+
                 $('#basicForm')[0].reset();
 
 
@@ -1694,7 +1658,6 @@
                 if (!result) return;
 
                 $('#parent_jr_pk').val(result.id);
-                $('#selected_order_num').val(result.order_num);
 
                 const workcenter_id = result.workcenter_id;
                 const routing_id = result.routing_id ?? null;
@@ -3641,6 +3604,13 @@
             });
 
             page.searchMainData();
+
+            $('#choMat').on('keydown', function (e) {
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    e.preventDefault(); // form submit 방지
+                    page.searchMainData();
+                }
+            });
 
         });
     </script>
