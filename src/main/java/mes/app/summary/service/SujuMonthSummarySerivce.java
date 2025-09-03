@@ -2,6 +2,7 @@ package mes.app.summary.service;
 
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import mes.domain.services.SqlRunner;
 
+@Slf4j
 @Service
 public class SujuMonthSummarySerivce {
 	
@@ -45,6 +47,7 @@ public class SujuMonthSummarySerivce {
 	            , extract (month from s."JumunDate") as data_month
 	            , sum(s."SujuQty") as qty_sum
 	            , sum(s."Price" + coalesce(s."Vat", 0)) as money_sum
+	            , s."Standard" as standard
 	            """;
 		
 		sql += " ,sum( " + data_column + " ) as suju_sum "; 
@@ -68,9 +71,9 @@ public class SujuMonthSummarySerivce {
 		}
 		
 		sql += """
-				group by s."Material_id", s."CompanyName", extract (month from s."JumunDate")
+				group by s."Material_id", s."CompanyName", extract (month from s."JumunDate"),s."Standard"
                 )
-	            select 1 as grp_idx, mg."Name" as mat_grp_name, m."Code" as mat_code, m."Name" as mat_name, A.mat_pk
+	            select 1 as grp_idx, mg."Name" as mat_grp_name, m."Code" as mat_code, m."Name" as mat_name, A.mat_pk,A.standard
                 , u."Name" as unit_name
 	            , A.company_name
 			    , sum(A.qty_sum) as year_qty_sum	        
@@ -86,10 +89,10 @@ public class SujuMonthSummarySerivce {
         inner join material m on m.id = A.mat_pk
         left join unit u on u.id = m."Unit_id"
         left join mat_grp mg on mg.id = m."MaterialGroup_id"
-        group by mg."Name", m."Code", m."Name", A.mat_pk, u."Name", A.company_name
+        group by mg."Name", m."Code", m."Name", A.mat_pk, u."Name", A.company_name,A.standard
         --order by m."Code", m."Name", A.company_name
         union all 
-        select 2 as grp_idx, mg."Name" as mat_grp_name, m."Code" as mat_code, m."Name" as mat_name, A.mat_pk
+        select 2 as grp_idx, mg."Name" as mat_grp_name, m."Code" as mat_code, m."Name" as mat_name, A.mat_pk,A.standard
         , u."Name" as unit_name
         , '소계' as company_name
 		, sum(A.qty_sum) as year_qty_sum	 
@@ -106,18 +109,12 @@ public class SujuMonthSummarySerivce {
         inner join material m on m.id = A.mat_pk
         left join unit u on u.id = m."Unit_id"
         left join mat_grp mg on mg.id = m."MaterialGroup_id"
-        group by mg."Name", m."Code", m."Name", A.mat_pk, u."Name"
+        group by mg."Name", m."Code", m."Name", A.mat_pk, u."Name",A.standard
         order by mat_code, mat_name, grp_idx, company_name
 				""";
-		
-		
-		
-		
-		
-		
-
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
-		
+//		log.info("업체별 월별수주량 SQL: {}", sql);
+//    log.info("업체별 월별수주량 데이터: {}", paramMap.getValues());
 		return items;
 	}
 

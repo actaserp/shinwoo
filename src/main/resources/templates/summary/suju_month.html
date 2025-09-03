@@ -135,7 +135,7 @@
                 autoGenerateColumns: false,
                 showMarquee: true,
                 isReadOnly: true,
-                frozenColumns: 7,
+                frozenColumns: 8,
                 formatItem: (sender, e) => {
                     if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                         e.cell.style.textAlign = 'center';
@@ -144,8 +144,9 @@
 
                 columns: [
                     { binding: 'mat_grp_name', header: '제품그룹', width: 100 ,allowMerging: true },
-                    { binding: 'mat_code', header: '제품코드', width: 150 ,allowMerging: true },
+                    { binding: 'mat_code', header: '제품코드', width: 80 ,allowMerging: true },
                     { binding: 'mat_name', header: '제품명', width: 150 ,allowMerging: true },
+                    { binding: 'standard', header: '규격', width: 70 , allowSorting: false },
                     { binding: 'unit_name', header: '단위', width: 70 , allowSorting: false },
                     { binding: 'year_qty_sum', header: '연수주량', width: 100, format: 'n0', align: 'right' },
                     { binding: 'year_money_sum', header: '연수주액', width: 150, format: 'n0', align: 'right' },
