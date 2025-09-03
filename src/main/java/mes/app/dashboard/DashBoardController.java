@@ -44,6 +44,7 @@ public class DashBoardController {
 	public AjaxResult getSujuList(
 			@RequestParam(value="date_from", required=false) String start_date,
 			@RequestParam(value="date_to", required=false) String end_date,
+			@RequestParam(value="choComp", required=false) String choComp,
 			@RequestParam(value="spjangcd") String spjangcd,
 			HttpServletRequest request) {
 
@@ -53,7 +54,7 @@ public class DashBoardController {
 		Timestamp start = Timestamp.valueOf(start_date);
 		Timestamp end = Timestamp.valueOf(end_date);
 
-		List<Map<String, Object>> items = this.dashBoardService.getOverview(start, end, spjangcd);
+		List<Map<String, Object>> items = this.dashBoardService.getOverview(start, end, spjangcd, choComp);
 
 		AjaxResult result = new AjaxResult();
 		result.data = items;
