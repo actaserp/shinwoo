@@ -36,6 +36,18 @@
                             </dd>
                         </dl>
                         <dl>
+                            <dt>
+                                <label for="choComp">
+                                    거래처<span class="eq"></span>
+                                </label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <input id="choComp" name="choComp" style="width: 160px;"/>
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
                             <dt>&nbsp;</dt>
                             <dd>
                                 <li>
@@ -49,10 +61,10 @@
                         </dl>
                     </div>
                 </div>
-                <div class="container-fluid">
+                <div class="container-fluid" style="height: 35vh;">
                     <div id="prod-result-grid"></div>
                 </div>
-                <div class="container-fluid" style="margin-top: 5px; height: 20vh;">
+                <div class="container-fluid" style="margin-top: 5px; height: 10vh;">
                     <div id="result-grid"></div>
                 </div>
             </section>
@@ -425,6 +437,7 @@
                 let param = {
                     'date_from': $('#date_from').val(),
                     'date_to': $('#date_to').val(),
+                    'choComp': $('#choComp').val(),
                 };
 
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/read', param);
@@ -634,6 +647,13 @@
 
             $('#btnMainSearch').click(function (e) {
                 page.searchMainData();
+            });
+
+            $('#choComp').on('keydown', function (e) {
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    e.preventDefault(); // form submit 방지
+                    page.searchMainData();
+                }
             });
 
         });

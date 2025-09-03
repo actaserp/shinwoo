@@ -20,15 +20,13 @@ public class DashBoardService {
 	SqlRunner sqlRunner;
 
 	@Autowired
-	BaljuOrderService baljuOrderService;
-
-	@Autowired
 	SujuService sujuService;
 
-	public List<Map<String, Object>> getOverview(Timestamp start, Timestamp end, String spjangcd) {
+	public List<Map<String, Object>> getOverview(Timestamp start, Timestamp end, String spjangcd, String choComp) {
+
 		// 1) 각각 조회
-		List<Map<String, Object>> balju = baljuOrderService.getBaljuList("sales", start, end, spjangcd);
-		List<Map<String, Object>> suju  = sujuService.getSujuList("sales", start, end, spjangcd);
+		List<Map<String, Object>> balju = getBaljuList(start, end, spjangcd, choComp);
+		List<Map<String, Object>> suju  = getSujuList(start, end, spjangcd, choComp);
 
 		// 2) 구분(division) 부여 + 키 표준화(필요 시)
 		balju.forEach(m -> {
@@ -45,7 +43,7 @@ public class DashBoardService {
 		merged.addAll(balju);
 		merged.addAll(suju);
 
-		// due_date, order_date 모두 'YYYY-MM-DD' 문자열이라고 가정
+		// due_date, order_date 모두 'YYYY-MM-DD' 문자열
 		Comparator<Map<String, Object>> byJumunDateDesc =
 				Comparator.comparing(
 						(Map<String, Object> m) -> Optional.ofNullable(m.get("JumunDate"))
@@ -91,6 +89,296 @@ public class DashBoardService {
 		m.remove("ShipmentStateName");
 		m.remove("StateName");
 
+	}
+
+	public List<Map<String, Object>> getBaljuList(Timestamp start, Timestamp end, String spjangcd, String choComp) {
+
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("start", start);
+		dicParam.addValue("end", end);
+		dicParam.addValue("spjangcd", spjangcd);
+		String pattern = (choComp == null || choComp.isBlank()) ? "%" : "%" + choComp + "%";
+		dicParam.addValue("choComp", pattern);
+
+		String sql = """
+        WITH base_data AS (
+                   SELECT
+                     bh.id AS bh_id,
+                     bh."Company_id",
+         b."CompanyName",
+         c."BusinessNumber",
+         b."BaljuHead_id",
+         bh."JumunDate",
+         bh."JumunNumber",
+         mg."Name" AS "MaterialGroupName",
+         fn_code_name('Balju_type', bh."SujuType") AS "BaljuTypeName",
+         b.id AS balju_id,
+         m."Code" AS product_code,
+         m."Name" AS product_name,
+         u."Name" AS unit,
+         b."SujuQty",
+         b."UnitPrice",
+         b."Price",
+         b."Vat",
+         b."TotalAmount",
+         fn_code_name('balju_state', bh."State") AS "StateName",
+         mi."SujuQty2" AS "SujuQty2",
+        GREATEST((b."SujuQty" - mi."SujuQty2"), 0) AS "SujuQty3",
+         sh."Name" AS "ShipmentStateName",
+         bh."DeliveryDate",
+         bh."Description",
+         (
+          SELECT
+            CASE
+              WHEN COUNT(*) FILTER (
+                WHERE
+                  CASE
+                    WHEN b2."State" IN ('canceled', 'force_completion') THEN b2."State"
+        WHEN COALESCE(mi2."SujuQty2", 0) = 0 AND b2."SujuQty" > 0 THEN 'draft'
+        WHEN COALESCE(mi2."SujuQty2", 0) >= b2."SujuQty" THEN 'received'
+        WHEN COALESCE(mi2."SujuQty2", 0) > 0 AND COALESCE(mi2."SujuQty2", 0) < b2."SujuQty" THEN 'partial'
+        ELSE 'draft'
+          END = 'received'
+          ) = COUNT(*) THEN 'received'
+          WHEN COUNT(*) FILTER (
+            WHERE
+              CASE
+                WHEN b2."State" IN ('canceled', 'force_completion') THEN b2."State"
+        WHEN COALESCE(mi2."SujuQty2", 0) = 0 AND b2."SujuQty" > 0 THEN 'draft'
+        WHEN COALESCE(mi2."SujuQty2", 0) >= b2."SujuQty" THEN 'received'
+        WHEN COALESCE(mi2."SujuQty2", 0) > 0 AND COALESCE(mi2."SujuQty2", 0) < b2."SujuQty" THEN 'partial'
+        ELSE 'draft'
+          END = 'draft'
+          ) = COUNT(*) THEN 'draft'
+          WHEN COUNT(*) FILTER (
+            WHERE
+              CASE
+                WHEN b2."State" IN ('canceled', 'force_completion') THEN b2."State"
+        WHEN COALESCE(mi2."SujuQty2", 0) = 0 AND b2."SujuQty" > 0 THEN 'draft'
+        WHEN COALESCE(mi2."SujuQty2", 0) >= b2."SujuQty" THEN 'received'
+        WHEN COALESCE(mi2."SujuQty2", 0) > 0 AND COALESCE(mi2."SujuQty2", 0) < b2."SujuQty" THEN 'partial'
+        ELSE 'draft'
+          END = 'canceled'
+          ) = COUNT(*) THEN 'canceled'
+          ELSE 'partial'
+            END
+          FROM balju b2
+          LEFT JOIN (
+            SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
+        FROM mat_inout
+        WHERE "SourceTableName" = 'balju' AND COALESCE("_status", 'a') = 'a'
+        GROUP BY "SourceDataPk"
+          ) mi2 ON mi2."SourceDataPk" = b2.id
+          WHERE b2."BaljuHead_id" = bh.id
+        ) AS "BalJuHeadType",
+        fn_code_name(
+          'balju_state',
+          (
+            SELECT
+              CASE
+                WHEN COUNT(*) FILTER (
+                  WHERE
+                    CASE
+                      WHEN b2."State" IN ('canceled', 'force_completion') THEN b2."State"
+          WHEN COALESCE(mi2."SujuQty2", 0) = 0 AND b2."SujuQty" > 0 THEN 'draft'
+          WHEN COALESCE(mi2."SujuQty2", 0) >= b2."SujuQty" THEN 'received'
+          WHEN COALESCE(mi2."SujuQty2", 0) > 0 AND COALESCE(mi2."SujuQty2", 0) < b2."SujuQty" THEN 'partial'
+          ELSE 'draft'
+        END = 'received'
+        ) = COUNT(*) THEN 'received'
+        WHEN COUNT(*) FILTER (
+          WHERE
+            CASE
+              WHEN b2."State" IN ('canceled', 'force_completion') THEN b2."State"
+          WHEN COALESCE(mi2."SujuQty2", 0) = 0 AND b2."SujuQty" > 0 THEN 'draft'
+          WHEN COALESCE(mi2."SujuQty2", 0) >= b2."SujuQty" THEN 'received'
+          WHEN COALESCE(mi2."SujuQty2", 0) > 0 AND COALESCE(mi2."SujuQty2", 0) < b2."SujuQty" THEN 'partial'
+          ELSE 'draft'
+        END = 'draft'
+        ) = COUNT(*) THEN 'draft'
+        WHEN COUNT(*) FILTER (
+          WHERE
+            CASE
+              WHEN b2."State" IN ('canceled', 'force_completion') THEN b2."State"
+          WHEN COALESCE(mi2."SujuQty2", 0) = 0 AND b2."SujuQty" > 0 THEN 'draft'
+          WHEN COALESCE(mi2."SujuQty2", 0) >= b2."SujuQty" THEN 'received'
+          WHEN COALESCE(mi2."SujuQty2", 0) > 0 AND COALESCE(mi2."SujuQty2", 0) < b2."SujuQty" THEN 'partial'
+          ELSE 'draft'
+        END = 'canceled'
+        ) = COUNT(*) THEN 'canceled'
+        ELSE 'partial'
+          END
+        FROM balju b2
+        LEFT JOIN (
+          SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
+          FROM mat_inout
+          WHERE "SourceTableName" = 'balju' AND COALESCE("_status", 'a') = 'a'
+          GROUP BY "SourceDataPk"
+        ) mi2 ON mi2."SourceDataPk" = b2.id
+        WHERE b2."BaljuHead_id" = bh.id
+          )
+          ) AS "bh_StateName",
+           ROW_NUMBER() OVER (PARTITION BY bh."JumunNumber" ORDER BY b.id ASC) AS rn
+             FROM balju_head bh
+             LEFT JOIN balju b ON b."BaljuHead_id" = bh.id AND b.spjangcd = bh.spjangcd AND b."JumunNumber" = bh."JumunNumber"
+             left join company c on bh."Company_id" = c.id
+             INNER JOIN material m ON m.id = b."Material_id" AND m.spjangcd = b.spjangcd
+             INNER JOIN mat_grp mg ON mg.id = m."MaterialGroup_id" AND mg.spjangcd = b.spjangcd
+             LEFT JOIN unit u ON m."Unit_id" = u.id AND u.spjangcd = b.spjangcd
+             LEFT JOIN store_house sh ON sh.id::varchar = b."ShipmentState" AND sh.spjangcd = b.spjangcd
+             LEFT JOIN (
+               SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
+           FROM mat_inout
+           WHERE "SourceTableName" = 'balju' AND COALESCE("_status", 'a') = 'a'
+           GROUP BY "SourceDataPk"
+             ) mi ON mi."SourceDataPk" = b.id
+           WHERE bh.spjangcd = :spjangcd
+           AND bh."JumunDate" BETWEEN :start AND :end
+           and b."CompanyName" like :choComp
+			)
+			SELECT
+			  bh_id,
+			  "JumunNumber",
+			  MAX("Company_id") AS "Company_id",
+			  MAX("CompanyName") AS "CompanyName",
+			  MAX("BusinessNumber") AS "BusinessNumber",
+			  MAX("BaljuHead_id") AS "BaljuHead_id",
+			  MAX("JumunDate") AS "JumunDate",
+			  MAX("MaterialGroupName") AS "MaterialGroupName",
+			  MAX("BaljuTypeName") AS "BaljuTypeName",
+			  MAX(CASE WHEN rn = 1 THEN product_code END) AS product_code,
+			  MAX(CASE WHEN rn = 1 THEN product_name END) AS product_name,
+			  MAX(CASE WHEN rn = 1 THEN unit END) AS unit,
+			  SUM("SujuQty") AS "SujuQty",
+			  SUM("UnitPrice") AS "BaljuUnitPrice",
+			  SUM("Price") AS "BaljuPrice",
+			  SUM("Vat") AS "BaljuVat",
+			 SUM("TotalAmount") AS "BaljuTotalPrice",
+			  MAX("StateName") AS "StateName",
+			  MAX("BalJuHeadType") AS "BalJuHeadType",
+			  MAX("bh_StateName") AS "bh_StateName",
+			  SUM("SujuQty2") AS "SujuQty2",
+			  SUM(GREATEST("SujuQty" - COALESCE("SujuQty2", 0), 0)) AS "SujuQty3",
+			  MAX("ShipmentStateName") AS "ShipmentStateName",
+			  MAX("DeliveryDate") AS "DueDate",
+			  MAX("Description") AS "Description"
+			FROM base_data
+			GROUP BY "JumunNumber", bh_id
+			ORDER BY MAX("DeliveryDate") DESC, bh_id
+        """;
+
+		return this.sqlRunner.getRows(sql, dicParam);
+	}
+
+	public List<Map<String, Object>> getSujuList(Timestamp start, Timestamp end, String spjangcd, String choComp) {
+
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("start", start);
+		dicParam.addValue("end", end);
+		dicParam.addValue("spjangcd", spjangcd);
+		String pattern = (choComp == null || choComp.isBlank()) ? "%" : "%" + choComp + "%";
+		dicParam.addValue("choComp", pattern);
+
+		String sql = """
+				WITH suju_state_summary AS (
+				  SELECT
+					sh.id AS suju_head_id,
+					-- 상태 요약 계산
+					CASE
+					  WHEN COUNT(DISTINCT s."State") = 1 THEN MIN(s."State")
+					  WHEN BOOL_AND(s."State" IN ('received', 'planned')) AND BOOL_OR(s."State" = 'planned') THEN 'part_planned'
+					  WHEN BOOL_AND(s."State" IN ('received', 'ordered', 'planned')) AND BOOL_OR(s."State" = 'ordered') THEN 'part_ordered'
+					  ELSE '기타'
+					END AS summary_state
+				   
+				  FROM suju_head sh
+				  JOIN suju s ON s."SujuHead_id" = sh.id
+				   
+				  GROUP BY sh.id
+				),
+				shipment_summary AS (
+					SELECT
+						s."SujuHead_id",
+						SUM(s."SujuQty") AS total_qty,
+						COALESCE(SUM(shp."shippedQty"), 0) AS total_shipped,
+						CASE
+						  WHEN COUNT(shp."shippedQty") = 0 THEN ''
+						  WHEN SUM(shp."shippedQty") >= SUM(s."SujuQty") THEN 'shipped'
+						  WHEN SUM(shp."shippedQty") < SUM(s."SujuQty") THEN 'partial'
+						ELSE ''
+						END AS shipment_state
+					  FROM suju s
+					  LEFT JOIN (
+						SELECT "SourceDataPk", SUM("Qty") AS "shippedQty"
+						FROM shipment
+						GROUP BY "SourceDataPk"
+					  ) shp ON shp."SourceDataPk" = s.id
+					  GROUP BY s."SujuHead_id"
+				)
+				   
+				SELECT
+				  sh.id,
+				  sh."JumunNumber",
+				  to_char(sh."JumunDate", 'yyyy-mm-dd') AS "JumunDate",
+				  to_char(sh."DeliveryDate", 'yyyy-mm-dd') AS "DueDate",
+				  sh."Company_id",
+				  c."BusinessNumber",
+				  SUM(s."Price") AS "sujuPrice",
+				  SUM(s."Vat") AS "sujuVat",
+				  c."Name" AS "CompanyName",
+				  sh."TotalPrice",
+				  sh."Description",
+				  sc_state."Value" AS "StateName",
+				  sc_type."Value" AS "SujuTypeName",
+				   
+				  -- 대표 제품명 + 외 N개
+				  CASE
+					WHEN COUNT(DISTINCT s."Material_id") = 1 THEN MAX(m."Name")
+					ELSE CONCAT(MAX(m."Name"), ' 외 ', COUNT(DISTINCT s."Material_id") - 1, '개')
+				  END AS product_name,
+				   
+				  sss.summary_state AS "State",
+				  sc_ship."Value" AS "ShipmentStateName"
+				   
+				FROM suju_head sh
+				JOIN suju s ON s."SujuHead_id" = sh.id
+				JOIN material m ON m.id = s."Material_id"
+				LEFT JOIN (
+				  SELECT "SourceDataPk", SUM("Qty") AS "shippedQty"
+				  FROM shipment
+				  GROUP BY "SourceDataPk"
+				) shp ON shp."SourceDataPk" = s.id
+				LEFT JOIN company c ON c.id = sh."Company_id"
+				LEFT JOIN shipment_summary ss ON ss."SujuHead_id" = sh.id
+				LEFT JOIN suju_state_summary sss ON sss.suju_head_id = sh.id
+				LEFT JOIN sys_code sc_state ON sc_state."Code" = sss.summary_state AND sc_state."CodeType" = 'suju_state'
+				LEFT JOIN sys_code sc_type ON sc_type."Code" = sh."SujuType" AND sc_type."CodeType" = 'suju_type'
+				LEFT JOIN sys_code sc_ship ON sc_ship."Code" = ss.shipment_state AND sc_ship."CodeType" = 'shipment_state'
+					where 1 = 1
+					and sh.spjangcd = :spjangcd
+					and sh."JumunDate" between :start and :end
+					and c."Name" like :choComp
+					group by
+						 sh.id,
+						 sh."JumunNumber",
+						 sh."JumunDate",
+						 sh."DeliveryDate",
+						 sh."Company_id",
+						 c."Name",
+						 c."BusinessNumber",
+						 sh."TotalPrice",
+						 sh."Description",
+						 sh."SujuType",
+						 sss.summary_state,
+						 sc_state."Value",
+						 sc_type."Value",
+						 sc_ship."Value"
+					order by sh."JumunDate" desc,  sh.id desc
+				""";
+
+		List<Map<String, Object>> itmes = this.sqlRunner.getRows(sql, dicParam);
+
+		return itmes;
 	}
 
 	// 수주 디테일
