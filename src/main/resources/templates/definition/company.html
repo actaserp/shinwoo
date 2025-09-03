@@ -63,14 +63,14 @@
                                 <select class="form-control2" id="cboCompanyType" name="cboCompanyType"></select>
                             </dd>
                         </dl>
-                        <!--<dl>
+                        <dl>
                             <dt>
-                                <label>분류</label>
+                                <label>자사관리자</label>
                             </dt>
                             <dd>
-                                <select class="form-control2" id="cboGroupName" name="cboGroupName"></select>
+                                <select class="form-control2" id="ourManager" name="ourManager"></select>
                             </dd>
-                        </dl>-->
+                        </dl>
                         <dl>
                             <dt>
                                 <label>업체명</label>
@@ -327,7 +327,7 @@
                                         <tbody>
                                         <tr>
                                             <th>
-                                                <label for="our_manager">자사담당자</label>
+                                                <label for="our_manager"><span class="eq">*</span>자사담당자</label>
                                             </th>
                                             <td>
                                                 <input type="text" id="our_manager" name="our_manager"
@@ -1052,7 +1052,7 @@
                 let _this = this;
                 let data = {
                     'comp_type': $('#cboCompanyType').val(),
-                    /*'group_name': $('#cboGroupName').val(),*/
+                    'ourManager': $('#ourManager').val(),
                     'keyword': $('#txtCompany').val(),
                     spjangcd: sessionStorage.getItem('spjangcd'),
                 };
@@ -1607,6 +1607,9 @@
         $(document).ready(function (e) {
             page = new CompanyPage();
 
+            // 자사담당자 group by select box 구현
+            ourManagerSelect();
+
             AjaxUtil.fillSelectOptions($('#cboCompanyType'), 'system_code', 'choose', false, 'company_type');
             /*AjaxUtil.fillSelectOptions($('#cboGroupName'), 'system_code', 'choose', false,'company_group');*/
 
@@ -1757,6 +1760,8 @@
             $('#btnSave').click(function (e) {
                 let basicData = FormUtil.extractForm($('#basicForm'));
                 let data = $.extend({}, basicData);
+                let manageData = FormUtil.extractForm($('#manageForm'));
+                let dataMN = $.extend({}, manageData);
 
                 if (!data.name) {
                     Alert.alert('', '업체명을 입력해 주세요');
@@ -1776,6 +1781,11 @@
                 if (!data.business_number) {  // 사업자번호 체크
                     Alert.alert('', '사업자번호를 입력해 주세요');
                     $('#basicForm #business_number').focus();
+                    return;
+                }
+                if (!dataMN.our_manager) {  // 자사담당자 체크
+                    Alert.alert('', '자사담당자를 입력해 주세요');
+                    $('#manageForm #our_manager').focus();
                     return;
                 }
 
@@ -1843,6 +1853,39 @@
                 // 그 외: 숫자 그대로
                 return value;
             }
+        }
+        // 자사 담당자 select box 바인드 메서드
+        function ourManagerSelect(){
+            $.ajax({
+                url: '/api/definition/company/manager',
+                type: 'GET',
+                async: false,
+                success: function (res) {
+                    console.log('res.data : ', res.data);
+
+                    let $select = $("#ourManager");
+                    $select.empty(); // 기존 옵션 제거
+
+                    // 기본 선택값 추가 (필요 시)
+                    $select.append('<option value="">전체</option>');
+
+                    // 데이터 반복 처리
+                    res.data.forEach(function(item) {
+                        if (item.OurManager && item.OurManager.trim() !== "") {
+                            // 값이 빈 문자열이 아닐 때만 추가
+                            $select.append(
+                                $('<option>', {
+                                    value: item.OurManager,
+                                    text: item.OurManager
+                                })
+                            );
+                        }
+                    });
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error('자사담당자 불러오기 오류');
+                }
+            });
         }
 
     </script>

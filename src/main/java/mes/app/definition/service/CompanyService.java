@@ -17,11 +17,11 @@ public class CompanyService {
 	SqlRunner sqlRunner;
 	
 	//업체 목록 조회
-	public List<Map<String, Object>> getCompnayList(String compType, String keyword, String spjangcd) {
+	public List<Map<String, Object>> getCompnayList(String compType, String ourManager, String keyword, String spjangcd) {
 		
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("comp_type", compType);
-		/*paramMap.addValue("group_name", groupName);*/
+		paramMap.addValue("ourManager", ourManager);
 		paramMap.addValue("keyword", keyword);
 		paramMap.addValue("spjangcd", spjangcd);
 		
@@ -61,11 +61,11 @@ public class CompanyService {
             where 1 = 1
             AND c.spjangcd = :spjangcd
 			""";
-		if (StringUtils.isEmpty(compType)==false) sql +="and c.\"CompanyType\" = :comp_type ";
-		/*if (StringUtils.isEmpty(groupName)==false) sql +="and upper(c.\"GroupName\") like concat('%%',upper(:group_name),'%%')";*/
-		if (StringUtils.isEmpty(keyword)==false) sql+="and upper(c.\"Name\") like concat('%%',upper(:keyword),'%%')";
+		if (StringUtils.isEmpty(compType)==false) sql +=" and c.\"CompanyType\" = :comp_type ";
+		if (StringUtils.isEmpty(ourManager)==false) sql+=" and c.\"OurManager\" = :ourManager";
+		if (StringUtils.isEmpty(keyword)==false) sql+=" and upper(c.\"Name\") like concat('%%',upper(:keyword),'%%')";
 		
-		sql += "order by c.\"id\" desc";
+		sql += " order by c.\"id\" desc";
 		
 		List<Map<String,Object>> items = this.sqlRunner.getRows(sql, paramMap);
 		
@@ -243,4 +243,18 @@ public class CompanyService {
 		
 		return items;
 	}
+	// 자사담당자 select
+	public List<Map<String, Object>> getOurManager(){
+
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+
+		String sql = """
+			select "OurManager" from company group by "OurManager"
+			""";
+
+		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
+
+		return items;
+
+	};
 }

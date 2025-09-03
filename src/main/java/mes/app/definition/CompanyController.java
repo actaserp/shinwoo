@@ -50,11 +50,11 @@ public class CompanyController {
 	@GetMapping("/read")
 	public AjaxResult getCompanyList(
 			@RequestParam("comp_type") String compType,
-			/*@RequestParam("group_name") String groupName,*/
+			@RequestParam("ourManager") String ourManager,
 			@RequestParam("keyword") String keyword,
 			@RequestParam(value ="spjangcd") String spjangcd) {
 		
-		List<Map<String, Object>> items = this.companyService.getCompnayList(compType, keyword, spjangcd);
+		List<Map<String, Object>> items = this.companyService.getCompnayList(compType, ourManager, keyword, spjangcd);
 		
 		AjaxResult result = new AjaxResult();
 		result.data = items;
@@ -296,6 +296,16 @@ public class CompanyController {
         	result.success = false;
         }; 
         
+		return result;
+	}
+	// 자사담당자 (select box 바인드 필요 데이터) 조회
+	@GetMapping("/manager")
+	public AjaxResult getOurManager() {
+
+		AjaxResult result = new AjaxResult();
+
+		result.data = this.companyService.getOurManager();
+
 		return result;
 	}
 }
