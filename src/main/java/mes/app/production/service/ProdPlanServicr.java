@@ -52,6 +52,7 @@ public class ProdPlanServicr {
                , fn_code_name('mat_type', mg."MaterialType") as mat_type_name
                , s."State"
                , s."Description" as description
+               , s."Standard"
                from suju s
                inner join material m on m.id = s."Material_id"
                inner join mat_grp mg on mg.id = m."MaterialGroup_id"
@@ -104,7 +105,9 @@ public class ProdPlanServicr {
        , s."Material_id" as mat_pk
        , s."SujuQty" as "SujuQty"
        , s.description
-       , s."StateName", s."State"
+       , s."StateName"
+       , s."State"
+       , s."Standard"
        from s
        left join q on q.suju_id = s.id
        where 1 = 1

@@ -43,6 +43,7 @@ public class ProdPrepareService {
                 , jr."MaterialProcessInputRequest_id" as proc_input_req_id
                 , jr."State"
                 , fn_code_name('job_state', jr."State") as state_name
+                , COALESCE(s."Standard", m."Standard1") as standard
                 from job_res jr 
                 left join material m on m.id = jr."Material_id"
                 left join mat_grp mg on mg.id = m."MaterialGroup_id"
@@ -50,6 +51,7 @@ public class ProdPrepareService {
                 left join work_center wc on wc.id = jr."WorkCenter_id"
                 left join equ e on e.id = jr."Equipment_id"
                 left join shift sh on sh."Code" = jr."ShiftCode"
+                left join suju s on s.id = jr."SourceDataPk" and jr."SourceTableName" = 'suju'
                 where jr."ProductionDate" = :data_date and jr."State" = 'ordered'
                 and jr.spjangcd = :spjangcd
                 and jr."Parent_id" is null

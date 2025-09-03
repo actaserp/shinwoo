@@ -44,6 +44,7 @@ public class ProductionMonthService {
                 , u."Name" as unit_name
 	            , sum(jr."GoodQty") as year_qty_sum
                 , sum(jr."GoodQty" * m."UnitPrice") as year_money_sum
+                , COALESCE(s."Standard", m."Standard1") as standard
 				""";
 		
 		for(int i=1; i<13; i++) {
@@ -55,6 +56,7 @@ public class ProductionMonthService {
 	        inner join material m on m.id = jr."Material_id"
 	        left join mat_grp mg on mg.id = m."MaterialGroup_id"
             left join unit u on u.id = m."Unit_id"
+            left join suju s on s.id = jr."SourceDataPk" and jr."SourceTableName" = 'suju'
 	        where jr."ProductionDate" between cast(:date_form as date) and cast(:date_to as date)
             and jr."State" = 'finished'
 				""";
@@ -72,7 +74,7 @@ public class ProductionMonthService {
 		}
 		
 		sql += """
-				group by jr."Material_id", mg."MaterialType", mg."Name", m."Name", m."Code", u."Name" 
+				group by jr."Material_id", mg."MaterialType", mg."Name", m."Name", m."Code", u."Name", s."Standard", m."Standard1"
 				order by mg."MaterialType", mg."Name" , m."Name" , m."Code" 
 				""";
 		

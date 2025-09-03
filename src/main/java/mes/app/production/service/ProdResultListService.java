@@ -49,6 +49,7 @@ public class ProdResultListService {
 		             , coalesce(mp."DefectQty", 0) as defect_qty
 		             , coalesce(mp."LossQty", 0) as loss_qty
 		             , coalesce(mp."ScrapQty", 0) as scrap_qty
+		             , COALESCE(s."Standard", m."Standard1") as standard
 	            from job_res jr 
 	            inner join mat_produce mp on mp."JobResponse_id" = jr.id
 	            left join material m on m.id = jr."Material_id"
@@ -57,6 +58,7 @@ public class ProdResultListService {
 	            left join process p on p.id = wc."Process_id" 
 	            left join equ e on e.id = mp."Equipment_id"
 	            left join shift sh on sh."Code" = mp."ShiftCode"
+	            left join suju s on s.id = jr."SourceDataPk" and jr."SourceTableName" = 'suju'
 	            where jr."ProductionDate" between :date_from and :date_to
 	            and jr."State" = 'finished'
 	            and jr.spjangcd = :spjangcd
@@ -114,6 +116,7 @@ public class ProdResultListService {
 							   )
 						   END
 					   )::numeric, 2) AS defect_percent
+				   	 , COALESCE(s."Standard", m."Standard1") as standard
 	            from job_res jr 
 	            inner join mat_produce mp on mp."JobResponse_id" = jr.id
 	            left join material m on m.id = jr."Material_id"
@@ -122,6 +125,7 @@ public class ProdResultListService {
 	            left join process p on p.id = wc."Process_id" 
 	            left join equ e on e.id = mp."Equipment_id"
 	            left join shift sh on sh."Code" = mp."ShiftCode"
+	            left join suju s on s.id = jr."SourceDataPk" and jr."SourceTableName" = 'suju'
 	            where jr."ProductionDate" between :date_from and :date_to
 	            and jr."State" = 'finished'
 	            and jr.spjangcd = :spjangcd

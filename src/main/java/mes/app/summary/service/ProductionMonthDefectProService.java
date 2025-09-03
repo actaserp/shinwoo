@@ -51,10 +51,12 @@ public class ProductionMonthDefectProService {
                 , sum(jr."DefectQty") * m."UnitPrice" as defect_money
 	            ,(coalesce(sum(jr."GoodQty"),0) + coalesce(sum(jr."DefectQty"),0)) as prod_sum
 	            , 100 * coalesce(sum(jr."DefectQty"),0) / nullif(coalesce(sum(jr."GoodQty"),0) + coalesce(sum(jr."DefectQty"),0),0 ) as defect_pro
+	            , COALESCE(s."Standard", m."Standard1") as standard
 	            from job_res jr
 	            inner join material m on m.id = jr."Material_id"
 	            left join mat_grp mg on mg.id = m."MaterialGroup_id"
                 left join unit u on u.id = m."Unit_id"
+                left join suju s on s.id = jr."SourceDataPk" and jr."SourceTableName" = 'suju'
 	            where jr."ProductionDate" between cast(:date_form as date) and cast(:date_to as date)
                 and jr."State" = 'finished'
 				""";
@@ -72,7 +74,7 @@ public class ProductionMonthDefectProService {
 		}
 		
 		sql += """
-				group by jr."Material_id", mg."MaterialType", mg."Name" , m."Name" , m."Code", m."UnitPrice"
+				group by jr."Material_id", mg."MaterialType", mg."Name" , m."Name" , m."Code", m."UnitPrice", s."Standard", m."Standard1"
                 , u."Name"
                 , extract (month from jr."ProductionDate") 
 	            )
@@ -82,6 +84,7 @@ public class ProductionMonthDefectProService {
                 , sum(defect_qty) as year_defect_qty 
                 , sum(defect_money) as year_defect_money
                 , sum(prod_sum) as prod_Sum
+                , A.standard
 				""";
 		
 		for(int i=1; i<13; i++) {
@@ -92,7 +95,7 @@ public class ProductionMonthDefectProService {
 		
 		sql += """ 
 				from A 
-				group by A.mat_pk, A.mat_type_name, A.mat_grp_name, A.mat_code, A.mat_name, A.unit_name
+				group by A.mat_pk, A.mat_type_name, A.mat_grp_name, A.mat_code, A.mat_name, A.unit_name, A.standard
 				""";
 		
 		if(chkOnlyDefect.equals("checkd")) {

@@ -300,6 +300,7 @@ public class ProductionResultService {
 			   , B."ScrapQty"                                 AS scrap_qty
 			   , TO_CHAR(B."ProductionDate" + M."ValidDays", 'yyyy-mm-dd') AS "ValidDays"
 			   , M."Routing_id"                               AS routing_id
+			   , COALESCE(su."Standard", M."Standard1") as standard
 			  FROM S
 			  JOIN job_res       C  ON C.id = S.child_id              -- child = 대표행
 			  JOIN job_res       B  ON B.id = S.base_id               -- base = 부모
@@ -310,6 +311,7 @@ public class ProductionResultService {
 			  LEFT JOIN routing       R  ON M."Routing_id" = R.id
 			  LEFT JOIN mat_grp       MG ON MG.id = M."MaterialGroup_id"
 			  LEFT JOIN unit          U  ON U.id = M."Unit_id"
+			  left join suju su on su.id = B."SourceDataPk" and B."SourceTableName" = 'suju'
 			  WHERE S.rn = 1
 			)
 			SELECT *
