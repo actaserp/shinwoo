@@ -228,7 +228,7 @@ public class BaljuOrderService {
              c."Name" AS "CompanyName",
              bh."JumunDate",
              bh."DeliveryDate",
-             bh.special_note,
+             bh."Description",
              bh."JumunNumber",
              b.id AS balju_id,
              b."Material_id",
@@ -248,7 +248,7 @@ public class BaljuOrderService {
              COALESCE(bt.total_amount_sum, 0) AS "BaljuTotalPrice",
              TO_CHAR(b."ProductionPlanDate", 'yyyy-mm-dd') AS production_plan_date,
              TO_CHAR(b."ShipmentPlanDate", 'yyyy-mm-dd') AS shiment_plan_date,
-             b."Description",
+             b."Description" as b_description,
              b."AvailableStock",
              b."ReservationStock",
              mi."SujuQty2",
@@ -398,7 +398,7 @@ public class BaljuOrderService {
     header.put("DeliveryDate", first.get("DeliveryDate"));
     header.put("State", first.get("BalJuHeadType"));
     header.put("StateName", first.get("bh_StateName"));
-    header.put("special_note", first.get("special_note"));
+    header.put("Description", first.get("Description"));
     header.put("JumunNumber", first.get("JumunNumber"));
 
     List<Map<String, Object>> items = new ArrayList<>();
@@ -414,7 +414,7 @@ public class BaljuOrderService {
       item.put("supply_price", row.get("BaljuPrice"));
       item.put("vat", row.get("BaljuVat"));
       item.put("total_price", row.get("LineTotalAmount"));
-      item.put("description", row.get("Description"));
+      item.put("description", row.get("b_description"));
       item.put("vatIncluded", row.get("InVatYN"));
       item.put("State", row.get("BalJuType"));
       item.put("balju_StateName", row.get("balju_StateName"));

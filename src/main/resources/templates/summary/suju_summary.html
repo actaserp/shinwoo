@@ -54,14 +54,14 @@
                                 <select class="form-control2" id="cboMatGrp" name="cboMatGrp" ></select>
                             </dd>
                         </dl>
-                        <dl>
+                       <!-- <dl>
                             <dt>
                                 수주상태
                             </dt>
                             <dd>
                                 <select class="form-control2" id="sujuState" name="sujuState" ></select>
                             </dd>
-                        </dl>
+                        </dl>-->
                         <dl>
                             <dt>&nbsp;</dt>
                             <dd>
@@ -140,8 +140,9 @@
                 },
                 columns: [
                     { binding: 'mat_grp_name', header: '제품그룹', width: 150 ,allowMerging: true },
-                    { binding: 'mat_code', header: '제품코드', width: 200 ,allowMerging: true },
+                    { binding: 'mat_code', header: '제품코드', width: 90 ,allowMerging: true },
                     { binding: 'mat_name', header: '제품명', width: 250 ,allowMerging: true },
+                    { binding: 'standard', header: '규격', width: 70, allowSorting: false },
                     { binding: 'unit_name', header: '단위', width: 70, allowSorting: false },
                     { binding: 'tot_price_sum', header: '총수주액', width: '*', minWidth: 150,align: 'right', format: 'n0' },
                     { binding: 'tot_suju_sum', header: '총 수주량', width: 100, align: 'right', format: 'n0' },

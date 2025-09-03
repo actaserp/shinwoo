@@ -91,7 +91,7 @@ public class BaljuOrderController {
     String CompanyName = (String) payload.get("CompanyName");
     String spjangcd = (String) payload.get("spjangcd");
     String isVat = (String) payload.get("invatyn");
-    String specialNote = (String) payload.get("special_note");
+    String description = (String) payload.get("Description");
     String sujuType = (String) payload.get("cboBaljuType");
 
     Date jumunDate = CommonUtil.trySqlDate(jumunDateStr);
@@ -128,7 +128,7 @@ public class BaljuOrderController {
     head.setJumunDate(jumunDate);
     head.setCompanyId(companyId);
     head.setSpjangcd(spjangcd);
-    head.setSpecialNote(specialNote);
+    head.setDescription(description);
 
     balJuHeadRepository.save(head);
     //log.info("✅ BaljuHead 저장 완료 - ID: {}", head.getId());
@@ -532,7 +532,7 @@ public class BaljuOrderController {
         // 6. 병합 시작 셀에 값 설정
         Row noteRow = sheet.getRow(specialNoteStartRow);
         Cell noteCell = noteRow.getCell(1);
-        noteCell.setCellValue("***특이사항 : " + header.get("special_note"));
+        noteCell.setCellValue("***특이사항 : " + header.get("Description"));
 
         //파일 생성 후 저장
         workbook.write(fos);
