@@ -1042,6 +1042,7 @@ public class DashBoardService {
 				inner join mat_grp mg  on mg.id = m."MaterialGroup_id" 
 				where m."CurrentStock" > 0
 				and m."spjangcd" = :spjangcd
+				and mg."MaterialType" = 'product'
 				group by m."Name" , mg."Name" , m."UnitPrice" 
 				order by coalesce(sum(m."CurrentStock") * m."UnitPrice",0) desc
 				limit 5

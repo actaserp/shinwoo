@@ -3,15 +3,15 @@
     <div class="layout-contents">
         <div class="page-title-wrap">
             <div class="left">
-                <h2>출하 처리B</h2>
+                <h2>출고 지시 등록(LOT)</h2>
                 <a title="북마크" class="bookmark toggle">
                     내 메뉴
                 </a>
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>출하관리</li>
-                <li>출하처리B(LOT)</li>
+                <li>영업 관리</li>
+                <li>출고 지시 등록(LOT)</li>
             </ul>
         </div>
         <div style="display: flex; gap: 5px;">
@@ -22,7 +22,7 @@
                             <dl>
                                 <dt>
                                     <label>
-                                        출하일<span class="eq"></span>
+                                        출고일<span class="eq"></span>
                                     </label>
                                 </dt>
                                 <dd>
@@ -82,7 +82,7 @@
                             <dl>
                                 <dt>
                                     <label>
-                                        출하대기<span class="eq"></span>
+                                        출고대기<span class="eq"></span>
                                     </label>
                                 </dt>
                                 <dd>
@@ -109,13 +109,13 @@
                 <!--                    <label class="switch">-->
                 <!--                        <input type="checkbox" checked id="btnListCollapse"><span class="slider round"></span>-->
                 <!--                    </label>-->
-                <!--                    출하 지시 보기/감추기-->
+                <!--                    출고 지시 보기/감추기-->
                 <!--                </div>-->
                 <!--            </div>-->
                 <div class="grid_box" id="divList">
                     <div class="title_box">
-                        <span class="right_align rpt" data-labelCd="출하 지시 목록">출하 지시 목록</span>
-                        <button class="btn-default y_write_auth" id="btnShipmentComplete" title="출하처리" disabled>출하처리
+                        <span class="right_align rpt" data-labelCd="출고 지시 목록">출고 지시 목록</span>
+                        <button class="btn-default y_write_auth" id="btnShipmentComplete" title="출고처리" disabled>출고처리
                         </button>
                     </div>
                     <div class="container-fluid">
@@ -128,9 +128,9 @@
                 <div class="section-top">
                     <div class="container-fluid">
                         <div class="title_box buttons">
-                            <span class="right_align rpt" data-labelCd="출하">출하</span>
+                            <span class="right_align rpt" data-labelCd="출고">출고</span>
                             <button style="visibility: hidden;" class="btn-default y_write_auth" id="btnSaveShip"
-                                    data-labelCd="출하 처리">출하 처리
+                                    data-labelCd="출고 처리">출고 처리
                             </button>
                         </div>
                         <div id="theGrid2" style="height: 32vh;"></div>
@@ -138,7 +138,7 @@
 
                     <div class="container-fluid" style="margin-top: 15px;">
                         <div class="title_box buttons">
-                            <span class="right_align rpt" data-labelCd="출하 처리 LOT상세">출하 처리 LOT상세</span>
+                            <span class="right_align rpt" data-labelCd="출고 처리 LOT상세">출고 처리 LOT상세</span>
                             <input style="width: 170px; height: 32px" class="w-140 tac y_write_auth" type="text"
                                    id="LotNumber" placeholder="LOT번호 스캔 or 입력" disabled/>
                             <button type="button" class="btn-default" id="btnLOTSelect" title="LOT추가" disabled><i
@@ -291,7 +291,7 @@
 
                         {binding: 'company_id', header: '판매처id', width: 0, align: 'right', visible: false},
                         {binding: 'company_name', header: '판매처', width: '*', align: 'left', isReadOnly: true},
-                        {binding: 'ship_date', header: '출하일', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'ship_date', header: '출고일', width: '*', align: 'center', isReadOnly: true},
                         {binding: 'item_count', header: '품목건수', width: '*', align: 'right', isReadOnly: true},
                         {binding: 'total_price', header: '총공급가', width: '*', align: 'right', isReadOnly: true},
                         {binding: 'total_vat', header: '총부가세', width: '*', align: 'center', isReadOnly: true},
@@ -356,17 +356,17 @@
 
                     let headerItems = _this.shipmentHeaderGrid.selectedItems;
                     if (headerItems.length === 0 || headerItems === undefined || headerItems === null) {
-                        Alert.alert('출하처리', '선택된 데이터가 없습니다.');
+                        Alert.alert('출고처리', '선택된 데이터가 없습니다.');
                         return;
                     }
                     let head_item = headerItems[0];
-                    Alert.confirm('출하처리', "출하 처리하시겠습니까?", function () {
+                    Alert.confirm('출고처리', "출고 처리하시겠습니까?", function () {
                         _this.shipmentStateComplete(head_item);
                     });
                 });
 
                 new FlexGridContextMenu(this.shipmentHeaderGrid);
-                this.shipmentHeaderGrid.downloadFileName = '출하지시';
+                this.shipmentHeaderGrid.downloadFileName = '출고지시';
             }
 
             initShipmentList() {
@@ -437,7 +437,7 @@
                     }
                 });
                 new FlexGridContextMenu(this.shipmentListGrid);
-                this.shipmentListGrid.downloadFileName = '출하';
+                this.shipmentListGrid.downloadFileName = '출고';
             }
 
             initLotList() {
@@ -488,7 +488,7 @@
                     }
                 });
                 new FlexGridContextMenu(this.lotListGrid);
-                this.lotListGrid.downloadFileName = '출하';
+                this.lotListGrid.downloadFileName = '출고';
 
                 this.lotListGrid.itemsSource = new wijmo.collections.CollectionView([]);
 
@@ -579,7 +579,7 @@
                         $btnLotDetailSave.click(function (e) {
                             let lot_use_quantity = $popLotUseQuantity.val();
                             if (lot_use_quantity == "" || lot_use_quantity == 0) {
-                                Alert.alert('LOT 추가 오류', '출하 수량을 입력하십시요');
+                                Alert.alert('LOT 추가 오류', '출고 수량을 입력하십시요');
                                 return;
                             }
                             console.log('4')
@@ -701,7 +701,7 @@
                 let shipmentItems = this.shipmentListGrid.selectedItems;
 
                 if (headerItems.length === 0 || headerItems === undefined || headerItems === null) {
-                    Alert.alert('로트 지정 오류', '출하 지시 항목을 선택해 주세요.');
+                    Alert.alert('로트 지정 오류', '출고 지시 항목을 선택해 주세요.');
                     return;
                 }
 
@@ -773,12 +773,12 @@
                 });
 
                 new FlexGridContextMenu(lotSearchGrid);
-                lotSearchGrid.downloadFileName = '출하';
+                lotSearchGrid.downloadFileName = '출고';
 
                 let fnLotSearch = function () {
                     $lotForm[0].reset();
                     // 헤더번호만 있거나 헤데와 material이 다 있거나 둘 중 하나
-                    // 헤더만 있는경우 출하 항목의 모든 폼목에 해당되는 lot을 리스트업
+                    // 헤더만 있는경우 출고 항목의 모든 폼목에 해당되는 lot을 리스트업
                     // 헤더와 material 이 있는경우 해당 품목에 해당되는 lot 리스트업
                     let data = {
                         material_id: material_id,
@@ -807,7 +807,7 @@
 
                     let lot_use_quantity = $popLotUseQuantity.val();
                     if (lot_use_quantity == "" || lot_use_quantity == 0) {
-                        Alert.alert('LOT 추가 오류', '출하 수량을 입력하십시요');
+                        Alert.alert('LOT 추가 오류', '출고 수량을 입력하십시요');
                         return;
                     }
 
@@ -859,7 +859,7 @@
 
                 let sh_id = headerItems[0].id;
 
-                // 출하 항목 없이 삭제할 수 있다.
+                // 출고 항목 없이 삭제할 수 있다.
                 let shipment_id = null;
                 if (shipmentItems.length > 0) {
                     shipment_id = shipmentItems[0].shipment_id;
@@ -895,7 +895,7 @@
                 return;
             }
 
-            //출하처리
+            //출고처리
             shipmentStateComplete(head_item) {
                 let _this = this;
                 let data = {sh_id: head_item.id, description: head_item.description};
@@ -903,12 +903,12 @@
                 let fnSuccess = function (result) {
                     if (result.success) {
                         _this.searchDataBind();
-                        Notify.success("출하 처리 완료.");
+                        Notify.success("출고 처리 완료.");
                     } else {
                         if (result.message != '') {
                             Notify.success(result.message);
                         } else {
-                            Notify.success("출하 처리 실패.");
+                            Notify.success("출고 처리 실패.");
                         }
                     }
                 }

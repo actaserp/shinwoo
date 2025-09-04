@@ -3,15 +3,15 @@
     <div class="layout-contents">
         <div class="page-title-wrap">
             <div class="left">
-                <h2>출하 처리A</h2>
+                <h2>출고 지시 등록(수량)</h2>
                 <a title="북마크" class="bookmark toggle">
                     내 메뉴
                 </a>
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>출하관리</li>
-                <li>출하처리A(수량)</li>
+                <li>영업 관리</li>
+                <li>출고 지시 등록(수량)</li>
             </ul>
         </div>
         <div style="display: flex; gap: 5px;">
@@ -121,8 +121,8 @@
                 <!--            </div>-->
                 <div class="container-fluid" id="divList">
                     <div class="title_box">
-                        <span class="right_align rpt" data-labelCd="출하지시">출하지시</span>
-                        <button class="btn-default" style="width: 120px" id="btnBatchSave" data-labelCd="일괄 출하 처리">일괄 출하
+                        <span class="right_align rpt" data-labelCd="출고지시">출고지시</span>
+                        <button class="btn-default" style="width: 120px" id="btnBatchSave" data-labelCd="일괄 출고 처리">일괄 출고
                             처리
                         </button>
                         <button class="btn-default" style="width: 120px" id="LoadSujuList" data-labelCd="수주 불러오기">수주
@@ -140,8 +140,8 @@
                 <div class="section-top">
                     <div class="container-fluid">
                         <div class="title_box buttons">
-                            <span class="right_align rpt" data-labelCd="출하">출하</span>
-                            <!--<button class="btn-default y_write_auth" id="btnSaveShip" data-labelCd="출하 처리">출하 처리</button>-->
+                            <span class="right_align rpt" data-labelCd="출고">출고</span>
+                            <!--<button class="btn-default y_write_auth" id="btnSaveShip" data-labelCd="출고 처리">출고 처리</button>-->
                         </div>
                     </div>
                 </div>
@@ -224,7 +224,7 @@
                         <dl>
                             <dt>
                                 <label>
-                                    미출하<span class="eq"></span>
+                                    미출고<span class="eq"></span>
                                 </label>
                             </dt>
                             <dd>
@@ -253,7 +253,7 @@
     </form>
 
         <div class="popup-button">
-            <button type="button" class="btn-popup" id="btnCompSelect" ><span data-commonCd="출하목록반영">출하목록반영</span></button>
+            <button type="button" class="btn-popup" id="btnCompSelect" ><span data-commonCd="출고목록반영">출고목록반영</span></button>
             <button type="button" class="btn-popup" id="btn-search-close"><span data-commonCd="닫기">닫기</span></button>
         </div>
 </div>
@@ -306,9 +306,9 @@
                     columns: [
                         {binding: 'company_id', header: '판매처번호', width: '*', align: 'right', visible: false},
                         {binding: 'company_name', header: '판매처', width: '*', align: 'left', isReadOnly: true},
-                        {binding: 'ship_date', header: '출하일', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'ship_date', header: '출고일', width: '*', align: 'center', isReadOnly: true},
                         {binding: 'tot_order_qty', header: '총지시량', width: '*', align: 'right', isReadOnly: true},
-                        {binding: 'tot_ship_qty', header: '총출하량', width: '*', align: 'right', isReadOnly: true},
+                        {binding: 'tot_ship_qty', header: '총출고량', width: '*', align: 'right', isReadOnly: true},
                         {binding: 'state_name', header: '상태', width: '*', align: 'center', isReadOnly: true},
                         {binding: 'description', header: '비고', width: '*', align: 'left', isReadOnly: true},
                     ],
@@ -347,7 +347,7 @@
                     }
                 });
                 new FlexGridContextMenu(this.grid1);
-                this.grid1.downloadFileName = '출하지시';
+                this.grid1.downloadFileName = '출고지시';
                 let selector = new wijmo.grid.selector.Selector(this.grid1, {
                     itemChecked: (e, ctx) => {
                         SelectItem = this.grid1.rows.filter(r => r.isSelected);
@@ -370,7 +370,7 @@
                         {binding: 'mat_name', header: '제품명', width: '*', align: 'left', isReadOnly: true},
                         {binding: 'unit_name', header: '단위', width: '*', align: 'center', isReadOnly: true},
                         {binding: 'order_qty', header: '지시량', width: '*', align: 'right', isReadOnly: true},
-                        {binding: 'ship_qty', header: '출하량', width: '*', align: 'right', isReadOnly: true},
+                        {binding: 'ship_qty', header: '출고량', width: '*', align: 'right', isReadOnly: true},
                         {binding: 'description', header: '비고', width: '*', align: 'left', isReadOnly: true},
                         {
                             binding: 'src_table_name',
@@ -421,7 +421,7 @@
                     }
                 });
                 new FlexGridContextMenu(this.grid2);
-                this.grid2.downloadFileName = '출하';
+                this.grid2.downloadFileName = '출고';
 
 
                 this.$LoadSujuList.click(function () {
@@ -505,7 +505,7 @@
                                 step: 1       // 증가/감소 단위
                             })
                         },
-                        {binding: 'shipment_qty', header: '출하량', width: '*', align: 'right', isReadOnly: true},
+                        {binding: 'shipment_qty', header: '출고량', width: '*', align: 'right', isReadOnly: true},
                         {binding: 'remark', header: '비고', width: '*', align: 'left', isReadOnly: true}
                     ],
                     itemsSource: this.viewData3,
@@ -662,13 +662,13 @@
 
                 let fnSuccess = function (res) {
                     if (res.success) {
-                        Notify.success('출하 지시 완료.');
+                        Notify.success('출고 지시 완료.');
 
                         document.getElementById('btn-search-close').click();
                         document.getElementById('btnSearch').click();
 
                     } else {
-                        const message = res.message ?? '출하지시실패';
+                        const message = res.message ?? '출고지시실패';
                         Alert.alert('', message);
                     }
                 }
@@ -756,7 +756,7 @@
 
             beforeSave() {
                 if (page.grid2.selectedItems.length == 0) {
-                    Alert.alert('', '출하 처리할 내용이 없습니다.');
+                    Alert.alert('', '출고 처리할 내용이 없습니다.');
                     return;
                 }
                 return true;
@@ -773,9 +773,9 @@
                 let fnSuccess = function (res) {
                     if (res.success) {
                         page.searchMain();
-                        Notify.success("출하 처리 완료.");
+                        Notify.success("출고 처리 완료.");
                     } else {
-                        Notify.success("출하 처리 실패.");
+                        Notify.success("출고 처리 실패.");
                     }
                 }
                 AjaxUtil.postAsyncData(gUrl + "/save_shipdata_a", data, fnSuccess);
@@ -809,7 +809,7 @@
 
 
                 if (headList.length === 0 || headList === undefined || headList === null) {
-                    Alert.alert('', '일괄 출하 처리할 항목을 선택해주세요.');
+                    Alert.alert('', '일괄 출고 처리할 항목을 선택해주세요.');
                     return;
                 }
 
@@ -818,13 +818,13 @@
                 let fnSuccess = function (res) {
                     if (res.success) {
                         page.searchMain();
-                        Notify.success("출하 처리 완료.");
+                        Notify.success("출고 처리 완료.");
                     } else {
-                        Notify.success("출하 처리 실패.");
+                        Notify.success("출고 처리 실패.");
                     }
                 }
 
-                Alert.confirm('', '일괄 출하 처리 하시겠습니까?',
+                Alert.confirm('', '일괄 출고 처리 하시겠습니까?',
                     function () {
                         AjaxUtil.postAsyncData(gUrl + "/batch_save", data, fnSuccess);
                     },
@@ -880,7 +880,7 @@
 
             $('#btnSaveShip').click(function (e) {
                 if (page.beforeSave()) {
-                    Alert.confirm('', "출하 처리하시겠습니까?",
+                    Alert.confirm('', "출고 처리하시겠습니까?",
                         function () {
                             page.saveShipData();
                         },

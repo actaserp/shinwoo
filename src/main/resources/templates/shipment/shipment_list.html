@@ -3,15 +3,15 @@
     <div class="layout-contents">
         <div class="page-title-wrap">
             <div class="left">
-                <h2>출하 내역</h2>
+                <h2>출고 내역</h2>
                 <a title="북마크" class="bookmark toggle">
                     내 메뉴
                 </a>
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>출하관리</li>
-                <li>출하내역</li>
+                <li>영업 관리</li>
+                <li>출고 내역</li>
             </ul>
         </div>
         <div style="display: flex; gap: 5px;">
@@ -22,7 +22,7 @@
                             <dl>
                                 <dt>
                                     <label>
-                                        출하일<span class="eq"></span>
+                                        출고일<span class="eq"></span>
                                     </label>
                                 </dt>
                                 <dd>
@@ -97,7 +97,7 @@
 
                 <div class="grid_box" id="divList">
                     <div class="title_box">
-                        <span class="right_align rpt" data-labelCd="출하 내역">출하 내역</span>
+                        <span class="right_align rpt" data-labelCd="출고 내역">출고 내역</span>
                     </div>
                     <div id="theGrid" ></div>
                 </div>
@@ -106,7 +106,7 @@
             <section style="flex: 1; min-width: 0;">
                 <div class="grid_box">
                     <div class="title_box">
-                        <span class="right_align rpt" data-labelCd="출하 내역 상세">출하 내역 상세</span>
+                        <span class="right_align rpt" data-labelCd="출고 내역 상세">출고 내역 상세</span>
                     </div>
                     <div id="theGrid2"></div>
                 </div>
@@ -152,10 +152,10 @@
                     selectionMode: wijmo.grid.SelectionMode.Row, // 행 단위 선택
                     isReadOnly: true,
                     columns: [
-                        {binding: 'id', header: '출하지시번호', width: 110, align: 'center'},  // width: 40
+                        {binding: 'id', header: '출고지시번호', width: 110, align: 'center'},  // width: 40
                         {binding: 'company_name', header: '판매처', width: 280, align: 'left'},
                         //{ key: 'address', label: '<span style="color:orange">주소</span>', width: 0, align: 'left' },  // width: 400
-                        {binding: 'ship_date', header: '출하일', width: 200, align: 'center'},
+                        {binding: 'ship_date', header: '출고일', width: 200, align: 'center'},
                         {binding: 'total_qty', header: '총수량', width: 80, align: 'right'},
                         //{ key: 'product_cnt', label: '제품수', width: 80, align: 'right'},
                         {binding: 'description', header: '비고', width: '*', align: 'left'},
@@ -204,7 +204,7 @@
                 });
                 //this.loading = false;
                 new FlexGridContextMenu(this.grid1);
-                this.grid1.downloadFileName = '출하 내역';
+                this.grid1.downloadFileName = '출고 내역';
 
 
                 ////////////////////////////////////////////////////
@@ -220,7 +220,7 @@
                         {binding: 'mat_code', header: '제품코드', width: 100, align: 'center'},
                         {binding: 'mat_name', header: '제품명', width: 160, align: 'left'},
                         {binding: 'order_qty', header: '지시량', width: 80, align: 'right'},
-                        {binding: 'ship_qty', header: '출하량', width: 80, align: 'right'},  //, editor: { type: 'money' }
+                        {binding: 'ship_qty', header: '출고량', width: 80, align: 'right'},  //, editor: { type: 'money' }
                         {binding: 'unit_name', header: '단위', width: 80, align: 'center'},
                         {binding: 'description', header: '비고', width: 200, align: 'left'},
                     ],
@@ -256,7 +256,7 @@
                     }
                 });
                 new FlexGridContextMenu(this.grid2);
-                this.grid2.downloadFileName = '출하 내역';
+                this.grid2.downloadFileName = '출고 내역';
             }
 
             searchDetail() {
