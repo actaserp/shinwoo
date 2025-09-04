@@ -1507,6 +1507,7 @@ public class ProductionResultController {
             mi.setInoutTime(LocalTime.parse(time.format(timeFormat)));
             mi = this.matInoutRepository.saveAndFlush(mi);
 
+            ml.setCurrentStock(ml.getCurrentStock() - ml.getInputQty() + mp.getGoodQty());
             ml.setInputQty(mp.getGoodQty());
             ml = this.matLotRepository.saveAndFlush(ml);
         }
