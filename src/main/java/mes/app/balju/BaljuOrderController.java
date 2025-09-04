@@ -160,7 +160,10 @@ public class BaljuOrderController {
       Double unitPrice = Double.parseDouble(item.get("unit_price").toString());
       Double supply_price = Double.parseDouble(item.get("supply_price").toString());
       Double vat = Double.parseDouble(item.get("vat").toString());
-
+      String standard = java.util.Objects.toString(
+          item.containsKey("Standard") ? item.get("Standard") : item.get("standard"),
+          ""
+      );
       Balju detail;
 
       if (baljuId != null) {
@@ -204,6 +207,7 @@ public class BaljuOrderController {
       detail.setState("draft");
       detail.setSujuQty2(0.0d);
       detail.set_status("manual");
+      detail.setStandard(standard);
 
       totalPriceSum += detail.getTotalAmount();
       bujuRepository.save(detail);

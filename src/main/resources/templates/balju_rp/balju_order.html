@@ -296,7 +296,8 @@
 
             <colgroup>
               <col style="width: 7%">
-              <col style="width: 24%">
+              <col style="width: 20%">
+              <col style="width: 10%">
               <col style="width: 6%">
               <col style="width: 20%">
               <col style="width: 12%">
@@ -310,6 +311,7 @@
               <tr id="itemHeaderRow">
                 <th>품목코드</th>
                 <th>품목</th>
+                <th>규격</th>
                 <th>수량</th>
                 <th>단가 (체크박스 선택시 부과세 포함)</th>
                 <th>공급가액</th>
@@ -338,6 +340,7 @@
                   </a>
                 </div>
               </td>
+              <td><input type="text" name="Standard" placeholder="규격" /></td>
               <td><input type="text" name="quantity" placeholder="수량" /></td>
               <td>
                 <div class="input-with-checkbox">
@@ -561,6 +564,7 @@
         const $code = $row.find('input[name^="product_code_"]');
         const $group = $row.find('input[name^="MaterialGroupName_"]');
         const $next = $row.find('input[name^="quantity_"]');
+        const $standard = $row.find('input[name^="Standard_"]');
 
         $input.on('input', function () {
           const value = $(this).val().trim();
@@ -577,6 +581,7 @@
           $id.val(item.id);
           $code.val(item.Code);
           $group.val(item.group_name);
+          $standard.val(item.Spec);
           tryShowBaljuPrice($row);
 
           setTimeout(() => {
@@ -1018,7 +1023,8 @@
             totalEdited: $row.find('input[name^="totalEdited_"]').val() === 'Y',
             description: $row.find('input[name^="description_"]').val(),
             vatIncluded: $row.find('input[name^="VatIncluded"]').prop('checked') ? 'Y' : 'N',
-            cboBaljuType: $row.find('input[name^="BalJuHeadType"]').val()
+            cboBaljuType: $row.find('input[name^="BalJuHeadType"]').val(),
+            standard  :$row.find('input[name^="Standard_"]').val()
           };
 
           console.log("🔍 저장될 항목:", item);
@@ -1158,7 +1164,8 @@
               totalEdited: $row.find('input[name^="totalEdited_"]').val() === 'Y',  // ✅ 이 줄 반드시 추가
               description: $row.find('input[name^="description_"]').val(),
               vatIncluded: $row.find('input[name^="VatIncluded"]').prop('checked') ? 'Y' : 'N',
-              cboBaljuType: $row.find('input[name^="BalJuHeadType"]').val()
+              cboBaljuType: $row.find('input[name^="BalJuHeadType"]').val(),
+              standard  :$row.find('input[name^="Standard_"]').val()
             };
 
             itemRows.push(item);
@@ -1286,6 +1293,7 @@
             $newRow.find('input[name^="balju_StateName_"]').val(item.balju_StateName);
             $newRow.find('input[name^="VatIncluded"]').prop('checked', item.vatIncluded === 'Y');
             $newRow.find('input[name^="balju_id_"]').val(item.balju_id);
+            $newRow.find('input[name^="Standard_"]').val(item.Standard);
             $baljuForm.find('input[name="bh_id"]').val(data.id);
             $baljuForm.find('input[name^="DueDate"]').val(data.DeliveryDate);
 
@@ -1352,6 +1360,7 @@
           const $productId = $row.find('input[name^="Material_id_"]');
           const $productCode = $row.find('input[name^="product_code_"]');
           const $materialGroup = $row.find('input[name^="MaterialGroupName_"]');
+          const $standard = $row.find('input[name^="Standard_"]')
 
           const pop = new PopMatComponent();
           pop.material_type = 'product,sangpum';
@@ -1361,6 +1370,7 @@
             $productId.val(item.id);
             $productCode.val(item.Code);
             $materialGroup.val(item.group_name);
+            $standard.val(item.Spec);
 
             // ✅ 제품 선택 후 단가 자동 조회
             tryShowBaljuPrice($row);
@@ -1380,6 +1390,7 @@
 
           const focusOrder = [
             'txtProductName_',
+            'Standard_',
             'quantity_',
             'BaljuUnitPrice_',
             'BaljuPrice_',

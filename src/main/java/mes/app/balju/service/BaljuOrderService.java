@@ -252,6 +252,7 @@ public class BaljuOrderService {
              b."AvailableStock",
              b."ReservationStock",
              mi."SujuQty2",
+             b."Standard",
              -- 동적 계산된 Head 상태
              (
            SELECT
@@ -418,6 +419,7 @@ public class BaljuOrderService {
       item.put("vatIncluded", row.get("InVatYN"));
       item.put("State", row.get("BalJuType"));
       item.put("balju_StateName", row.get("balju_StateName"));
+      item.put("Standard", row.get("Standard"));
 
       items.add(item);
     }
