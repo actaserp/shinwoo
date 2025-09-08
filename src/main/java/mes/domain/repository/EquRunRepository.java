@@ -2,11 +2,13 @@ package mes.domain.repository;
 
 import org.apache.ibatis.annotations.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import mes.domain.entity.EquRun;
 
+import javax.transaction.Transactional;
 import java.util.Optional;
 
 
@@ -23,4 +25,7 @@ public interface EquRunRepository extends JpaRepository<EquRun, Integer>{
 
 	long countByEquipmentIdAndRunState(Integer equipmentId, String runState);
 
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
+	@Transactional
+	int deleteByWorkOrderNumberAndEquipmentId(String orderNum, Integer equipmentId);
 }

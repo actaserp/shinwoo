@@ -78,6 +78,18 @@
             background-color: #EDEFF5 !important;
         }
 
+        .select-locked {
+            background-color: #EDEFF5;
+        }
+
+        .readonly-wrap {
+            /* 필요한 경우 width를 select와 맞춤 */
+            width: auto;
+        }
+        .readonly-display {
+            /* 표시용 텍스트가 select와 겹쳐 보이도록 */
+            padding-right: 28px; /* 화살표 영역 여유 */
+        }
     </style>
     <style id="print_css">
         @media print {
@@ -1513,6 +1525,91 @@
                 this.consumedGrid.setValue(timeColumn.dindex, timeColumn.key, timeColumn.value);
             }
 
+            initReadonlyView($sel) {
+                if ($sel.closest('.readonly-wrap').length) return;
+
+                const $wrap = $('<div class="readonly-wrap" />').css({
+                    position: 'relative', display: 'inline-block'
+                });
+
+                // select와 같은 크기로 깔맞춤
+                const selW = $sel.outerWidth();
+                const selH = $sel.outerHeight();
+
+                const $display = $('<span class="readonly-display" />').css({
+                    position: 'absolute',
+                    left: 9, top: 0,
+                    width: selW,
+                    height: selH,
+                    lineHeight: selH + 'px',
+                    padding: '0 8px',
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                    pointerEvents: 'none',
+                    visibility: 'hidden',           // 기본은 숨김(잠글 때만 보임)
+                    zIndex: 2
+                });
+
+                const $mask = $('<div class="readonly-mask" />').css({
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'transparent',
+                    pointerEvents: 'none',          // 기본은 비활성
+                    visibility: 'hidden',
+                    zIndex: 3
+                });
+
+                // select가 네이티브 렌더링으로 위로 튀지 않게 position 지정
+                $sel.css('position', 'relative').css('z-index', 1);
+
+                $sel.wrap($wrap);
+                $sel.after($display).after($mask);
+
+                // select 값 바뀌면 표시 텍스트 갱신
+                $sel.on('change readonlysync', function () {
+                    const text = $sel.find('option:selected').text() || '';
+                    $display.text(text);
+                }).trigger('readonlysync');
+            }
+
+            setSelectLocked($sel, locked) {
+                this.initReadonlyView($sel);
+
+                const $wrap    = $sel.closest('.readonly-wrap');
+                const $display = $wrap.find('.readonly-display');
+                const $mask    = $wrap.find('.readonly-mask');
+
+                if (locked) {
+                    // 표시 텍스트 갱신 + 보이기
+                    $sel.trigger('readonlysync');
+                    $display.css({ visibility: 'visible' });
+
+                    // 클릭/키보드 완전 차단
+                    $mask.css({ pointerEvents: 'auto', visibility: 'visible' });
+                    $sel.attr('tabindex', '-1').attr('aria-disabled', 'true');
+
+                    // ★ select 실제 텍스트 투명 처리 → 겹침 방지
+                    $sel.addClass('select-locked').css({
+                        color: 'transparent',
+                        // 사파리 등 렌더링 보정
+                        '-webkit-text-fill-color': 'transparent',
+                        'text-shadow': 'none',
+                        'caret-color': 'transparent'
+                    });
+                } else {
+                    // 오버레이/표시 숨김
+                    $mask.css({ pointerEvents: 'none', visibility: 'hidden' });
+                    $display.css({ visibility: 'hidden' });
+
+                    // 포커스/접근성 복원
+                    $sel.removeAttr('tabindex').removeAttr('aria-disabled');
+
+                    // ★ 투명 처리 해제
+                    $sel.removeClass('select-locked').css({
+                        color: '', '-webkit-text-fill-color': '', 'text-shadow': '', 'caret-color': ''
+                    });
+                }
+            }
+
             // 버튼 활성화 설정
             setButtonState() {
                 let pk = $('#tabBasic').find('#id').val();
@@ -1537,10 +1634,10 @@
                     $('#btnDeleteChasu').attr('disabled', 'disabled');
                     $('#btnWorkStop').attr('disabled', 'disabled');
                     $('#btnWorkStop').text('일시중지');
-                    $('#process_id').removeAttr('disabled');
-                    $('#equipment_id').removeAttr('disabled');
                     $('#btnFinishCancel').attr('disabled', 'disabled');
-                    // $('#shift_code').removeAttr('disabled');
+                    this.setSelectLocked($('#process_id'), false);
+                    this.setSelectLocked($('#equipment_id'), false);
+                    this.setSelectLocked($('#shift_code'), false);
                 } else if (state === 'stopped') {
                     $('#btnWorkStart').attr('disabled', 'disabled');
                     $('#btnSave').removeAttr('disabled');
@@ -1553,15 +1650,15 @@
                     $('#btnWorkFinish').attr('disabled', 'disabled');
                     $('#btnWorkStop').removeAttr('disabled');
                     $('#btnWorkStop').text('재가동');
-                    $('#process_id').removeAttr('disabled');
-                    $('#equipment_id').removeAttr('disabled');
                     $('#btnFinishCancel').attr('disabled', 'disabled');
-                    // $('#shift_code').removeAttr('disabled');
+                    this.setSelectLocked($('#process_id'), false);
+                    this.setSelectLocked($('#equipment_id'), false);
+                    this.setSelectLocked($('#shift_code'), false);
                 } else if (state === 'working') {
                     $('#btnWorkStart').attr('disabled', 'disabled');
-                    $('#process_id').attr('disabled', 'disabled');
-                    $('#equipment_id').attr('disabled', 'disabled');
-                    // $('#shift_code').attr('disabled', 'disabled');
+                    this.setSelectLocked($('#process_id'), true);
+                    this.setSelectLocked($('#equipment_id'), true);
+                    this.setSelectLocked($('#shift_code'), true);
                     $('#btnWorkStop').removeAttr('disabled');
                     $('#btnSave').removeAttr('disabled');
                     $('#btnTest').removeAttr('disabled');
@@ -1584,10 +1681,10 @@
                     $('#btnDel').attr('disabled', 'disabled');
                     $('#btnWorkFinish').attr('disabled', 'disabled');
                     $('#btnFinishCancel').removeAttr('disabled');
-                    $('#process_id').removeAttr('disabled');
-                    $('#equipment_id').removeAttr('disabled');
-                    $('#shift_code').removeAttr('disabled');
                     $('#btnTest').attr('disabled', 'disabled');
+                    this.setSelectLocked($('#process_id'), false);
+                    this.setSelectLocked($('#equipment_id'), false);
+                    this.setSelectLocked($('#shift_code'), false);
                 } else {
                     $('#btnWorkStart').removeAttr('disabled');
                     $('#btnSave').removeAttr('disabled');
@@ -1601,11 +1698,11 @@
                     $('#btnWorkStop').attr('disabled', 'disabled');
                     $('#btnWorkStop').text('일시중지');
                     $('#btnDefectSave').attr('disabled', 'disabled');
-                    $('#process_id').removeAttr('disabled');
-                    $('#equipment_id').removeAttr('disabled');
-                    $('#shift_code').removeAttr('disabled');
                     $('#btnFinishCancel').attr('disabled', 'disabled');
                     $('#btnTest').attr('disabled', 'disabled');
+                    this.setSelectLocked($('#process_id'), false);
+                    this.setSelectLocked($('#equipment_id'), false);
+                    this.setSelectLocked($('#shift_code'), false);
 
                 }
 
@@ -1657,7 +1754,10 @@
                 const result = res.data;
                 if (!result) return;
 
+                FormUtil.BindDataForm(result, $('#basicForm'));
+
                 $('#parent_jr_pk').val(result.id);
+                $('#selected_order_num').val(result.order_num);
 
                 const workcenter_id = result.workcenter_id;
                 const routing_id = result.routing_id ?? null;
@@ -1667,7 +1767,7 @@
 
                 // 공통: 설비 선택 박스(워크센터 기준)만 먼저 맞춰둠
                 AjaxUtil.fillSelectOptions($('#equipment_id'), 'equipment_code', 'choose', equipment_id, workcenter_id);
-                FormUtil.BindDataForm(result, $('#basicForm'));
+
 
                 // 상태 뱃지 처리 등 생략...
                 $('#ordqty').text((result.order_qty ?? 0).toLocaleString());
@@ -1706,8 +1806,6 @@
 
                     // 의존 필드 비활성화
                     $('#tabBasic #prod_mat_id, #tabBasic #need_pro_mat_qty, #tabBasic #parent_jr_pk, #tabBasic #consumed_mode').prop('disabled', true);
-
-                    $('#tabBasic #id').val('');
 
                     // 라우팅이 없으므로 onProcessChange 호출하지 않음
                     this._suppressProcessChange = false;
@@ -1802,6 +1900,7 @@
 
                 } else {
                     // ---- PLAN: 자식 없음
+                    $('#tabBasic #parent_jr_pk').val($('#tabBasic #id').val());
                     $('#tabBasic #id').val('');
                     $('#tabBasic #consumed_mode').val('PLAN');
 
@@ -1880,35 +1979,29 @@
 
                 let data = FormUtil.extractForm($('#basicForm'));
 
-                let fnSuccess = function (res) {
+                data.id = $('#id').val();
+
+                const fnSuccess = function (res) {
                     if (res.success) {
                         Notify.success('취소되었습니다.');
                         _this.searchMainData();
-                        // _this.setButtonState();
-                        setTimeout(() => {
-                            _this.grid.select(previousIndex, 0);
-                        }, 100);
+                        setTimeout(() => _this.grid.select(previousIndex, 0), 100);
                     } else {
-                        Alert.alert('작업지시 취소', res.message);
+                        Alert.alert('작업지시 취소', res.message || '취소에 실패했습니다.');
                     }
-                }
+                };
 
-                // 필수입력 check routine
+                // 완료 상태/수량 존재 시 막기 (자식/부모 공통 가드)
                 if (data.state === 'finished') {
                     Alert.alert('', '완료된 작업은 취소할 수 없습니다.');
                     return;
-                } else if (parseFloat(data.good_qty) + parseFloat(data.defect_qty)) {
+                }
+                if ((parseFloat(data.good_qty) || 0) + (parseFloat(data.defect_qty) || 0)) {
                     Alert.alert('', '생산 수량이 존재하는 작업은 취소할 수 없습니다.');
                     return;
-                } else {
-                    Alert.confirm('작업지시 취소', '현재 작업지시(' + data.order_num + ')를 취소하시겠습니까?',
-                        function () {
-                            AjaxUtil.postAsyncData(url, data, fnSuccess);
-                        },
-                        function () {
-                        }
-                    )
                 }
+
+                AjaxUtil.postAsyncData(url, data, fnSuccess)
             }
 
             // 작업시작

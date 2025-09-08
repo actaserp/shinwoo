@@ -1688,49 +1688,96 @@ public class ProductionResultController {
     @PostMapping("/del")
     @Transactional
     public AjaxResult prodResultDel(
-            @RequestParam(value = "id", required = false) Integer jobresId,
-            @RequestParam(value = "order_num", required = false) String order_num,
+            @RequestParam("id") Integer jobresId,
+            @RequestParam(value = "order_num", required = false) String orderNum,
             @RequestParam(value = "equipment_id", required = false) Integer equipmentId,
-            HttpServletRequest request,
-            Authentication auth) {
-
+            Authentication auth
+    ) {
         AjaxResult result = new AjaxResult();
 
-        List<MaterialConsume> mcList = this.matConsuRepository.findByJobResponseId(jobresId);
+        if (jobresId == null) {
+            result.success = false;
+            result.message = "작업지 ID가 없습니다.";
+            return result;
+        }
+
+        // 대상 작업지
+        JobRes jr = jobResRepository.getJobResById(jobresId);
+        if (jr == null) {
+            result.success = false;
+            result.message = "대상 작업지를 찾을 수 없습니다.";
+            return result;
+        }
+
+        // 1) 생산량 가드: 양품+불량 > 0 이면 취소/삭제 불가
+        double good = jr.getGoodQty() == null ? 0d : jr.getGoodQty().doubleValue();
+        double defect = jr.getDefectQty() == null ? 0d : jr.getDefectQty().doubleValue();
+        if (good + defect > 0) {
+            result.success = false;
+            result.message = "생산량이 존재하여 취소할 수 없습니다.";
+            return result;
+        }
+
+        // (선택) 차수/투입 등 존재 시 가드 유지
+        // 기존 코드 유지: 등록된 차수(=소모/투입 등) 있으면 삭제 불가
+        List<MaterialConsume> mcList = matConsuRepository.findByJobResponseId(jobresId);
+        if (mcList != null && !mcList.isEmpty()) {
+            result.success = false;
+            result.message = "등록된 차수가 있어 삭제할 수 없습니다.";
+            return result;
+        }
 
         User user = (User) auth.getPrincipal();
-
         Timestamp now = DateUtil.getNowTimeStamp();
 
+        boolean isChild = jr.getParentId() != null; // ← 프로젝트 필드명에 맞게 변경
 
-        Optional<EquRun> runningRunOpt = equRunRepository.findLatestRunningByEquipmentAndOrder(equipmentId, order_num);
-        if (runningRunOpt.isPresent()) {
-            EquRun equ = runningRunOpt.get();
-            if (equ.getEndDate() == null) {
-                equ.setEndDate(now); // 중지 시각
-                equ.setRunState("stop");
+        if (isChild) {
+            if (equipmentId == null) {
+                result.success = false;
+                result.message = "장비 정보가 없어 삭제할 수 없습니다.";
+                return result;
             }
-            equ.setDescription("작지 취소");
-            equ.set_audit(user);
 
-            equRunRepository.save(equ);
-        }
+            // EquRun: jobresId + equipmentId 모두 일치하는 행만 삭제
+            int deleted = equRunRepository.deleteByWorkOrderNumberAndEquipmentId(orderNum, equipmentId);
+            // 필요시 로그: log.info("EquRun deleted rows: {}", deleted);
 
-        if (mcList.size() > 0) {
-            result.success = false;
-            result.message = "등록된 차수가 있어 삭제 할 수 없습니다.";
+            // 자식 JobRes 삭제
+            jobResRepository.deleteById(jobresId);
+
+            result.success = true;
+            result.message = "자식 작업지와 관련 설비가동 기록이 삭제되었습니다.";
             return result;
-        } else {
-            JobRes jr = this.jobResRepository.getJobResById(jobresId);
-            if (jr != null) {
-                jr.setState("canceled");
-                jobResRepository.save(jr);
-            }
         }
+        else {
+            // ======================
+            // PLAN(부모) 취소 플로우
+            // ======================
 
-        return result;
+            // 진행 중인 설비가동은 stop 처리 (기존 로직 유지)
+            equRunRepository.findLatestRunningByEquipmentAndOrder(equipmentId, orderNum)
+                    .ifPresent(run -> {
+                        if (run.getEndDate() == null) {
+                            run.setEndDate(now);
+                            run.setRunState("stop");
+                        }
+                        run.setDescription("작지 취소");
+                        run.set_audit(user);
+                        equRunRepository.save(run);
+                    });
 
+            // 부모 상태만 canceled 로 업데이트 (이력 보존)
+            jr.setState("canceled");
+            jr.set_audit(user);
+            jobResRepository.save(jr);
+
+            result.success = true;
+            result.message = "작업지시가 취소되었습니다.";
+            return result;
+        }
     }
+
     // 생산정보 삭제
 //	@PostMapping("/del")
 //	@Transactional
