@@ -59,6 +59,7 @@ public class ProductionMonthService {
             left join suju s on s.id = jr."SourceDataPk" and jr."SourceTableName" = 'suju'
 	        where jr."ProductionDate" between cast(:date_form as date) and cast(:date_to as date)
             and jr."State" = 'finished'
+            and jr."Parent_id" is null
 				""";
 		
 		if(cbomatType != null && !cbomatType.trim().isEmpty()) {
