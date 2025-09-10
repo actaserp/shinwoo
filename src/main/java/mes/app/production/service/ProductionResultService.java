@@ -258,9 +258,12 @@ public class ProductionResultService {
 				  T.*,
 				  -- 대표행 선택: working 우선, 다음 최근 id
 				  ROW_NUMBER() OVER (
-					PARTITION BY T.base_id
-					ORDER BY T.is_working DESC, T.child_id DESC
-				  ) AS rn,
+						PARTITION BY T.base_id
+						ORDER BY
+						  T.is_working DESC,                                  -- 1) working 우선
+						  CASE WHEN T.parent_id IS NULL THEN 1 ELSE 0 END DESC, -- 2) 그다음 부모 우선
+						  T.child_id DESC                                     -- 3) 마지막 타이브레이커: 최신 id
+					  ) AS rn,
 				  -- 체인에 working 있는지 (있으면 1)
 				  MAX(T.is_working) OVER (PARTITION BY T.base_id) AS any_working
 			  FROM T

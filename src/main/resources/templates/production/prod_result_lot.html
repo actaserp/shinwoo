@@ -959,7 +959,8 @@
                 this.baseUrl = '/api/production/prod_result';
                 this._procCascadeBound = false;
                 this._suppressProcessChange = false;
-                this._currentJrPk = null;
+                this.baseByOrder = this.baseByOrder || {};
+                this.currentOrderNum = this.currentOrderNum || null;
                 this._hasRouting = false;
                 this.suppressSelect = true;
                 this.init();
@@ -1748,7 +1749,7 @@
 
             // 생산정보 조회
             showBasicInfo(jr_pk) {
-                const res = AjaxUtil.getSyncData(this.baseUrl + '/detail', {jr_pk});
+                const res = AjaxUtil.getSyncData(this.baseUrl + '/detail', { jr_pk });
                 this._suppressProcessChange = true;
 
                 const result = res.data;
@@ -1756,7 +1757,24 @@
 
                 FormUtil.BindDataForm(result, $('#basicForm'));
 
-                $('#parent_jr_pk').val(result.id);
+                // ★ 이번 레코드의 '베이스 id' 계산
+                const baseOfThis = (result.parent_jr_pk ) || '';
+
+                // ★ 작지별 베이스 맵에 기록
+                const orderNum = result.order_num;
+                if (orderNum) {
+                    this.baseByOrder[orderNum] = baseOfThis;
+                }
+
+                // ★ 현재 작지 변경 감지 → 현재 작지 포인터 갱신
+                if (this.currentOrderNum !== orderNum) {
+                    this.currentOrderNum = orderNum;
+                }
+
+                // ★ parent_jr_pk는 항상 현재 작지의 base로
+                $('#tabBasic #parent_jr_pk').val(this.baseByOrder[this.currentOrderNum] || baseOfThis || '');
+
+                // 기존 코드 유지
                 $('#selected_order_num').val(result.order_num);
 
                 const workcenter_id = result.workcenter_id;
@@ -1765,49 +1783,33 @@
                 const process_nm = result.process_nm || '';
                 const equipment_id = result.equipment_id;
 
-                // 공통: 설비 선택 박스(워크센터 기준)만 먼저 맞춰둠
                 AjaxUtil.fillSelectOptions($('#equipment_id'), 'equipment_code', 'choose', equipment_id, workcenter_id);
 
-
-                // 상태 뱃지 처리 등 생략...
                 $('#ordqty').text((result.order_qty ?? 0).toLocaleString());
                 $('#chasuLotSize').val(result.lot_size);
 
-                // 라우팅 존재 여부 판단
                 this._hasRouting = (routing_id != null && String(routing_id).trim() !== '');
 
                 if (this._hasRouting) {
-                    // 라우팅 있는 경우: 라우팅 기반 공정 옵션 세팅 + 체인지 바인딩 + onProcessChange 실행
                     AjaxUtil.fillSelectOptions($('#process_id'), 'routing_mat', '', process_id, routing_id);
-
-                    // 의존 필드 활성화
                     $('#tabBasic #prod_mat_id, #tabBasic #need_pro_mat_qty, #tabBasic #parent_jr_pk, #tabBasic #consumed_mode').prop('disabled', false);
 
-
                     if (!this._procCascadeBound) {
-                        this.initProcessCascade();         // change 핸들러 바인딩
+                        this.initProcessCascade();
                         this._procCascadeBound = true;
-                    } else {
-                        // 이미 바인딩되어 있으면 충분
                     }
 
-                    $('#tabBasic #id').val('');
+                    // ★ id는 여기서 지우지 말고 onProcessChange에서 상태에 맞게 세팅
+                    // $('#tabBasic #id').val('');  <-- 제거 권장
+
                     this._suppressProcessChange = false;
-                    this.onProcessChange();               // 라우팅 있을 때만 필요
+                    this.onProcessChange();
                 } else {
-                    // 라우팅 없는 경우: 현재 공정만 옵션으로 꽂고 change 핸들러 해제
                     const $proc = $('#process_id');
-                    $proc.off('change.prod');             // onProcessChange 비활성
-                    this._procCascadeBound = false;       // 상태 초기화
+                    $proc.off('change.prod');
+                    $proc.empty().append(new Option(process_nm || String(process_id), process_id, true, true));
+                    this._procCascadeBound = false;
 
-                    $proc.empty().append(
-                        new Option(process_nm || String(process_id), process_id, true, true)
-                    );
-
-                    // 의존 필드 비활성화
-                    $('#tabBasic #prod_mat_id, #tabBasic #need_pro_mat_qty, #tabBasic #parent_jr_pk, #tabBasic #consumed_mode').prop('disabled', true);
-
-                    // 라우팅이 없으므로 onProcessChange 호출하지 않음
                     this._suppressProcessChange = false;
                     this.suppressSelect = false;
 
@@ -1816,6 +1818,7 @@
 
                 this.setButtonState();
             }
+
 
             initProcessCascade() {
                 const $proc = $('#process_id');
@@ -1828,70 +1831,80 @@
 
             onProcessChange() {
                 if (this._suppressProcessChange) return;
-                if (!this._hasRouting) return; // 라우팅 없으면 전혀 필요 없음
+                if (!this._hasRouting) return;
 
                 const processId = $('#tabBasic #process_id').val();
                 const routingId = this.jobres?.routing_id || $('#routing_id').val();
                 const materialId = $('#tabBasic #mat_pk').val();
-                const orderQty = parseFloat($('#tabBasic #order_qty').val()) || 1;
-                const prodDate = $('#tabBasic #prod_date').val() || null;
-                const orderNum = $('#tabBasic #order_num').val();
+                const orderQty  = parseFloat($('#tabBasic #order_qty').val()) || 1;
+                const prodDate  = $('#tabBasic #prod_date').val() || null;
 
-                // 1) 공정→워크센터 세팅
-                const wcRes = AjaxUtil.getSyncData('/api/definition/workcenter/of-process', {
-                    process_id: processId,
-                    routing_id: routingId
-                });
-                const wc = wcRes?.data || {};
+                // ★ 현재 작지 확인
+                const orderNum  = $('#tabBasic #order_num').val() || this.currentOrderNum || $('#selected_order_num').val() || null;
+                if (orderNum && this.currentOrderNum !== orderNum) {
+                    this.currentOrderNum = orderNum;
+                }
+
+                // ★ 현재 작지의 baseId 확보 (없으면 안전한 백업 순서로)
+                const fallbackBase = this.jobres?.parent_id || this.jobres?.id || $('#tabBasic #parent_jr_pk').val() || '';
+                const baseId = (orderNum && this.baseByOrder[orderNum]) ? this.baseByOrder[orderNum] : fallbackBase;
+
+                // ★ parent는 항상 base
+                $('#tabBasic #parent_jr_pk').val(baseId || '');
+
+                // 1) 공정→워크센터
+                const wc = AjaxUtil.getSyncData('/api/definition/workcenter/of-process', {
+                    process_id: processId, routing_id: routingId
+                })?.data || {};
                 $('#tabBasic #workcenter_id').val(wc.workcenter_id || '');
                 $('#tabBasic #workcenter_name').val(wc.workcenter_nm || '');
                 AjaxUtil.fillSelectOptions($('#tabBasic #equipment_id'), 'equipment_code', '', '', wc.workcenter_id);
 
                 // 2) 공정별 BOM 메타
-                const metaRes = AjaxUtil.getSyncData(this.baseUrl + '/process-step-meta', {
-                    material_id: materialId,
-                    routing_id: routingId,
-                    process_id: processId,
-                    order_qty: orderQty,
-                    prod_date: prodDate
-                });
-                const meta = metaRes?.data || {};
+                const meta = AjaxUtil.getSyncData(this.baseUrl + '/process-step-meta', {
+                    material_id: materialId, routing_id: routingId, process_id: processId,
+                    order_qty: orderQty, prod_date: prodDate
+                })?.data || {};
                 $('#tabBasic #prod_mat_id').val(meta.pro_mat_id || '');
                 $('#tabBasic #need_pro_mat_qty').val(meta.need_pro_mat_qty || '');
 
-                // PLAN/ACTUAL 모드 판정
+                // PLAN/ACTUAL 판정
                 let found = null;
                 if (orderNum && meta.pro_mat_id && processId) {
-                    const findRes = AjaxUtil.getSyncData(this.baseUrl + '/find-by-order-process', {
+                    found = AjaxUtil.getSyncData(this.baseUrl + '/find-by-order-process', {
                         order_num: orderNum, process_id: processId, pro_mat_id: meta.pro_mat_id
-                    });
-                    found = findRes?.data || null;
+                    })?.data || null;
                 }
 
                 $('#state').val('');
                 $('#job_state').val('');
+
                 if (found?.jr_pk) {
-                    // ---- ACTUAL: 자식 있음
+                    // ---- ACTUAL
                     const childId = found.jr_pk;
+
+                    // ★ id는 자식으로, parent는 항상 base
                     $('#tabBasic #id').val(childId);
                     $('#tabBasic #consumed_mode').val('ACTUAL');
 
-                    // (조건부) 화면에 필요한 값이 없거나 틀릴 수 있으니 /detail 한 번만
-                    // ※ 불필요한 값까지 덮어쓰지 않도록 필요한 필드만 선택해 바인딩
-                    const child = AjaxUtil.getSyncData(this.baseUrl + '/detail', {jr_pk: childId})?.data || {};
+                    // 혹시 parent가 child로 덮였으면 즉시 복구
+                    if ($('#tabBasic #parent_jr_pk').val() === String(childId)) {
+                        $('#tabBasic #parent_jr_pk').val('');
+                    }
+
+                    // 세부 갱신
+                    const child = AjaxUtil.getSyncData(this.baseUrl + '/detail', { jr_pk: childId })?.data || {};
                     const def = {
                         job_state: (v) => (v == null || String(v).trim() === '' ? '지시' : v),
-                        state: (v) => (v == null || String(v).trim() === '' ? 'ordered' : v),
+                        state:     (v) => (v == null || String(v).trim() === '' ? 'ordered' : v),
                     };
-
                     $('#job_state').val(def.job_state(child.job_state));
                     $('#state').val(def.state(child.state));
                     if (child.shift_code) $('#shift_code').val(child.shift_code);
                     if (child.start_time) $('#start_time').val(child.start_time);
-                    if (child.end_time) $('#end_time').val(child.end_time);
+                    if (child.end_time)   $('#end_time').val(child.end_time);
                     if (child.description) $('#description').val(child.description);
 
-                    // DB 기준이 우선이어야 하면 워크센터/설비도 child로 보정
                     if (child.workcenter_id) {
                         $('#tabBasic #workcenter_id').val(child.workcenter_id);
                         $('#tabBasic #workcenter_name').val(child.workcenter_name || '');
@@ -1899,22 +1912,25 @@
                     }
 
                 } else {
-                    // ---- PLAN: 자식 없음
-                    $('#tabBasic #parent_jr_pk').val($('#tabBasic #id').val());
-                    $('#tabBasic #id').val('');
+                    // ---- PLAN
+                    $('#tabBasic #id').val('');                 // 새 자식 생성 준비
                     $('#tabBasic #consumed_mode').val('PLAN');
+
+                    // ★ parent는 현재 작지의 base 유지
+                    $('#tabBasic #parent_jr_pk').val(baseId || '');
 
                     const def = {
                         job_state: (v) => (v == null || String(v).trim() === '' ? '지시' : v),
-                        state: (v) => (v == null || String(v).trim() === '' ? 'ordered' : v),
+                        state:     (v) => (v == null || String(v).trim() === '' ? 'ordered' : v),
                     };
-                    // 현재 입력칸이 비어있으면 기본값 채우기
                     $('#job_state').val(def.job_state($('#job_state').val()));
                     $('#state').val(def.state($('#state').val()));
                 }
-                this.refreshProcessLists();
 
+                this.refreshProcessLists();
             }
+
+
 
             // 통합 헬퍼: 현재 공정의 자식 id로 리스트 갱신
             refreshProcessLists = () => {
@@ -2046,7 +2062,7 @@
                         Alert.alert('', '현재 공정의 작업지가 없습니다. PLAN 모드에서 작업 시작을 먼저 해주세요.');
                         return;
                     }
-                } else {
+                } else if (mode === 'PLAN') {
                     // PLAN → 새 자식 생성 → 부모 id 필요
                     data.id = $('#parent_jr_pk').val();
                     if (!data.id) {
@@ -2056,6 +2072,12 @@
                     // (선택) PLAN 모드라면 산출품/지시수량 체크
                     if (!data.prod_mat_id || !data.need_pro_mat_qty) {
                         Alert.alert('', 'PLAN 모드에서는 공정 산출품과 지시수량이 필요합니다.');
+                        return;
+                    }
+                } else {
+                    data.id = $('#id').val();
+                    if (!data.id) {
+                        Alert.alert('', '현재 공정의 작업지가 없습니다.');
                         return;
                     }
                 }
@@ -2838,8 +2860,9 @@
             // 투입목록 품목추가
             addMaterial() {
                 let _this = this;
+                let state = $('#tabBasic').find('#state').val();
 
-                if (this.jobres.state === "ordered") {
+                if (state === "ordered") {
                     Alert.alert('LOT 투입오류', '작업이 시작되지 않았습니다.');
                     return;
                 }
@@ -3014,7 +3037,9 @@
             // }
 
             async showLotInput(lot_number, jr_pk, mpi_id) {
-                if (this.jobres.state === "ordered") {
+                let state = $('#tabBasic').find('#state').val();
+
+                if (state === "ordered") {
                     Alert.alert('LOT 투입오류', '작업이 시작되지 않았습니다.');
                     return;
                 }
@@ -3073,7 +3098,9 @@
             multiSaveLotInput(lot) {
                 let _this = this;
 
-                if (this.jobres.state == "ordered") {
+                let state = $('#tabBasic').find('#state').val();
+
+                if (state === "ordered") {
                     Alert.alert('LOT 투입오류', '작업이 시작되지 않았습니다.');
                     return;
                 }
