@@ -666,9 +666,24 @@
                         $content.find('#SuJuOrderId').val(items.id);
                         $content.find('#SuJuOrderName').val(items.compname);
 
-                        // if ($Material_id.val() && $cboCompany.val()) {
-                        //     tryShowPrice();
-                        // }
+                        $content.find('#cboCompany').val(items.id);
+                        $content.find('#CompanyName').val(items.compname);
+
+                        setTimeout(() => {
+                            const $delivery = $content.find('#DeliveryName');
+                            if ($delivery.length) {
+                                $delivery.focus();
+                                // 커서를 맨 뒤로 이동(선택 범위 = 길이,길이)
+                                const el = $delivery.get(0);
+                                if (el && el.setSelectionRange) {
+                                    const v = $delivery.val() || '';
+                                    el.setSelectionRange(v.length, v.length);
+                                }
+                            } else {
+                                const $fallback = $('#DeliveryName');
+                                if ($fallback.length) $fallback.focus();
+                            }
+                        }, 120);
                     };
 
                     poppage.show(searchcallback);
