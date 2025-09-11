@@ -379,7 +379,7 @@
                     </thead>
                     <tr class="item-template-row" style="display: none;">
                         <td>
-                            <input type="text" name="product_code" placeholder="코드" readonly/>
+                            <input type="text" style="text-align:center;" name="product_code" placeholder="코드" readonly/>
                         </td>
                         <td>
                             <div class="input-with-button">
@@ -395,23 +395,23 @@
                             </div>
                         </td>
                         <td>
-                            <input type="text" name="standard" placeholder="규격" />
+                            <input type="text" style="text-align:center;" name="standard" placeholder="규격" />
                         </td>
-                        <td><input type="text" name="quantity" placeholder="수량" /></td>
+                        <td><input type="text" style="text-align:right;" name="quantity" placeholder="수량" /></td>
                         <td>
                             <div class="input-with-checkbox">
-                                <input type="text" name="unitPrice" placeholder="단가" />
+                                <input style="text-align:right;" type="text" name="unitPrice" placeholder="단가" />
                                 <input type="hidden" name="originalUnitPrice" />
                                 <input type="checkbox" name="VatIncluded" />
                             </div>
                         </td>
-                        <td><input type="text" name="supplyAmount" placeholder="공급가액" /></td>
-                        <td><input type="text" name="VatAmount" placeholder="부과세"/></td>
-                        <td><input type="text" name="totalAmount" placeholder="합계" /></td>
+                        <td><input type="text" style="text-align:right;" name="supplyAmount" placeholder="공급가액" /></td>
+                        <td><input type="text" style="text-align:right;" name="VatAmount" placeholder="부과세"/></td>
+                        <td><input type="text" style="text-align:right;" name="totalAmount" placeholder="합계" /></td>
                         <td><input type="text" name="description" placeholder="비고" /></td>
                          <td>
                             <input type="hidden" name="State"/>
-                            <input type="text" name="suju_StateName" placeholder="상태" readonly />
+                            <input type="text" style="text-align:center;" name="suju_StateName" placeholder="상태" readonly />
                         </td>
                         <td class="al_c item_border">
                             <a class="btn in_btn" title="삭제" onclick="removeItemRow(this)">
