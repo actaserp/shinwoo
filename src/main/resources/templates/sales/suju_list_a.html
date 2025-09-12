@@ -733,7 +733,7 @@
                         if ($lockedHidden.length) $lockedHidden.val(locked ? 'Y' : 'N');
                     });
 
-                    // ✅ 각 행 unitType 선세팅 (Bind 직후)
+                    // 각 행 unitType 선세팅 (Bind 직후)
                     $content.find('.item-table tbody tr:visible').not('.item-template-row').each(function (i) {
                         const $row = $(this);
                         const unitRaw = ($row.find('input[name^="unit_"]').val() || '').toString().trim().toUpperCase();
@@ -973,18 +973,31 @@
                                 vatAmount = Math.floor(supplyAmount * 0.1);
                             }
 
-                            if (!isSupplyEdited) $row.find('input[name^="supplyAmount_"]').val(supplyAmount.toLocaleString());
-                            if (!isVatEdited)    $row.find('input[name^="VatAmount_"]').val(isVatExempt ? '면세' : vatAmount.toLocaleString());
+                            if (!isSupplyEdited) {
+                                $row.find('input[name^="supplyAmount_"]')
+                                    .val(supplyAmount === 0 ? '' : supplyAmount.toLocaleString());
+                            }
+
+                            if (!isVatEdited) {
+                                $row.find('input[name^="VatAmount_"]')
+                                    .val(
+                                        isVatExempt
+                                            ? '면세'
+                                            : (vatAmount === 0 ? '' : vatAmount.toLocaleString())
+                                    );
+                            }
                         }
 
-                        // 합계(0도 "0"으로 표시)
+                        // 합계
                         const sNum = getNumericValue($row.find('input[name^="supplyAmount_"]'), 0);
                         const vNum = getNumericValue($row.find('input[name^="VatAmount_"]'), 0);
-                        $row.find('input[name^="totalAmount_"]').val((sNum + vNum).toLocaleString());
+                        const total = sNum + vNum;
+                        $row.find('input[name^="totalAmount_"]').val(total === 0 ? '' : total.toLocaleString());
 
-                        // 표시 포맷(수량/단가)
-                        $row.find('input[name^="quantity_"]').val(quantity.toLocaleString());
-                        $row.find('input[name^="unitPrice_"]').val(unitPrice.toLocaleString());
+                        // 수량 / 단가 표시
+                        $row.find('input[name^="quantity_"]').val(quantity === 0 ? '' : quantity.toLocaleString());
+                        $row.find('input[name^="unitPrice_"]').val(unitPrice === 0 ? '' : unitPrice.toLocaleString());
+
 
                         calculateTotalSum();
                     } finally {

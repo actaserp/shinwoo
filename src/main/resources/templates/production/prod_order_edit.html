@@ -626,6 +626,8 @@
                     if (result.data != null) {
                         $.each(result.data, function (idx, item) {
                             item['prod_date'] = prod_date;
+                            // 잔여량을 지시량에 기본값으로 세팅
+                            item['AdditionalQty'] = item.remain_qty;
                             if (!item.workshift) {
                                 // 주간조를 디폴트로 선택
                                 item.workshift = _this.workshifOptions.length > 0 ? _this.workshifOptions[2].value : null;
