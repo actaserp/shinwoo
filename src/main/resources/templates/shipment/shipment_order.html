@@ -159,7 +159,8 @@
                                 </label>
                             </dt>
                             <dd>
-                                <select class="" id="company_id" name="company_id"></select>
+                                <input class="" type="text" id="company_name" value="" placeholder="판매처를 선택하여 주십시오">
+                                <input class="" type="hidden" id="company_id" value="" placeholder="">
                             </dd>
                         </dl>
                         <dl>
@@ -182,7 +183,7 @@
                                 </label>
                             </dt>
                             <dd>
-                                <input class="" type="text" id="DeliveryName" value="" placeholder="납품처를 선택하여 주십시오">
+                                <input class="" type="text" id="DeliveryName" value="" placeholder="" style="width: 200px;">
                                 <input class="" type="hidden" id="description" value="">
                             </dd>
                         </dl>
@@ -441,7 +442,6 @@
 
 
                 $('#div_product').hide();
-                AjaxUtil.fillSelectOptions($('#company_id'), 'company', 'choose', '', 'sale');
             }
 
             searchMain() {
@@ -470,7 +470,7 @@
 
             grid_shipment_clear() {
                 this.grid_shipment.itemsSource = new wijmo.collections.CollectionView([]);
-                document.getElementById('company_id').selectedIndex = 0;
+                document.getElementById('company_id').value = '';
 
             }
 
@@ -479,12 +479,15 @@
                 if ($("#cboSource").val() == 'suju') {
                     let comp_pk = null;
                     let comp_name = null;
+                    let del_name = null;
 
                     let hasError = false;
 
                     $.each(SelectItem, function (index, item) {
+                        console.log('item', SelectItem);
                         comp_pk = item._data.Company_id;
                         comp_name = item._data.CompanyName;
+                        del_name = item._data.DeliveryName;
                         //let row_idx = _this.getShipMatRow(item._data.mat_id);
 
                         let order_input_qty = Number(item._data.order_input_qty);
@@ -578,7 +581,8 @@
                     });*/
                     if (hasError) return;
                     $("#company_id").val(comp_pk);
-                    $("#company_id_text").val(comp_name);
+                    $("#company_name").val(comp_name);
+                    $("#DeliveryName").val(del_name);
                 } else if ($("#cboSource").val() == 'product') {
 
                     $.each(SelectItem2, function (index, item) {
@@ -613,7 +617,7 @@
                 cv.refresh();
 
                 if (cv.items.length === 0) {
-                    document.getElementById('company_id').selectedIndex = 0;
+                    document.getElementById('company_id').value = '';
                 }
 
             }
@@ -673,7 +677,7 @@
 
                         let comboBox = $('#cboSource').val();
 
-                        $('#company_id option:eq(0)').prop('selected', true);
+                        $('#company_id').value = '';
 
 
                         page.grid_shipment_clear();
@@ -755,13 +759,6 @@
                 data_fill: true,
                 condition1: ''
             });
-            new CompanySelector('dataCompanySelect', 'combobox', 'company_id', 'sale', {
-                null_option: 'all',
-                selected_value: '',
-                data_fill: true,
-                condition1: ''
-            });
-
             AjaxUtil.fillSelectOptions($('#cboMatGroup'), 'material_group', 'all', '', 'product,semi,sangpum');
             AjaxUtil.fillSelectOptions($('#cboMaterial'), 'material', 'all', '', null);
             $('#cboMatGroup').change(function (e) {
@@ -772,13 +769,6 @@
             function initAll() {
                 $('#btnListCollapse').prop("checked", true);
                 $('#divList').show();
-
-                if ($("#cboSource").val() === 'product') {
-                    $("#company_id option:eq(0)").prop("selected", true);
-                } else {
-                    $("#company_id option:eq(0)").prop("selected", true);
-                }
-
 
                 if ($("#cboSource").val() != 'product') {
                     page.grid_shipment_clear();
@@ -921,12 +911,13 @@
                 page.grid_shipment_clear();
             });
 
-            // 납품처 검색 팝업
-            $("#DeliveryName").click(function () {
+            // 판매처 검색 팝업
+            $("#company_name").click(function () {
                 let poppage = new PopCompComponent();
                 let $poppage = $(poppage);
                 let searchcallback = function (items) {
-                    $('#DeliveryName').val(items.compname);
+                    $('#company_id').val(items.id);
+                    $('#company_name').val(items.compname);
 
                     // if ($Material_id.val() && $cboCompany.val()) {
                     //     tryShowPrice();

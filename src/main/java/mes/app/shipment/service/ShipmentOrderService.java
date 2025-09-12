@@ -51,7 +51,9 @@ public class ShipmentOrderService {
 	            , suju."SujuQty" 
 	            , suju."SujuQty2" 
                 , suju."Description"
+                , sh."DeliveryName"
 	            from suju suju
+	            inner join suju_head sh on sh.id = suju."SujuHead_id"
                 inner join material m on m.id = suju."Material_id" 
                 left join company c2 on c2.id = suju."Company_id"
 	            where suju."JumunDate" between cast(:dateFrom as date) and cast(:dateTo as date) 
@@ -81,6 +83,7 @@ public class ShipmentOrderService {
             , m."Code" as mat_code
             , m."Name" as mat_name
             , s."SujuQty" as suju_qty
+            , s."SujuQty" as order_input_qty
             , s."SujuQty2" as prod_qty 
             , sp.order_sum as order_qty 
             , sp.ship_sum  as shipment_qty
@@ -89,6 +92,7 @@ public class ShipmentOrderService {
             , u."Name" as unit_name
             , case when sp.ship_sum > 0 then '출하' when sp.order_sum > 0 then '출하' else '' end as shipment_state
             , s."State"
+            , s."DeliveryName"
             from s  
             left join sp on sp.suju_pk = s.suju_pk
             inner join material m on m.id = s."Material_id" 
