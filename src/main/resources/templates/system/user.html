@@ -850,7 +850,7 @@
                             Alert.alert('', res.message);
                         }
                     };
-                    AjaxUtil.postAsyncData(_this.baseUrl + '/passSetting', data, fncallback);
+                    AjaxUtil.postAsyncData('/api/system/user/passSetting', data, fncallback);
                 }
             });
 
