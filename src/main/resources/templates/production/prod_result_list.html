@@ -103,6 +103,16 @@
                         </dd>
                     </dl>
                     <dl>
+                        <dt>
+                            <label>
+                                판매처<span class="eq"></span>
+                            </label>
+                        </dt>
+                        <dd>
+                            <input type="text" id="CompanySearch" name="CompanySearch" placeholder="판매처"/>
+                        </dd>
+                    </dl>
+                    <dl>
                         <dt>&nbsp;</dt>
                         <dd>
                             <li>
@@ -448,6 +458,7 @@
                 'date_to': $('#date_to').val(),
                 'shift_code': $('#cboShift').val(),
                 'workcenter_pk': $('#cboWorkCenter').val(),
+                'company'  :$('#CompanySearch').val(),
             }
 
             let result = AjaxUtil.getSyncData(this.baseUrl + "/read", param);
@@ -554,15 +565,18 @@
     $(document).ready(function (e) {
         page = new ProdResultPage();
 
-        const now  = new Date();
-        const jan1 = new Date(now.getFullYear(), 0, 1);
-        const nextMonthLast = new Date(now.getFullYear(), now.getMonth() + 2, 0);
+        const now = new Date();
 
-        let date_from = CommonUtil.formatYYYYMMDD(jan1);
-        let today = CommonUtil.formatYYYYMMDD(nextMonthLast);
+        // ✅ 시작일: 오늘 기준 1년 전
+        const oneYearAgo = new Date(now);
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
-        $('#date_from').val(date_from);
-        $('#date_to').val(today);
+        // ✅ 종료일: 오늘 기준 한 달 뒤 (같은 일자)
+        const oneMonthLater = new Date(now);
+        oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+
+        $('#date_from').val(CommonUtil.formatYYYYMMDD(oneYearAgo));
+        $('#date_to').val(CommonUtil.formatYYYYMMDD(oneMonthLater));
 
         $('#btnMainSearch').click(function (e) {
             page.searchMainData();

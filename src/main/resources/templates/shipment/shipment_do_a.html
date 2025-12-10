@@ -168,77 +168,86 @@
         <div class="section-top">
             <div class="search-wrap" style="text-align: left;">
                 <dl>
-                            <dt>
-                                <label>
-                                    수주일<span class="eq"></span>
-                                </label>
-                            </dt>
-                            <dd>
-                                <div class="srch-box">
-                                    <input type="date"id="srchStartDt2" name="srchStartDt"  />
-                                    <span class="slow_sign">~</span>
-                                    <input type="date" id="srchEndDt2" name="srchEndDt" />
-                                </div>
-                            </dd>
+                    <dt>
+                        <label>
+                            수주일<span class="eq"></span>
+                        </label>
+                    </dt>
+                    <dd>
+                        <div class="srch-box">
+                            <input type="date"id="srchStartDt2" name="srchStartDt"  />
+                            <span class="slow_sign">~</span>
+                            <input type="date" id="srchEndDt2" name="srchEndDt" />
+                        </div>
+                    </dd>
                 </dl>
 
+                <!--<dl>
+                    <dt>
+                        <label>
+                            업체<span class="eq"></span>
+                        </label>
+                    </dt>
+                    <dd>
+                        <select class="" id="cboCompany2" name="cboCompany" >
+                        </select>
+                    </dd>
+                </dl>-->
 
                 <dl>
-                            <dt>
-                                <label>
-                                    업체<span class="eq"></span>
-                                </label>
-                            </dt>
-                            <dd>
-                                <select class="" id="cboCompany2" name="cboCompany" >
-                                </select>
-                            </dd>
-                        </dl>
+                    <dt>
+                        <label>
+                            품목그룹
+                        </label>
+                    </dt>
+                    <dd>
+                        <select class="" id="cboMatGroup2" name="cboMatGroup" >
+                        </select>
+                    </dd>
+                </dl>
+                <!--<dl>
+                    <dt>
+                        <label>
+                            품목<span class="eq"></span>
+                        </label>
+                    </dt>
+                    <dd>
+                        <select class="" id="cboMaterial2" name="cboMaterial" >
+                        </select>
+                    </dd>
+                </dl>-->
 
-                        <dl>
-                            <dt>
-                                <label>
-                                    품목그룹
-                                </label>
-                            </dt>
-                            <dd>
-                                <select class="" id="cboMatGroup2" name="cboMatGroup" >
-                                </select>
-                            </dd>
-                        </dl>
-                        <!--<dl>
-                            <dt>
-                                <label>
-                                    품목<span class="eq"></span>
-                                </label>
-                            </dt>
-                            <dd>
-                                <select class="" id="cboMaterial2" name="cboMaterial" >
-                                </select>
-                            </dd>
-                        </dl>-->
+                <dl>
+                    <dt>
+                        <label>
+                            품목명<span class="eq"></span>
+                        </label>
+                    </dt>
+                    <dd>
+                        <input type="text" style="width: 180px" class="" id="keyword2" name="keyword">
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        <label>
+                            납품처<span class="eq"></span>
+                        </label>
+                    </dt>
+                    <dd>
+                        <input style='width: 80%' type="text" id="CompanySearch" name="CompanySearch" />
+                    </dd>
+                </dl>
 
-                        <dl>
-                            <dt>
-                                <label>
-                                    품목명<span class="eq"></span>
-                                </label>
-                            </dt>
-                            <dd>
-                                <input type="text" style="width: 180px" class="" id="keyword2" name="keyword">
-                            </dd>
-                        </dl>
-
-                        <dl>
-                            <dt>
-                                <label>
-                                    미출고<span class="eq"></span>
-                                </label>
-                            </dt>
-                            <dd>
-                                <input type="checkbox" id="chkNotShipped2" name="chkNotShipped" value="Y" checked />
-                            </dd>
-                        </dl>
+                <dl>
+                    <dt>
+                        <label>
+                            미출고<span class="eq"></span>
+                        </label>
+                    </dt>
+                    <dd>
+                        <input type="checkbox" id="chkNotShipped2" name="chkNotShipped" value="Y" checked />
+                    </dd>
+                </dl>
 
                 <dl>
                     <dt>&nbsp;</dt>
@@ -252,17 +261,6 @@
                         </li>
                     </dd>
                 </dl>
-
-                <dl>
-                            <dt>
-                                <label>
-                                    납품처<span class="eq"></span>
-                                </label>
-                            </dt>
-                            <dd>
-                                <input style='width: 80%' type="text" id="DeliveryName" name="DeliveryName" />
-                            </dd>
-                        </dl>
             </div>
             <div class="container-fluid">
                 <div id="suju_grid" style="height: 400px;"></div>

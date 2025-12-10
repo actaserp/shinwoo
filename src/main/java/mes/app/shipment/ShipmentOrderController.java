@@ -61,7 +61,7 @@ public class ShipmentOrderController {
 			@RequestParam("cboMatGroup") String matGrpPk,
 			@RequestParam("cboMaterial") String matPk,
 			@RequestParam("keyword") String keyword,
-			@RequestParam("CompanySearch") String company
+			@RequestParam(value = "CompanySearch", required = false) String company
 			){
 
 		if(dateFrom.isEmpty()){

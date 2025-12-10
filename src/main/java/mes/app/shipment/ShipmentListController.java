@@ -35,13 +35,14 @@ public class ShipmentListController {
 	public AjaxResult getShipmentHeadList(
 			@RequestParam("srchStartDt") String dateFrom,
 			@RequestParam("srchEndDt") String dateTo,
-			@RequestParam("cboCompany") String compPk,
+			@RequestParam(value = "cboCompany", required = false) String compPk,
 			@RequestParam("cboMatGroup") String matGrpPk,
 			@RequestParam("cboMaterial") String matPk,
+			@RequestParam(value = "CompanySearch", required = false) String company,
 			@RequestParam("keyword") String keyword
 	) {
 		
-		List<Map<String, Object>> items = this.shipmentListService.getShipmentHeadList(dateFrom,dateTo,compPk,matGrpPk,matPk,keyword, "shipped");
+		List<Map<String, Object>> items = this.shipmentListService.getShipmentHeadList(dateFrom,dateTo,compPk,matGrpPk,matPk,keyword, "shipped", company);
 		
 		AjaxResult result = new AjaxResult();
 		result.data = items;

@@ -18,7 +18,7 @@ public class ProdResultListService {
 	SqlRunner sqlRunner;	
 	
 	// 작업목록
-	public List<Map<String, Object>> getProdResultList(String date_from, String date_to, String shift_code, Integer workcenter_pk, String spjangcd){
+	public List<Map<String, Object>> getProdResultList(String date_from, String date_to, String shift_code, Integer workcenter_pk, String spjangcd, String company){
 		
 		MapSqlParameterSource dicParam = new MapSqlParameterSource(); 
 		dicParam.addValue("date_from", Timestamp.valueOf(date_from + " 00:00:00"));
@@ -50,7 +50,7 @@ public class ProdResultListService {
 		             , coalesce(mp."LossQty", 0) as loss_qty
 		             , coalesce(mp."ScrapQty", 0) as scrap_qty
 		             , COALESCE(s."Standard", m."Standard1") as standard
-		             ,s."CompanyName" as company_name
+		             , s."CompanyName" as company_name
 	            from job_res jr 
 	            inner join mat_produce mp on mp."JobResponse_id" = jr.id
 	            left join material m on m.id = jr."Material_id"
@@ -70,6 +70,11 @@ public class ProdResultListService {
         
         if (workcenter_pk != null) 
         	sql += " and mp.\"WorkCenter_id\" = :workcenter_pk ";
+
+				if (StringUtils.isEmpty(company) == false) {
+					sql += " AND s.\"CompanyName\" LIKE :company ";
+					dicParam.addValue("company", "%" + company + "%");
+				}
 
         sql += " order by jr.\"ProductionDate\" desc, jr.\"WorkOrderNumber\" asc ";
         		

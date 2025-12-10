@@ -23,7 +23,7 @@ public class ShipmentListService {
 	@Autowired
 	mes.domain.repository.SujuRepository sujuRepository;
 
-	public List<Map<String, Object>> getShipmentHeadList(String dateFrom, String dateTo, String compPk, String matGrpPk, String matPk, String keyword, String state) {
+	public List<Map<String, Object>> getShipmentHeadList(String dateFrom, String dateTo, String compPk, String matGrpPk, String matPk, String keyword, String state, String company) {
 		
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("dateFrom", dateFrom);
@@ -54,7 +54,11 @@ public class ShipmentListService {
                 join company c on c.id = sh."Company_id"
                 where sh."ShipDate"  between cast(:dateFrom as date) and cast(:dateTo as date)
 				""";
-		
+
+		if (StringUtils.isEmpty(company) == false) {
+			sql += " AND  c.\"Name\" LIKE :company ";
+			paramMap.addValue("company", "%" + company + "%");
+		}
 		if (StringUtils.isEmpty(compPk)==false)  sql += " and sh.\"Company_id\" = cast(:compPk as Integer) ";
 		if (StringUtils.isEmpty(state)==false)  sql += " and sh.\"State\" = :state ";
 		if (StringUtils.isEmpty(matPk)==false || StringUtils.isEmpty(matGrpPk)==false || StringUtils.isEmpty(keyword)==false) {

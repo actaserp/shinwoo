@@ -20,7 +20,9 @@ public class ProdPlanServicr {
   SqlRunner sqlRunner;
 
   // 수주 목록 조회
-  public List<Map<String, Object>> getSujuList(String date_kind, String start, String end, Integer mat_group, String mat_name, String not_flag, String spjangcd) {
+  public List<Map<String, Object>> getSujuList(
+    String date_kind, String start, String end, Integer mat_group, String mat_name,
+    String not_flag, String spjangcd, String company) {
 
     MapSqlParameterSource dicParam = new MapSqlParameterSource();
     dicParam.addValue("start", Timestamp.valueOf(start + " 00:00:00"));
@@ -80,6 +82,10 @@ public class ProdPlanServicr {
                 or upper(m."Code") = upper(:mat_name)
                 )
           """;
+    }
+    if (StringUtils.isEmpty(company) == false) {
+      sql += " AND s.\"CompanyName\" LIKE :company ";
+      dicParam.addValue("company", "%" + company + "%");
     }
 
     sql += """

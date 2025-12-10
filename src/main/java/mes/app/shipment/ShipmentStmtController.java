@@ -71,6 +71,7 @@ public class ShipmentStmtController {
 			@RequestParam(value="srchEndDt") String date_to,
 			@RequestParam(value="cboCompany", required=false) String comp_pk,
 			@RequestParam(value="cboMatGroup", required=false) String mat_grp_pk,
+			@RequestParam(value="CompanySearch", required=false) String company,
 			@RequestParam(value="cboMaterial", required=false) String mat_pk) {
 
 		AjaxResult result = new AjaxResult();
@@ -83,7 +84,7 @@ public class ShipmentStmtController {
 
 		try{
 			List<Map<String, Object>> items
-				= this.shipmentListService.getShipmentHeadList(date_from, date_to, comp_pk, mat_grp_pk, mat_pk, null, "");
+				= this.shipmentListService.getShipmentHeadList(date_from, date_to, comp_pk, mat_grp_pk, mat_pk, null, "", company);
 
 			result.data = items;
 			return result;
