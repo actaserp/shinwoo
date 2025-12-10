@@ -60,7 +60,14 @@
               </ul>
             </dd>
           </dl>
-
+          <dl id="searchComArea">
+            <dt>
+              판매처
+            </dt>
+            <dd>
+              <input type="text" id="CompanySearch" name="CompanySearch" placeholder="판매처">
+            </dd>
+          </dl>
           <dl>
             <dt>&nbsp;</dt>
             <dd>
@@ -1047,15 +1054,14 @@
           }
         });
 
-
-
         // 엔터키 검색
-        $('#keyword').on('keypress', function (e) {
+        $('#CompanySearch').on('keypress', function (e) {
           if (e.keyCode === 13) {
             _this.searchMainData();
           }
         });
       }
+
 
       makeOrder(data) {
         let _this = this;
@@ -2684,11 +2690,13 @@
         let _this = this;
         let start = $('#srchStartDt').val();
         let end = $('#srchEndDt').val();
+        let company = $('#CompanySearch').val();
         let url = this.url + '/read';
 
         let data = {
           'start': start,
           'end': end,
+          'company':company ,
           'action': 'read'
         };
 
@@ -2705,6 +2713,8 @@
         AjaxUtil.getAsyncData(url, data, fnsuccess);
 
       }
+
+
 
       // 엑셀 업로드 버튼
       showPopupExcelUpload(data) {
@@ -2923,15 +2933,21 @@
 
     $(document).ready(function (e) {
 
-      page = new SujuUploadPage();
+     page = new SujuUploadPage();
 
+     const now = new Date();
 
-     const now  = new Date();
-     const jan1 = new Date(now.getFullYear(), 0, 1);
-     const nextMonthLast = new Date(now.getFullYear(), now.getMonth() + 2, 0);
+// ✅ 시작일: 오늘 기준 1년 전
+     const oneYearAgo = new Date(now);
+     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
-     $('#srchStartDt').val(CommonUtil.formatYYYYMMDD(jan1));
-     $('#srchEndDt').val(CommonUtil.formatYYYYMMDD(nextMonthLast));
+// ✅ 종료일: 오늘 기준 한 달 뒤 (같은 일자)
+     const oneMonthLater = new Date(now);
+     oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+
+     $('#srchStartDt').val(CommonUtil.formatYYYYMMDD(oneYearAgo));
+     $('#srchEndDt').val(CommonUtil.formatYYYYMMDD(oneMonthLater));
+
 
       page.searchMainData();
 

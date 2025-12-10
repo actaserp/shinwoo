@@ -119,9 +119,10 @@ public class ProductionResultController {
             @RequestParam(value = "is_include_comp", required = false) String isIncludeComp,
             @RequestParam(value="factory", required=false) Integer cboFactory,
             @RequestParam(value = "choMat", required = false) String choMat,
+            @RequestParam(value = "company", required = false) String company,
             @RequestParam("spjangcd") String spjangcd) {
 
-        List<Map<String, Object>> items = this.productionResultService.getProdResult(dateFrom, dateTo, isIncludeComp, spjangcd, choMat, cboFactory);
+        List<Map<String, Object>> items = this.productionResultService.getProdResult(dateFrom, dateTo, isIncludeComp, spjangcd, choMat, cboFactory, company);
 
         AjaxResult result = new AjaxResult();
         result.data = items;

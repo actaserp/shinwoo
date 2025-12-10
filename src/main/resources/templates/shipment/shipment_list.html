@@ -347,8 +347,18 @@
         $(document).ready(function (e) {
             page = new ShipmentPage();
 
-            $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-30));
-            $('#srchEndDt').val(CommonUtil.getYYYYMMDD());
+            const now = new Date();
+
+            // ✅ 시작일: 오늘 기준 1년 전
+            const oneYearAgo = new Date(now);
+            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+            // ✅ 종료일: 오늘 기준 한 달 뒤 (같은 일자)
+            const oneMonthLater = new Date(now);
+            oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+
+            $('#srchStartDt').val(CommonUtil.formatYYYYMMDD(oneYearAgo));
+            $('#srchEndDt').val(CommonUtil.formatYYYYMMDD(oneMonthLater));
 
 
             AjaxUtil.fillSelectOptions($('#cboCompany'), 'company', 'all', '', 'sale');

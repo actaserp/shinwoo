@@ -17,7 +17,7 @@ public class ShipmentDoaService {
 	SqlRunner sqlRunner;
 	
 	public List<Map<String, Object>> getOrderList(String dateFrom, String dateTo, String notShip, String compPk,
-			String matGrpPk, String matPk, String keyword) {
+			String matGrpPk, String matPk, String keyword, String company) {
 		
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("dateFrom", dateFrom);
@@ -48,7 +48,11 @@ public class ShipmentDoaService {
     		        where sh."ShipDate"  between cast(:dateFrom as date) and cast(:dateTo as date) 
                 """;
         
-        if (StringUtils.isEmpty(compPk)==false)  sql += " and sh.\"Company_id\" = cast(:compPk as Integer) ";
+//        if (StringUtils.isEmpty(compPk)==false)  sql += " and sh.\"Company_id\" = cast(:compPk as Integer) ";
+		if (StringUtils.isEmpty(company) == false) {
+			sql += " and c.\"Name\" like :company ";
+			paramMap.addValue("company", "%" + company + "%");
+		}
         if (StringUtils.isEmpty(state)==false)  sql += " and sh.\"State\" = :state ";
         
         sql += """

@@ -1053,12 +1053,16 @@
 
         $(document).ready(function (e) {
             page = new DashCustomPage();
-            const now  = new Date();
-            const jan1 = new Date(now.getFullYear(), 0, 1);
-            const nextMonthLast = new Date(now.getFullYear(), now.getMonth() + 2, 0);
+            const now = new Date();
+            // ✅ 시작일: 오늘 기준 1년 전
+            const oneYearAgo = new Date(now);
+            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+            // ✅ 종료일: 오늘 기준 한 달 뒤 (같은 일자)
+            const oneMonthLater = new Date(now);
+            oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
 
-            let date_from = CommonUtil.formatYYYYMMDD(jan1);
-            let today = CommonUtil.formatYYYYMMDD(nextMonthLast);
+            let date_from = CommonUtil.formatYYYYMMDD(oneYearAgo);
+            let today = CommonUtil.formatYYYYMMDD(oneMonthLater);
 
 
             page.today = today;

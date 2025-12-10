@@ -290,7 +290,7 @@
                                 </ul>
                             </dd>
                         </dl>
-                        <dl>
+                        <!--<dl>
                             <dt>
                                 <label for="choMat">
                                     품목<span class="eq"></span>
@@ -300,6 +300,15 @@
                                 <div class="srch-box">
                                     <input id="choMat" name="choMat" style="width: 160px;"/>
                                 </div>
+                            </dd>
+                        </dl>-->
+                        <dl id="searchComArea">
+                            <dt>
+                                판매처
+                            </dt>
+                            <dd>
+                                <input type="text" style="width: 160px;"
+                                       id="CompanySearch" name="CompanySearch" placeholder="판매처">
                             </dd>
                         </dl>
 
@@ -1147,25 +1156,26 @@
                     if (!dataSource || !Array.isArray(dataSource) || dataSource.length === 0) return;
 
                     const item = _this.grid.rows[selectedRow]?.dataItem;
-                    if (!item || _this._currentJrPk === item.id) return;
+                    if (!item) return;   // 🔹 같은 행 여부는 나중에 검사
 
                     // 🔹 1) 기본적으로 둘 다 비활성화
                     $btnJobResPrint.prop('disabled', true);
                     $btnReportPrint.prop('disabled', true);
 
                     // 🔹 2) 상태에 따라 버튼 활성화
-                    //    - job_state 값이 '생산완료' / '작업지시' 라고 가정
-                    const jobState = item.job_state;   // 또는 item.state 사용
+                    const jobState = item.job_state;   // ex) '작업지시', '생산중', '생산완료' ...
 
+                    // ✅ 생산완료 건: 제품확인서만 활성
                     if (jobState === '생산완료') {
-                        // ✅ 생산완료: 제품확인서 출력만 활성화
                         $btnReportPrint.prop('disabled', false);
-                    } else if (jobState === '작업지시') {
-                        // ✅ 작업지시 상태: 생산지시서 출력만 활성화
+
+                        // ✅ 생산완료 이외의 모든 상태: 생산지시서 출력 가능
+                    } else {
                         $btnJobResPrint.prop('disabled', false);
                     }
 
-                    // 🔹 동일 행 다시 클릭해도 버튼 상태는 적용되도록, 여기 이후에 _currentJrPk 체크
+                    // 🔹 3) 여기서부터는 상세조회/현황갱신 처리
+                    //    동일 행 다시 클릭해도 위의 버튼 활성화 로직은 이미 적용된 상태
                     if (_this._currentJrPk === item.id) {
                         return;
                     }
@@ -1188,6 +1198,7 @@
                         });
                     });
                 });
+                
                 new FlexGridContextMenu(this.grid);
                 this.grid.downloadFileName = '생산 내역';
 
@@ -1882,6 +1893,7 @@
                     'date_to': $('#date_to').val(),
                     'choMat': $('#choMat').val(),
                     'factory': $('#Factory_id').val(),
+                    'company' : $('#CompanySearch').val(),
                     'is_include_comp': $('#chxCompYn').is(':checked')
                 };
 
@@ -1947,7 +1959,6 @@
 
                 el.value = curVal ?? '';
             }
-
 
             // 생산정보 조회
             showBasicInfo(jr_pk, { skipProcessChange = false } = {}) {
@@ -2024,7 +2035,6 @@
 
                 this.setButtonState();
             }
-
 
             initProcessCascade() {
                 const $proc = $('#process_id');
@@ -2137,8 +2147,6 @@
 
                 this.refreshProcessLists();
             }
-
-
 
             // 통합 헬퍼: 현재 공정의 자식 id로 리스트 갱신
             refreshProcessLists = () => {
@@ -2306,6 +2314,16 @@
                             $('#id').val('');
                         }
 
+                        // ✅ ➊ 프론트에서 먼저 state 를 working 으로 변경 + 그리드도 갱신
+                        $('#tabBasic #state').val('working');
+                        if (_this.jobres) {
+                            _this.jobres.state = 'working';
+                            _this.jobres.job_state = 'working';   // 그리드 컬럼이 job_state 라면
+                            if (_this.grid && _this.grid.collectionView) {
+                                _this.grid.collectionView.refresh();
+                            }
+                        }
+
                         // 메인 그리드/상세 갱신: 부모 컨텍스트 유지
                         _this.searchMainData();
                         if (parentId) {
@@ -2327,18 +2345,40 @@
                             _this.showInputLotList(null);
                             _this.showChasuList(null);
                         }
-
+                        // ✅ ➋ 버튼 상태 즉시 반영
                         _this.setButtonState && _this.setButtonState();
+
+                        _this.showJobResPrint();
+
                     } else {
                         Alert.alert('작업 시작 실패', (res && res.message) || '작업을 시작할 수 없습니다.');
                     }
                 });
+
             }
 
 
             // 작업완료
             workFinish() {
                 const _this = this;
+
+                // 🔹 1) 재호출 시 차수 자동추가는 건너뛰기
+                if (_this.workFinishSkipChasu) {
+                    delete _this.workFinishSkipChasu; // 한 번만
+                } else {
+                    // 🔹 2) 첫 호출이고, 차수가 없으면 자동 생성 후 다시 workFinish 실행
+                    const cv = _this.chasuGrid?.collectionView;
+                    const items = cv ? cv.items : [];
+                    if (!items || items.length === 0) {
+                        _this.addChasu(function (res) {
+                            if (res && res.success) {
+                                _this.workFinishSkipChasu = true;
+                                _this.workFinish(); // → 여기서 재호출
+                            }
+                        });
+                        return;
+                    }
+                }
 
                 const url = this.baseUrl + '/work_finish';
                 const data = FormUtil.extractForm($('#basicForm'));
@@ -2347,7 +2387,7 @@
                 const childId = $('#tabBasic #id').val();
                 data.id = childId;
 
-                // 0) 종료일/시간 자동 세팅: 검증 이전에 강제 주입
+                // 0) 종료일/시간 자동 세팅
                 (function ensureEndNow(d) {
                     const now = new Date();
                     const pad2 = n => String(n).padStart(2, '0');
@@ -2356,11 +2396,8 @@
                     const dd = pad2(now.getDate());
                     const HH = pad2(now.getHours());
                     const MI = pad2(now.getMinutes());
-
-                    // ✅ 항상 오늘 날짜와 현재시간으로 갱신
                     d.end_date = `${yyyy}-${mm}-${dd}`;
                     $('#end_date').val(d.end_date);
-
                     d.end_time = `${HH}:${MI}`;
                     $('#end_time').val(d.end_time);
                 })(data);
@@ -2435,6 +2472,7 @@
                         $('#tabBasic #state').val('finished');
 
                         _this.searchMainData();
+                        _this.showBarcode(); //제품확인서 출력 요청
                         _this.showBasicInfo(res.data.jr_pk);
                         setTimeout(() => _this.grid.select(previousIndex, 0), 100);
                     }
@@ -2530,7 +2568,7 @@
             }
 
             // 차수추가
-            addChasu() {
+            addChasu(afterSuccess) {   // ⬅ 여기: 콜백 파라미터 추가
                 let _this = this;
 
                 let jr_pk = this.$tabBasic.find('#id').val();
@@ -2545,7 +2583,6 @@
                     Alert.alert('차수추가오류', '차수의 LOT size 를 확인하세요');
                     return;
                 }
-
 
                 let data = {jr_pk: jr_pk, good_qty: lotSize, defect_qty: 0, loss_qty: 0, scrap_qty: 0};
                 const addChasuCallbackSuccess = function (result) {
@@ -2574,15 +2611,19 @@
 
                     // 품목코드가 같은 경우에만 그리드 수량 업데이트
                     if (serverMatCode && row && serverMatCode === rowMatCode) {
-                       // 리렌더
+                        // 리렌더
                         row.good_qty = result.data.good_qty_sum;     // 누적 양품량 반영
                         _this.grid.collectionView?.commitEdit?.();  // 커밋
                         _this.grid.invalidate();
                     }
 
-
                     // detail은 항상 최신 jr_pk로 갱신
                     _this.showBasicInfo(result.data.jr_pk);
+
+                    // ✅ 추가: workFinish()에서 넘긴 콜백 실행
+                    if (typeof afterSuccess === 'function') {
+                        afterSuccess(result);
+                    }
                 };
                 let url = this.baseUrl + '/chasu_add';
                 AjaxUtil.postAsyncData(url, data, addChasuCallbackSuccess);
@@ -2868,9 +2909,8 @@
                     return;
                 }
 
-                // 상태 체크 (선택 사항)
-                if (selected.job_state !== '작업지시') {
-                    Alert.alert('', '작업지시 상태인 건만 출력할 수 있습니다.');
+                if (selected.job_state === '생산완료') {
+                    Alert.alert('', '생산완료 건은 출력할 수 없습니다.');
                     return;
                 }
 
@@ -3871,7 +3911,7 @@
         let page = null;
 
         $(document).ready(function (e) {
-            window.page = new ProdResultPage();
+            /*window.page = new ProdResultPage();
             page = window.page;
 
             let date_from = CommonUtil.getYYYYMMDD();
@@ -3879,8 +3919,39 @@
             page.today = today;
 
             $('#date_from').val(date_from);
-            $('#date_to').val(today);
+            $('#date_to').val(today);*/
+            window.page = new ProdResultPage();
+            page = window.page;
 
+            // 기준이 되는 오늘
+            const now = new Date();
+
+            // ✅ 시작일: 오늘 기준 1년 전
+            const oneYearAgo = new Date(now);
+            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+            // ✅ 종료일: 오늘 기준 한 달 뒤 (같은 일자)
+            const oneMonthLater = new Date(now);
+            oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+
+            // 날짜 포맷 함수 (yyyy-MM-dd 기준, input[type="date"]용)
+            function formatDate(date) {
+                const y = date.getFullYear();
+                const m = ('0' + (date.getMonth() + 1)).slice(-2);
+                const d = ('0' + date.getDate()).slice(-2);
+                return `${y}-${m}-${d}`;
+            }
+
+            // page.today 는 오늘로 유지
+            let today = formatDate(now);
+            page.today = today;
+
+            // 시작/종료일 세팅
+            let date_from = formatDate(oneYearAgo);
+            let date_to   = formatDate(oneMonthLater);
+
+            $('#date_from').val(date_from);
+            $('#date_to').val(date_to);
 
             // 보기/감추기 버튼
             $('#btnWorkListToggle').click(function (e) {
@@ -4064,6 +4135,13 @@
             });
 
             $('#choMat').on('keydown', function (e) {
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    e.preventDefault(); // form submit 방지
+                    page.searchMainData();
+                }
+            });
+
+            $('#CompanySearch').on('keydown', function (e) {
                 if (e.key === 'Enter' || e.keyCode === 13) {
                     e.preventDefault(); // form submit 방지
                     page.searchMainData();

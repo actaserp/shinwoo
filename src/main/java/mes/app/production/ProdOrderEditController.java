@@ -64,9 +64,10 @@ public class ProdOrderEditController {
 			@RequestParam(value="factory", required=false) Integer cboFactory,
 			@RequestParam(value="mat_name", required=false) String mat_name,
 			@RequestParam("spjangcd") String spjangcd,
+			@RequestParam(value = "company", required = false) String company,
 			@RequestParam(value="not_flag", required=false) String not_flag) {
 
-		List<Map<String, Object>> items = this.prodOrderEditService.getSujuList(date_kind, start, end, mat_group, mat_name, not_flag, spjangcd, cboFactory);
+		List<Map<String, Object>> items = this.prodOrderEditService.getSujuList(date_kind, start, end, mat_group, mat_name, not_flag, spjangcd, cboFactory, company);
 		
         AjaxResult result = new AjaxResult();
         result.data = items;

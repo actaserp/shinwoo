@@ -57,10 +57,12 @@ public class ShipmentOrderController {
 			@RequestParam("srchStartDt") String dateFrom,
 			@RequestParam("srchEndDt") String dateTo,
 			@RequestParam("not_ship") String notShip,
-			@RequestParam("cboCompany") String compPk,
+//			@RequestParam("cboCompany") String compPk,
 			@RequestParam("cboMatGroup") String matGrpPk,
 			@RequestParam("cboMaterial") String matPk,
-			@RequestParam("keyword") String keyword ){
+			@RequestParam("keyword") String keyword,
+			@RequestParam("CompanySearch") String company
+			){
 
 		if(dateFrom.isEmpty()){
 			//dateFrom = UtilClass.getDayByParamAdd(0); // 오늘날짜
@@ -70,7 +72,7 @@ public class ShipmentOrderController {
 			//dateTo = UtilClass.getDayByParamAdd(7);
 		}
 
-		List<Map<String, Object>> items = this.shipmentOrderService.getSujuList(dateFrom,dateTo,notShip,compPk,matGrpPk,matPk,keyword);
+		List<Map<String, Object>> items = this.shipmentOrderService.getSujuList(dateFrom,dateTo,notShip,matGrpPk,matPk,keyword, company);
 
 		AjaxResult result = new AjaxResult();
 		result.data = items;
@@ -376,6 +378,7 @@ public class ShipmentOrderController {
 			@RequestParam(value="cboCompany", required=false) Integer comp_pk,
 			@RequestParam(value="cboMatGroup", required=false) Integer mat_grp_pk, 
 			@RequestParam(value="cboMaterial", required=false) Integer mat_pk,
+			@RequestParam(value="CompanySearch", required=false) String company,
 			@RequestParam(value="keyword", required=false) String keyword,
 			HttpServletRequest request) {
 			
@@ -386,7 +389,7 @@ public class ShipmentOrderController {
 			state = "";
 		}
 		
-		List<Map<String, Object>> items = this.shipmentOrderService.getShipmentOrderList(date_from, date_to, state, comp_pk, mat_grp_pk, mat_pk, keyword);
+		List<Map<String, Object>> items = this.shipmentOrderService.getShipmentOrderList(date_from, date_to, state, comp_pk, mat_grp_pk, mat_pk, keyword, company);
         AjaxResult result = new AjaxResult();
         result.data = items;
 		return result;

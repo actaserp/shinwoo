@@ -46,21 +46,6 @@
                                     </div>
                                 </dd>
                             </dl>
-
-                            <dl>
-                                <dt>
-                                    <label>
-                                        업체<span class="eq"></span>
-                                    </label>
-                                </dt>
-                                <dd>
-                                    <select class="" id="cboCompany" name="cboCompany">
-                                    </select>
-                                </dd>
-                            </dl>
-
-                        </div>
-                        <div class="search-wrap">
                             <dl>
                                 <dt>
                                     <label>
@@ -72,6 +57,21 @@
                                     </select>
                                 </dd>
                             </dl>
+                            <!--<dl>
+                                <dt>
+                                    <label>
+                                        업체<span class="eq"></span>
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <select class="" id="cboCompany" name="cboCompany">
+                                    </select>
+                                </dd>
+                            </dl>-->
+
+                        </div>
+                        <div class="search-wrap">
+
                             <dl>
                                 <dt>
                                     <label>
@@ -94,6 +94,14 @@
                                     <input type="text" style="width: 180px" class="" id="keyword" name="keyword">
                                 </dd>
                             </dl>
+                            <dl id="searchComArea">
+                                <dt>
+                                    판매처
+                                </dt>
+                                <dd>
+                                    <input type="text" id="CompanySearch" name="CompanySearch" placeholder="판매처">
+                                </dd>
+                            </dl>
 
                             <dl>
                                 <dt>
@@ -105,7 +113,6 @@
                                     <input type="checkbox" id="chkNotShipped" name="chkNotShipped" value="Y" checked/>
                                 </dd>
                             </dl>
-
                             <dl>
                                 <dt>&nbsp;</dt>
                                 <dd>
@@ -766,12 +773,14 @@
 
         $(document).ready(function (e) {
             page = new ShipmentOrderPage();
+/*
             new CompanySelector('condCompanySelect', 'combobox', 'cboCompany', 'sale', {
                 null_option: 'all',
                 selected_value: '',
                 data_fill: true,
                 condition1: ''
-            });
+            });*/
+
             AjaxUtil.fillSelectOptions($('#cboMatGroup'), 'material_group', 'all', '', 'product,semi,sangpum');
             AjaxUtil.fillSelectOptions($('#cboMaterial'), 'material', 'all', '', null);
             $('#cboMatGroup').change(function (e) {
@@ -897,12 +906,19 @@
                 AjaxUtil.postJsonData('/api/sales/suju/force-complete', {sujuPkList}, fnSuccess);
 
             });
-            const now  = new Date();
-            const jan1 = new Date(now.getFullYear(), 0, 1);
-            const nextMonthLast = new Date(now.getFullYear(), now.getMonth() + 2, 0);
 
-            $('#srchStartDt').val(CommonUtil.formatYYYYMMDD(jan1));
-            $('#srchEndDt').val(CommonUtil.formatYYYYMMDD(nextMonthLast));
+            const now = new Date();
+
+            // ✅ 시작일: 오늘 기준 1년 전
+            const oneYearAgo = new Date(now);
+            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+            // ✅ 종료일: 오늘 기준 한 달 뒤 (같은 일자)
+            const oneMonthLater = new Date(now);
+            oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+
+            $('#srchStartDt').val(CommonUtil.formatYYYYMMDD(oneYearAgo));
+            $('#srchEndDt').val(CommonUtil.formatYYYYMMDD(oneMonthLater));
 
             $('#shipdate').val(CommonUtil.getYYYYMMDD());
 

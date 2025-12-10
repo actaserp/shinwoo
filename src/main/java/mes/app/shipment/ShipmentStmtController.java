@@ -82,7 +82,8 @@ public class ShipmentStmtController {
 		}
 
 		try{
-			List<Map<String, Object>> items = this.shipmentListService.getShipmentHeadList(date_from, date_to, comp_pk, mat_grp_pk, mat_pk, null, "");
+			List<Map<String, Object>> items
+				= this.shipmentListService.getShipmentHeadList(date_from, date_to, comp_pk, mat_grp_pk, mat_pk, null, "");
 
 			result.data = items;
 			return result;

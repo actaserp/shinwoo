@@ -110,9 +110,10 @@ public class SujuController {
   // 수주 목록 조회
   @GetMapping("/read")
   public AjaxResult getSujuList(
-      @RequestParam(value = "start", required = false) String start_date,
-      @RequestParam(value = "end", required = false) String end_date,
+      @RequestParam(value = "start") String start_date,
+      @RequestParam(value = "end" ) String end_date,
       @RequestParam(value = "spjangcd") String spjangcd,
+      @RequestParam(value = "company",required = false) String company,
       HttpServletRequest request) {
 
     start_date = start_date + " 00:00:00";
@@ -121,7 +122,7 @@ public class SujuController {
     Timestamp start = Timestamp.valueOf(start_date);
     Timestamp end = Timestamp.valueOf(end_date);
 
-    List<Map<String, Object>> items = this.sujuService.getSujuList(start, end, spjangcd);
+    List<Map<String, Object>> items = this.sujuService.getSujuList(start, end,spjangcd, company);
 
     AjaxResult result = new AjaxResult();
     result.data = items;

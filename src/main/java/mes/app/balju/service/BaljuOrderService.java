@@ -1,5 +1,6 @@
 package mes.app.balju.service;
 
+import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import mes.domain.services.CommonUtil;
 import mes.domain.services.SqlRunner;
@@ -23,7 +24,7 @@ public class BaljuOrderService {
   @Autowired
   SqlRunner sqlRunner;
 
-  public List<Map<String, Object>> getBaljuList(String date_kind, Timestamp start, Timestamp end, String spjangcd) {
+  public List<Map<String, Object>> getBaljuList(String date_kind, Timestamp start, Timestamp end, String spjangcd, String company) {
 
     MapSqlParameterSource dicParam = new MapSqlParameterSource();
     dicParam.addValue("date_kind", date_kind);
@@ -170,6 +171,11 @@ public class BaljuOrderService {
       sql += " AND bh.\"JumunDate\" BETWEEN :start AND :end ";
     } else {
       sql += " AND bh.\"DeliveryDate\" BETWEEN :start AND :end ";
+    }
+
+    if (StringUtils.isEmpty(company) == false) {
+      sql += " and c.\"Name\" like :company ";
+      dicParam.addValue("company", "%" + company + "%");
     }
 
     sql += """

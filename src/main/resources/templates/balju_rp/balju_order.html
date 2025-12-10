@@ -45,11 +45,20 @@
                   <input type="date" id="srchStartDt" name="srchStartDt">
                   <label for="srchStartDt" class="hide">시작일</label>
                 </li>
+                ~
                 <li>
                   <input type="date" id="srchEndDt" name="srchEndDt">
                   <label for="srchEndDt" class="hide">종료일</label>
                 </li>
               </ul>
+            </dd>
+          </dl>
+          <dl id="searchComArea">
+            <dt>
+              구매처
+            </dt>
+            <dd>
+              <input type="text" id="CompanySearch" name="CompanySearch" placeholder="구매처">
             </dd>
           </dl>
 
@@ -826,7 +835,15 @@
             _this.searchMainData();
           }
         });
-      }
+
+       // 엔터키 검색
+       $('#CompanySearch').on('keypress', function (e) {
+        if (e.keyCode === 13) {
+         _this.searchMainData();
+        }
+       });
+
+      }//init
 
       showBalJuMailForm(data) {
         let _this = this;
@@ -1628,14 +1645,16 @@
       searchMainData() {
         let _this = this;
         let date_kind = $('#cboDateKind').val();  //발주구분
-        let start = $('#srchStartDt').val();  //시작일
-        let end = $('#srchEndDt').val();      //종료일
+        let start = $('#srchStartDt').val();      //시작일
+        let end = $('#srchEndDt').val();          //종료일
+        let company = $('#CompanySearch').val();  //구매처
         let url = this.url + '/read';
 
         let data = {
           'date_kind': date_kind,
           'start': start,
           'end': end,
+          'company': company,
           'action': 'read',
           spjangcd: this.spjangcd.val()
         };
@@ -1803,12 +1822,18 @@
 
       page = new BaljuOrderPage();
 
-     const now  = new Date();
-     const jan1 = new Date(now.getFullYear(), 0, 1);
-     const nextMonthLast = new Date(now.getFullYear(), now.getMonth() + 2, 0);
+     const now = new Date();
 
-     $('#srchStartDt').val(CommonUtil.formatYYYYMMDD(jan1));
-     $('#srchEndDt').val(CommonUtil.formatYYYYMMDD(nextMonthLast));
+      // ✅ 시작일: 오늘 기준 1년 전
+     const oneYearAgo = new Date(now);
+     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+    // ✅ 종료일: 오늘 기준 한 달 뒤 (같은 일자)
+     const oneMonthLater = new Date(now);
+     oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+
+     $('#srchStartDt').val(CommonUtil.formatYYYYMMDD(oneYearAgo));
+     $('#srchEndDt').val(CommonUtil.formatYYYYMMDD(oneMonthLater));
 
 
       page.searchMainData();

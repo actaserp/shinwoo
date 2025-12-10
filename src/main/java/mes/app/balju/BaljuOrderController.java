@@ -69,6 +69,7 @@ public class BaljuOrderController {
       @RequestParam(value = "start", required = false) String start_date,
       @RequestParam(value = "end", required = false) String end_date,
       @RequestParam(value = "spjangcd") String spjangcd,
+      @RequestParam(value = "company", required = false) String company,
       HttpServletRequest request) {
     //log.info("발주 read--- date_kind:{}, start_date:{},end_date:{} , spjangcd:{} " ,date_kind,start_date , end_date, spjangcd);
     start_date = start_date + " 00:00:00";
@@ -77,7 +78,7 @@ public class BaljuOrderController {
     Timestamp start = Timestamp.valueOf(start_date);
     Timestamp end = Timestamp.valueOf(end_date);
 
-    List<Map<String, Object>> items = this.baljuOrderService.getBaljuList(date_kind, start, end, spjangcd);
+    List<Map<String, Object>> items = this.baljuOrderService.getBaljuList(date_kind, start, end, spjangcd, company);
 
     AjaxResult result = new AjaxResult();
     result.data = items;

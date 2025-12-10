@@ -26,7 +26,7 @@ public class ShipmentOrderService {
 	@Autowired
 	SujuRepository sujuRepository;
 	
-	public List<Map<String, Object>> getSujuList(String dateFrom, String dateTo, String notShip, String compPk,String matGrpPk, String matPk, String keyword) {
+	public List<Map<String, Object>> getSujuList(String dateFrom, String dateTo, String notShip,String matGrpPk, String matPk, String keyword, String company) {
 		
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 
@@ -40,7 +40,7 @@ public class ShipmentOrderService {
 		paramMap.addValue("dateFrom", dateFrom);
 		paramMap.addValue("dateTo", dateTo);
 		paramMap.addValue("notShip", notShip);
-		paramMap.addValue("compPk", compPk);
+//		paramMap.addValue("compPk", compPk);
 		paramMap.addValue("matGrpPk", matGrpPk);
 		paramMap.addValue("matPk", matPk);
 		paramMap.addValue("keyword", keyword);
@@ -71,8 +71,12 @@ public class ShipmentOrderService {
 	            and sh."SujuType" <> 'estimate'
                 """;
         
-        if (StringUtils.isEmpty(compPk)==false)  sql += " and suju.\"Company_id\" = cast(:compPk as Integer) ";
-        if (StringUtils.isEmpty(matPk)==false)  sql += " and suju.\"Material_id\"  = cast(:matPk as Integer) ";
+//        if (StringUtils.isEmpty(compPk)==false)  sql += " and suju.\"Company_id\" = cast(:compPk as Integer) ";
+		if (StringUtils.isEmpty(company) == false) {
+			sql += " and c2.\"Name\" like :company ";
+			paramMap.addValue("company", "%" + company + "%");
+		}
+		if (StringUtils.isEmpty(matPk)==false)  sql += " and suju.\"Material_id\"  = cast(:matPk as Integer) ";
         if (StringUtils.isEmpty(matGrpPk)==false)  sql += " and m.\"MaterialGroup_id\"  = cast(:matGrpPk as Integer) ";
         sql += """
         		), SP as (
@@ -167,7 +171,7 @@ public class ShipmentOrderService {
 	}
 	
 	// 출하지시 목록 조회
-	public List<Map<String, Object>> getShipmentOrderList(String date_from, String date_to, String state, Integer comp_pk, Integer mat_grp_pk, Integer mat_pk, String keyword) {
+	public List<Map<String, Object>> getShipmentOrderList(String date_from, String date_to, String state, Integer comp_pk, Integer mat_grp_pk, Integer mat_pk, String keyword, String company) {
 
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("date_from", Date.valueOf(date_from));
@@ -198,8 +202,13 @@ public class ShipmentOrderService {
                 join company c on c.id = sh."Company_id"   
                 where sh."ShipDate"  between :date_from and :date_to
 				         """;
-		if (comp_pk != null) {
+		/*if (comp_pk != null) {
 			sql += " and sh.\"Company_id\" = :comp_pk ";
+		}*/
+
+		if (StringUtils.isEmpty(company) == false) {
+			sql += " and c.\"Name\" like :company ";
+			paramMap.addValue("company", "%" + company + "%");
 		}
 		
 		if (StringUtils.isEmpty(state) == false) {

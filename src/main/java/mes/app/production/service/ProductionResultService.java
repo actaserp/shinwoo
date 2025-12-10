@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import mes.domain.repository.MatLotRepository;
 import mes.domain.repository.StorehouseRepository;
 import mes.domain.services.SqlRunner;
 
+@Slf4j
 @Service
 public class ProductionResultService {
 
@@ -232,7 +234,7 @@ public class ProductionResultService {
 		this.sqlRunner.execute(sql, dicParam);
 	}
 
-	public List<Map<String, Object>> getProdResult(String dateFrom, String dateTo, String isIncludeComp, String spjangcd, String choMat, Integer cboFactory) {
+	public List<Map<String, Object>> getProdResult(String dateFrom, String dateTo, String isIncludeComp, String spjangcd, String choMat, Integer cboFactory, String company) {
 
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("dateFrom", dateFrom);
@@ -353,9 +355,15 @@ public class ProductionResultService {
 			sql += " and F.\"Factory_id\" = :cboFactory ";
 		}
 
-		sql += " ORDER BY F.prod_date, F.order_num, F.id ";
+		if (StringUtils.isEmpty(company) == false) {
+			sql += " AND F.company_name LIKE :company ";
+			dicParam.addValue("company", "%" + company + "%");
+		}
 
+		sql += " ORDER BY F.prod_date desc, F.order_num, F.id ";
 
+//		log.info("생산실적 입력 read SQL: {}", sql);
+//    log.info("SQL Parameters: {}", dicParam.getValues());
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
 		return items;
 	}

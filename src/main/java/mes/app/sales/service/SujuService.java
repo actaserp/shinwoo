@@ -30,14 +30,14 @@ public class SujuService {
 	SujuRepository SujuRepository;
 	
 	
-	// 수주 내역 조회 
-	public List<Map<String, Object>> getSujuList(Timestamp start, Timestamp end, String spjangcd) {
+	// 수주 내역 조회
+	public List<Map<String, Object>> getSujuList(Timestamp start, Timestamp end, String spjangcd, String company) {
 		
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("start", start);
 		dicParam.addValue("end", end);
 		dicParam.addValue("spjangcd", spjangcd);
-		
+
 		String sql = """
 			WITH suju_state_summary AS (
 			  SELECT
@@ -123,7 +123,21 @@ public class SujuService {
             where 1 = 1
             and sh.spjangcd = :spjangcd
             and sh."JumunDate" between :start and :end
-				group by
+			""";
+
+		if (company != null && !company.isEmpty()) {
+			dicParam.addValue("company", "%" + company + "%");   // ← 여기서 와일드카드 포함해서 덮어쓰기
+
+			sql += """
+          AND (
+              c."Name" ILIKE :company
+              OR CAST(c.id AS TEXT) ILIKE :company
+          )
+        """;
+		}
+
+		sql +="""
+			group by
 					 sh.id,
 					 sh."JumunNumber",
 					 sh."JumunDate",

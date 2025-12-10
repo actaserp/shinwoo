@@ -18,7 +18,8 @@ public class ProdOrderEditService {
 	SqlRunner sqlRunner;
 	
 	// 수주 목록 조회
-	public List<Map<String, Object>> getSujuList(String date_kind, String start, String end, Integer mat_group, String mat_name, String not_flag, String spjangcd, Integer cboFactory) {
+	public List<Map<String, Object>> getSujuList(String date_kind, String start, String end, Integer mat_group, String mat_name,
+																							 String not_flag, String spjangcd, Integer cboFactory, String company) {
 		
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("start", Timestamp.valueOf(start + " 00:00:00"));
@@ -54,7 +55,7 @@ public class ProdOrderEditService {
 	                , s."Description" as description
 	                , m."Routing_id"
 	                , f."Name" as fac_name
-					, r."Name" as routing_nm
+									, r."Name" as routing_nm
 	                from suju s
 	                inner join material m on m.id = s."Material_id"
 	                inner join mat_grp mg on mg.id = m."MaterialGroup_id"
@@ -72,9 +73,14 @@ public class ProdOrderEditService {
             sql += " and s.\"DueDate\" between :start and :end ";
         }
 
-		if (cboFactory != null) {
-			sql += " and m.\"Factory_id\" = :cboFactory ";
-		}
+				if (StringUtils.isEmpty(company) == false) {
+					sql += " and s.\"CompanyName\" like :company ";
+					dicParam.addValue("company", "%" + company + "%");
+				}
+
+				if (cboFactory != null) {
+					sql += " and m.\"Factory_id\" = :cboFactory ";
+				}
         
         if (mat_group != null) {
         	sql += " and mg.id = :mat_group ";

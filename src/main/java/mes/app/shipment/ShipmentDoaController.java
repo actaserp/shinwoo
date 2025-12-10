@@ -48,13 +48,15 @@ public class ShipmentDoaController {
 	public AjaxResult getOrderList(
 			@RequestParam("srchStartDt") String dateFrom,
 			@RequestParam("srchEndDt") String dateTo,
-			@RequestParam("cboCompany") String compPk,
+			@RequestParam(value = "cboCompany", required = false) String compPk,
 			@RequestParam("cboMatGroup") String matGrpPk,
 			@RequestParam("cboMaterial") String matPk,
 			@RequestParam("not_ship") String notShip,
-			@RequestParam("keyword") String keyword){
+			@RequestParam("keyword") String keyword,
+			@RequestParam(value = "CompanySearch", required = false) String company
+	){
 		
-		List<Map<String, Object>> items = this.shipmentDoaService.getOrderList(dateFrom,dateTo,notShip,compPk,matGrpPk,matPk,keyword);
+		List<Map<String, Object>> items = this.shipmentDoaService.getOrderList(dateFrom,dateTo,notShip,compPk,matGrpPk,matPk,keyword, company);
 		
 		AjaxResult result = new AjaxResult();
 		result.data = items;

@@ -108,7 +108,14 @@
                             </div>
                         </dd>
                     </dl>
-
+                    <dl id="searchComArea">
+                        <dt>
+                            판매처
+                        </dt>
+                        <dd>
+                            <input type="text" id="CompanySearch" name="CompanySearch" placeholder="판매처">
+                        </dd>
+                    </dl>
                     <dl>
                         <dt>
                             <label for="chkNoActionFlag">
@@ -568,12 +575,18 @@
                     let matType = _this.$cboMatType.val();
                     AjaxUtil.fillSelectOptions(_this.$cboMatGroup, 'material_group', 'all', false, matType);
                 });
-                const now  = new Date();
-                const jan1 = new Date(now.getFullYear(), 0, 1);
-                const nextMonthLast = new Date(now.getFullYear(), now.getMonth() + 2, 0);
+                const now = new Date();
+
+                // ✅ 시작일: 오늘 기준 1년 전
+                const oneYearAgo = new Date(now);
+                oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+                // ✅ 종료일: 오늘 기준 한 달 뒤 (같은 일자)
+                const oneMonthLater = new Date(now);
+                oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
                 // 기간 초기화
-                $('#srchStartDt').val(CommonUtil.formatYYYYMMDD(jan1));
-                $('#srchEndDt').val(CommonUtil.formatYYYYMMDD(nextMonthLast));
+                $('#srchStartDt').val(CommonUtil.formatYYYYMMDD(oneYearAgo));
+                $('#srchEndDt').val(CommonUtil.formatYYYYMMDD(oneMonthLater));
 
                 $('#ProductionDate').val(CommonUtil.getYYYYMMDD());
 
@@ -648,6 +661,7 @@
                 let date_kind = $('#cboDateKind').val();
                 let $cboMatGroup = $('#cboMatGroup');
                 let cboFactory = $('#Factory_id').val();
+                let company = $('#CompanySearch').val();
                 let mat_grp = $cboMatGroup.val();
                 let not_flag = $("input:checkbox[id='chkNoActionFlag']").is(":checked") ? 'NOT' : '';
                 let $ProductionDate = $('#ProductionDate');
@@ -659,6 +673,7 @@
                     mat_group: mat_grp,
                     not_flag: not_flag,
                     factory: cboFactory,
+                    company: company,
                     mat_name: $('#txtMatName').val()
                 };
 
@@ -1279,6 +1294,14 @@
                     $factory.val('').trigger('change'); // ''은 "전체" 옵션
                 }, 300);
             }
+
+            // 엔터키 검색
+            $('#CompanySearch').on('keypress', function (e) {
+                if (e.keyCode === 13) {
+                    pageProdOrder.sujuSearch();
+                }
+            });
+
         });
 
 

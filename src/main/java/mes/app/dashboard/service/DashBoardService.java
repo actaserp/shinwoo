@@ -28,36 +28,36 @@ public class DashBoardService {
 	public List<Map<String, Object>> getOverview(Timestamp start, Timestamp end, String spjangcd, String choComp) {
 
 		// 1) 각각 조회
-		List<Map<String, Object>> balju = getBaljuList(start, end, spjangcd, choComp);
+//		List<Map<String, Object>> balju = getBaljuList(start, end, spjangcd, choComp);
 		List<Map<String, Object>> suju  = getSujuList(start, end, spjangcd, choComp);
-		List<Map<String, Object>> invo  = getInvoList(start, end, spjangcd, choComp);
+//		List<Map<String, Object>> invo  = getInvoList(start, end, spjangcd, choComp);
 		List<Map<String, Object>> sales  = getSaleList(start, end, spjangcd, choComp);
-		List<Map<String, Object>> receive  = getReceiveList(start, end, spjangcd, choComp);
-		List<Map<String, Object>> payment  = getPaymentList(start, end, spjangcd, choComp);
+//		List<Map<String, Object>> receive  = getReceiveList(start, end, spjangcd, choComp);
+//		List<Map<String, Object>> payment  = getPaymentList(start, end, spjangcd, choComp);
 
 		// 2) 구분(division) 부여 + 키 표준화(필요 시)
-		balju.forEach(m -> {
+		/*balju.forEach(m -> {
 			m.put("division", "발주");
 			m.put("division_group", "매입");
 			normalizeBaljuRow(m); // 아래 예시 참고
-		});
+		});*/
 		suju.forEach(m -> {
 			m.put("division", "수주");
 			m.put("division_group", "수주");
 			normalizeSujuRow(m);  // 아래 예시 참고
 		});
-		invo.forEach(m -> {
+		/*invo.forEach(m -> {
 			 m.put("division", "매입");
 			 m.put("division_group", "매입");
 			 normalizeInvoRow(m);
 		 });
-
+*/
 		sales.forEach(m -> {
 			m.put("division", "매출");
 			m.put("division_group", "매출");
 			normalizeSalesRow(m);
 		});
-		receive.forEach(m -> {
+		/*receive.forEach(m -> {
 			m.put("division", "입금");
 			m.put("division_group", "입금");
 			normalizeReceiveRow(m);
@@ -66,17 +66,17 @@ public class DashBoardService {
 			m.put("division", "출금");
 			m.put("division_group", "출금");
 			normalizePaymentRow(m);
-		});
+		});*/
 
 		// 3) 병합 + 정렬(납기일 우선, 없으면 주문일)
-		List<Map<String, Object>> merged = new ArrayList<>(balju.size() +
-				suju.size() + invo.size()+ sales.size() + receive.size() + payment.size());
-		merged.addAll(balju);
+		List<Map<String, Object>> merged = new ArrayList<>( + sales.size() +
+				suju.size() /*+ balju.size() + invo.size()  + receive.size() + payment.size()*/);
+//		merged.addAll(balju);
 		merged.addAll(suju);
-		merged.addAll(invo);
+//		merged.addAll(invo);
 		merged.addAll(sales);
-		merged.addAll(receive);
-		merged.addAll(payment);
+//		merged.addAll(receive);
+//		merged.addAll(payment);
 
 		// due_date, order_date 모두 'YYYY-MM-DD' 문자열
 		Comparator<Map<String, Object>> byJumunDateDesc =
