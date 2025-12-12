@@ -2787,7 +2787,22 @@
 
                 const date = detail.prod_date || '';
                 const [y, m, d] = (date.includes('-') ? date.split('-') : ['', '', '']);
-                const rawNote = detail.memo || '';
+
+                const parentQty = parseFloat(detail.good_qty || 0) || 0;   // 제품확인서는 good_qty를 수량으로 쓰고 있음
+                const parentLen = parseFloat(detail.standard || 0) || 0;
+
+                const detailTotal = (detail.items || []).reduce((sum, v) => {
+                    const len = parseFloat(v.Standard || 0) || 0;
+                    const qty = parseFloat(v.Qty      || 0) || 0;
+                    return sum + (len * qty);
+                }, 0);
+
+                let totalMeter = 0;
+                if (!detail.standard || detail.standard === '총(M)') {
+                    totalMeter = parentQty;                 // 필요하면 Math.max(parentQty, detailTotal)
+                } else {
+                    totalMeter = (parentLen * parentQty) + detailTotal;
+                }
 
                 // ✅ /detail 결과 → print_report용 데이터 구성
                 const data = {
@@ -2802,7 +2817,7 @@
                     month: m,
                     day: d,
                     items: detail.items || [],
-                    totalMeter: (detail.items || []).reduce((sum, v) => sum + parseFloat(v.Standard || 0), 0),
+                    totalMeter: totalMeter,
                     note: detail.memo
                 };
 
@@ -2881,7 +2896,7 @@
                                     console.error("Barcode render failed for index", i, e);
                                 }
                             });
-                            // ✅ 여기서 프린트 + 자동 닫기 실행
+                            //  여기서 프린트 + 자동 닫기 실행
                             window.print();
                             setTimeout(() => window.close(), 300);
                         }
@@ -2925,13 +2940,13 @@
             printJobResReportFromRow(item) {
                 const _this = this;
 
-                // ✅ 1) 수주 PK: prod-result-grid에 숨겨진 'suju_id' 사용
+                //  1) 수주 PK: prod-result-grid에 숨겨진 'suju_id' 사용
                 const sujuId = item.suju_id;
                 if (!sujuId) {
                     console.warn('suju_id 없음, 상세규격 없이 출력합니다.', item);
                 }
 
-                // ✅ 2) /joborder_list 호출해서 suju_detail(items) 가져오기
+                //  2) /joborder_list 호출해서 suju_detail(items) 가져오기
                 let detailItems = [];
                 try {
                     if (sujuId) {
@@ -2939,7 +2954,6 @@
                         console.log('joborder_list from prod-result-grid', res);
 
                         if (res && Array.isArray(res.data) && res.data.length > 0) {
-                            // 각 job_res에 동일한 suju_detail 리스트가 items 로 들어가 있으므로 첫 번째만 사용
                             detailItems = res.data[0].items || [];
                         }
                     }
@@ -2948,34 +2962,36 @@
                     detailItems = [];
                 }
 
-                // ✅ 3) 날짜 파싱 (생산일)
+                //  3) 날짜 파싱 (생산일)
                 const date = item.prod_date || '';
                 const [y, m, d] = (date.includes('-') ? date.split('-') : ['', '', '']);
 
+                //  상위(부모) 값
                 const parentLen = parseFloat(item.standard  || 0) || 0;
                 const parentQty = parseFloat(item.order_qty || 0) || 0;
 
                 // 비고/메모
                 const rawNote = item.memo || '';
 
-                // ✅ 4) 하위항목 길이×수량 합계 (suju_detail 기준)
+                //  4) 하위항목 길이×수량 합계 (suju_detail 기준)
                 const detailTotal = (detailItems || []).reduce((sum, v) => {
                     const len = parseFloat(v.Standard || 0) || 0;
                     const qty = parseFloat(v.Qty      || 0) || 0;
                     return sum + (len * qty);
                 }, 0);
 
-                let parentTotal = 0;
+                //  4-1) 총(M) 중복합산 방지 totalMeter 계산
+                let totalMeter = 0;
 
-                //  - standard가 비었거나 '총(M)'이면 → 길이정보 없는 총 길이 지시로 보고 수량 그대로 사용
-                //  - 그 외에는 길이 × 수량
+                //  - standard가 비었거나 '총(M)'이면 → 상위 수량 자체가 총미터(이미 합계)로 보고 detailTotal 더하지 않음
+                //  - 그 외에는 길이 × 수량 + 하위합
                 if (!item.standard || item.standard === '총(M)') {
-                    parentTotal = parentQty;
+                    totalMeter = parentQty;                 // 필요하면 Math.max(parentQty, detailTotal)
                 } else {
-                    parentTotal = parentLen * parentQty;
+                    totalMeter = (parentLen * parentQty) + detailTotal;
                 }
 
-                // ✅ 5) 템플릿에 넘길 데이터 구성 (detailItems 포함)
+                //  5) 템플릿에 넘길 데이터 구성 (detailItems 포함)
                 const data = {
                     title: '생 산 지 시 서',
 
@@ -2984,7 +3000,6 @@
                     WorkcenterName: item.workcenter,
                     DueDate:        item.due_date,
 
-                    // 품목명 빨간색
                     mat_name: `<span style="color:red; font-weight:bold;">${item.mat_name}</span>`,
                     standard:  item.standard,
                     unit_name: item.unit,
@@ -2993,20 +3008,18 @@
                     month: m,
                     day:   d,
 
-                    // ✅ suju_detail 리스트 그대로 전달
                     items: detailItems,
 
-                    // 상위 + 하위 합계
-                    totalMeter: parentTotal + detailTotal,
+                    //  기존 parentTotal + detailTotal 대신 totalMeter 사용
+                    totalMeter: totalMeter,
 
-                    // 비고 파란색
                     note: `<span style="color:blue; font-weight:bold;">${rawNote}</span>`
                 };
 
-                // ✅ 6) 템플릿 렌더링
+                //  6) 템플릿 렌더링
                 let html = tmpl('print_report', data);
 
-                // ✅ 7) 이스케이프 복원
+                //  7) 이스케이프 복원
                 html = html
                 .replace(/&lt;/g, '<')
                 .replace(/&gt;/g, '>')
@@ -3014,7 +3027,7 @@
                 .replace(/&#39;/g, "'")
                 .replace(/&amp;/g, '&');
 
-                // ✅ 8) 프린트용 전체 HTML
+                //  8) 프린트용 전체 HTML
                 const allHtml = `
                     <html>
                     <head>
@@ -3022,12 +3035,8 @@
                         <title>생산지시서 출력</title>
                         <style>
                             body { font-family: 'Malgun Gothic'; margin: 20px; }
-                            @media print {
-                                .print-page { page-break-after: always; }
-                            }
-                            @media print {
-                                * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                            }
+                            @media print { .print-page { page-break-after: always; } }
+                            @media print { * { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
                         </style>
                     </head>
                     <body>
@@ -3037,6 +3046,7 @@
                     </body>
                     </html>
                 `;
+
                 const printWindow = window.open('', '_blank', 'width=850,height=1000');
                 if (!printWindow) {
                     alert('팝업이 차단되었습니다. 팝업 허용 후 다시 시도하세요.');
@@ -3962,11 +3972,11 @@
             // 기준이 되는 오늘
             const now = new Date();
 
-            // ✅ 시작일: 오늘 기준 1년 전
+            //  시작일: 오늘 기준 1년 전
             const oneYearAgo = new Date(now);
             oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
-            // ✅ 종료일: 오늘 기준 한 달 뒤 (같은 일자)
+            //  종료일: 오늘 기준 한 달 뒤 (같은 일자)
             const oneMonthLater = new Date(now);
             oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
 
@@ -4044,7 +4054,7 @@
                 Alert.confirm(
                     '삭제 확인',
                     '정말 삭제하시겠습니까?',
-                    function () { // ✅ 확인(yes)
+                    function () { //  확인(yes)
                         page.delBasicInfo();
                     },
                     function () { // ❌ 취소(no)
@@ -4187,12 +4197,12 @@
             const $factory = $('#Factory_id');
             const restrictedUsers = ['kio01', 'kio02', 'kio03'];
 
-            // ✅ 공장 셀렉트 변경 시 자동 검색
+            //  공장 셀렉트 변경 시 자동 검색
             $factory.on('change', function () {
                 page.searchMainData();
             });
 
-            // ✅ 사용자 구분 처리
+            //  사용자 구분 처리
             if (restrictedUsers.includes(userid)) {
                 // ▶ kio01~kio03 : factory_id 고정 + 셀렉트 비활성화
                 setTimeout(() => {
