@@ -1005,6 +1005,7 @@
                         const parentLen = parseFloat(item.standard || 0) || 0;   // 길이
                         const parentQty = parseFloat(item.OrderQty || 0) || 0;   // 수량
                         const parentTotal = parentLen * parentQty;
+                        const rawNote = item.Description || item.description || '';
 
                         // ✅ 하위항목 길이×수량 합계
                         const detailTotal = (item.items || []).reduce((sum, v) => {
@@ -1031,7 +1032,7 @@
                             day: d,
                             items: item.items || [],
                             totalMeter: parentTotal + detailTotal ,
-                            note: item.Description || item.description || ''
+                            note: `<span style="color:blue; font-weight:bold;">${rawNote}</span>`
                         };
 
                         // 기존 tmpl 호출

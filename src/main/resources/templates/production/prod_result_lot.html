@@ -1096,7 +1096,8 @@
                         {binding: 'workcenter', header: '워크센터', width: 100, align: 'center'},
                         {binding: 'work_idx', header: '작업순서', width: 100, align: 'center'},
                         {binding: 'memo', header: '비고', width: 190, align: 'left'},
-                        {binding: 'routing_id', visible: false}
+                        {binding: 'routing_id', visible: false},
+                        {binding: 'suju_id', visible: false}
                     ],
                     itemsSource: new wijmo.collections.CollectionView([]),
                     itemFormatter: function (panel, row, col, cell) {
@@ -2786,6 +2787,7 @@
 
                 const date = detail.prod_date || '';
                 const [y, m, d] = (date.includes('-') ? date.split('-') : ['', '', '']);
+                const rawNote = detail.memo || '';
 
                 // ✅ /detail 결과 → print_report용 데이터 구성
                 const data = {
@@ -2800,7 +2802,8 @@
                     month: m,
                     day: d,
                     items: detail.items || [],
-                    totalMeter: (detail.items || []).reduce((sum, v) => sum + parseFloat(v.Standard || 0), 0)
+                    totalMeter: (detail.items || []).reduce((sum, v) => sum + parseFloat(v.Standard || 0), 0),
+                    note: detail.memo
                 };
 
                 // ✅ print_report 템플릿 렌더링
@@ -2920,17 +2923,45 @@
 
             // prod-result-grid 한 행(item)으로 생산지시서 출력
             printJobResReportFromRow(item) {
-                // 날짜 파싱
+                const _this = this;
+
+                // ✅ 1) 수주 PK: prod-result-grid에 숨겨진 'suju_id' 사용
+                const sujuId = item.suju_id;
+                if (!sujuId) {
+                    console.warn('suju_id 없음, 상세규격 없이 출력합니다.', item);
+                }
+
+                // ✅ 2) /joborder_list 호출해서 suju_detail(items) 가져오기
+                let detailItems = [];
+                try {
+                    if (sujuId) {
+                        const res = AjaxUtil.getSyncData('/api/production/prod_order_edit/joborder_list', { suju_id: sujuId });
+                        console.log('joborder_list from prod-result-grid', res);
+
+                        if (res && Array.isArray(res.data) && res.data.length > 0) {
+                            // 각 job_res에 동일한 suju_detail 리스트가 items 로 들어가 있으므로 첫 번째만 사용
+                            detailItems = res.data[0].items || [];
+                        }
+                    }
+                } catch (e) {
+                    console.error('joborder_list 조회 실패', e);
+                    detailItems = [];
+                }
+
+                // ✅ 3) 날짜 파싱 (생산일)
                 const date = item.prod_date || '';
                 const [y, m, d] = (date.includes('-') ? date.split('-') : ['', '', '']);
 
-                const parentLen = parseFloat(item.standard || 0) || 0;
+                const parentLen = parseFloat(item.standard  || 0) || 0;
                 const parentQty = parseFloat(item.order_qty || 0) || 0;
 
-                // 하위항목 합계 (지금은 대부분 0일 것)
-                const detailTotal = (item.items || []).reduce((sum, v) => {
+                // 비고/메모
+                const rawNote = item.memo || '';
+
+                // ✅ 4) 하위항목 길이×수량 합계 (suju_detail 기준)
+                const detailTotal = (detailItems || []).reduce((sum, v) => {
                     const len = parseFloat(v.Standard || 0) || 0;
-                    const qty = parseFloat(v.Qty || 0) || 0;
+                    const qty = parseFloat(v.Qty      || 0) || 0;
                     return sum + (len * qty);
                 }, 0);
 
@@ -2944,31 +2975,38 @@
                     parentTotal = parentLen * parentQty;
                 }
 
+                // ✅ 5) 템플릿에 넘길 데이터 구성 (detailItems 포함)
                 const data = {
                     title: '생 산 지 시 서',
 
-                    CompanyName: item.company_name,
+                    CompanyName:    item.company_name,
                     ProductionDate: date,
                     WorkcenterName: item.workcenter,
-                    DueDate: item.due_date,
+                    DueDate:        item.due_date,
 
-                    mat_name: `<span style="color:black; font-weight:bold;">${item.mat_name}</span>`,
-                    standard: item.standard,
+                    // 품목명 빨간색
+                    mat_name: `<span style="color:red; font-weight:bold;">${item.mat_name}</span>`,
+                    standard:  item.standard,
                     unit_name: item.unit,
-                    OrderQty: item.order_qty,
+                    OrderQty:  item.order_qty,
 
                     month: m,
-                    day: d,
+                    day:   d,
 
-                    items: [],                   // 하위 품목 없음
-                    totalMeter: parentTotal + detailTotal ,
-                    note: item.memo || ''
+                    // ✅ suju_detail 리스트 그대로 전달
+                    items: detailItems,
+
+                    // 상위 + 하위 합계
+                    totalMeter: parentTotal + detailTotal,
+
+                    // 비고 파란색
+                    note: `<span style="color:blue; font-weight:bold;">${rawNote}</span>`
                 };
 
-                // 1) 템플릿 렌더링
+                // ✅ 6) 템플릿 렌더링
                 let html = tmpl('print_report', data);
 
-                // 2) tmpl이 <span> 등을 이스케이프했을 경우 복원
+                // ✅ 7) 이스케이프 복원
                 html = html
                 .replace(/&lt;/g, '<')
                 .replace(/&gt;/g, '>')
@@ -2976,7 +3014,7 @@
                 .replace(/&#39;/g, "'")
                 .replace(/&amp;/g, '&');
 
-                // 3) 전체 HTML 문서 구성
+                // ✅ 8) 프린트용 전체 HTML
                 const allHtml = `
                     <html>
                     <head>
@@ -2999,8 +3037,6 @@
                     </body>
                     </html>
                 `;
-
-                // 4) 새 창 열어서 프린트
                 const printWindow = window.open('', '_blank', 'width=850,height=1000');
                 if (!printWindow) {
                     alert('팝업이 차단되었습니다. 팝업 허용 후 다시 시도하세요.');

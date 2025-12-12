@@ -1,5 +1,6 @@
 package mes.app.dashboard.service;
 
+import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import mes.app.sales.service.SujuService;
 import mes.domain.entity.User;
@@ -2727,4 +2728,146 @@ public class DashBoardService {
 	}
 
 
+	public List<Map<String, Object>> getJobStateRead(String dateFrom, String dateTo, String isIncludeComp, String spjangcd, String choMat, Integer cboFactory, String company) {
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("dateFrom", dateFrom);
+		dicParam.addValue("dateTo", dateTo);
+		dicParam.addValue("isIncludeComp", isIncludeComp);
+		dicParam.addValue("spjangcd", spjangcd);
+		dicParam.addValue("cboFactory", cboFactory);
+		String pattern = (choMat == null || choMat.isBlank()) ? "%" : "%" + choMat + "%";
+		dicParam.addValue("choMat", pattern);
+
+		String sql = """
+			WITH T AS (
+				 SELECT
+					 jr.id AS child_id,
+					 jr."Parent_id" AS parent_id,
+					 jr."Description" AS memo,
+					 COALESCE(jr."Parent_id", jr.id) AS base_id,
+					 CASE WHEN jr."State"='working' THEN 1 ELSE 0 END AS is_working,
+					 CASE WHEN jr."State"='stopped' THEN 1 ELSE 0 END AS is_stopped
+				 FROM job_res jr
+				 WHERE jr."ProductionDate" BETWEEN CAST(:dateFrom AS date) AND CAST(:dateTo AS date)
+					 AND jr.spjangcd = :spjangcd
+			 ),
+	
+			 S AS (
+				 SELECT
+					 T.*,
+					 ROW_NUMBER() OVER (
+						 PARTITION BY T.base_id
+						 ORDER BY
+							 T.is_working DESC,
+							 CASE WHEN T.parent_id IS NULL THEN 1 ELSE 0 END DESC,
+							 T.child_id DESC
+					 ) AS rn,
+					 MAX(T.is_working) OVER (PARTITION BY T.base_id) AS any_working,
+					 MAX(T.is_stopped) OVER (PARTITION BY T.base_id) AS any_stopped
+				 FROM T
+			 ),
+	
+			 base_suju AS (
+				 SELECT DISTINCT
+					 B."SourceDataPk" AS suju_id
+				 FROM S
+				 JOIN job_res B ON B.id = S.base_id
+				 WHERE B."SourceTableName" = 'suju'
+					 AND B."SourceDataPk" IS NOT NULL
+			 ),
+	
+			 shipped_by_suju AS (
+				 SELECT
+					 shp."SourceDataPk" AS suju_id,
+					 SUM(shp."Qty") AS shipped_qty
+				 FROM shipment shp
+				 JOIN base_suju bs ON bs.suju_id = shp."SourceDataPk"
+				 GROUP BY shp."SourceDataPk"
+			 ),
+	
+			 ship_state_by_suju AS (
+				 SELECT
+					 su.id AS suju_id,
+					 CASE
+						 WHEN sb.suju_id IS NULL THEN ''
+						 WHEN COALESCE(sb.shipped_qty, 0) = 0 THEN 'ordered'
+						 WHEN COALESCE(sb.shipped_qty, 0) >= su."SujuQty" THEN 'shipped'
+						 WHEN COALESCE(sb.shipped_qty, 0) <  su."SujuQty" THEN 'partial'
+						 ELSE ''
+					 END AS shipment_state
+				 FROM suju su
+				 JOIN base_suju bs ON bs.suju_id = su.id
+				 LEFT JOIN shipped_by_suju sb ON sb.suju_id = su.id
+			 ),
+	
+			 F AS (
+				 SELECT
+					 S.child_id AS id,
+					 C."WorkOrderNumber" AS order_num,
+					 TO_CHAR(B."ProductionDate",'yyyy-mm-dd') AS prod_date,
+					 TO_CHAR(su."DueDate",'yyyy-mm-dd') AS due_date,
+	
+					 CASE
+						 WHEN S.any_working = 1 THEN 'working'
+						 WHEN S.any_stopped = 1 THEN 'stopped'
+						 ELSE B."State"
+					 END AS state,
+	
+					 fn_code_name('job_state',
+						 CASE
+							 WHEN S.any_working = 1 THEN 'working'
+							 WHEN S.any_stopped = 1 THEN 'stopped'
+							 ELSE B."State"
+						 END
+					 ) AS job_state,
+	
+					 M."Name" AS mat_name,
+					 M."Factory_id" AS "Factory_id",
+					 U."Name" AS unit,
+					 COALESCE(su."Standard", M."Standard1") AS standard,
+					 su."CompanyName" AS company_name,
+					 ROUND(B."OrderQty"::numeric, 2)  AS order_qty,
+					 ROUND(B."GoodQty"::numeric, 2)   AS good_qty,
+					 ROUND(B."DefectQty"::numeric, 2) AS defect_qty,
+					 S.memo,
+					 su.id AS suju_id,
+	
+					 ssbs.shipment_state AS "ShipmentState",
+					 fn_code_name('shipment_state', ssbs.shipment_state) AS "ShipmentStateName"
+	
+				 FROM S
+				 JOIN job_res C ON C.id = S.child_id
+				 JOIN job_res B ON B.id = S.base_id
+				 LEFT JOIN material M ON M.id = B."Material_id"
+				 LEFT JOIN unit U ON U.id = M."Unit_id"
+				 LEFT JOIN suju su ON su.id = B."SourceDataPk" AND B."SourceTableName" = 'suju'
+				 LEFT JOIN ship_state_by_suju ssbs ON ssbs.suju_id = su.id
+				 WHERE S.rn = 1
+			 )
+	
+			 SELECT *
+			 FROM F
+			 WHERE 1=1
+				 AND F.mat_name LIKE :choMat
+			""";
+
+		if ("false".equalsIgnoreCase(isIncludeComp)) {
+			// ★ 파생 상태(state) 기준으로 완료 제외
+			sql += " and F.state != 'finished' ";
+		}
+
+		if (cboFactory != null) {
+			sql += " and F.\"Factory_id\" = :cboFactory ";
+		}
+
+		if (StringUtils.isEmpty(company) == false) {
+			sql += " AND F.company_name LIKE :company ";
+			dicParam.addValue("company", "%" + company + "%");
+		}
+
+		sql += " ORDER BY F.prod_date desc, F.order_num, F.id ";
+
+		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
+		return items;
+	}
 }

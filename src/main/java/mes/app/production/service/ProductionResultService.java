@@ -326,6 +326,7 @@ public class ProductionResultService {
 			   , M."Factory_id" AS "Factory_id"
 			   , fa."Name" as fac_name
 			   , S.memo
+			   , su.id as suju_id
 			  FROM S
 			  JOIN job_res       C  ON C.id = S.child_id              -- child = 대표행
 			  JOIN job_res       B  ON B.id = S.base_id               -- base = 부모
@@ -486,7 +487,7 @@ public class ProductionResultService {
 
 		String sql = """
 			WITH target AS (
-				SELECT jr.id AS child_id, jr."Parent_id" AS parent_id
+				SELECT jr.id AS child_id, jr."Parent_id" AS parent_id, jr."Description" as memo
 				FROM job_res jr
 				WHERE jr.id = :jrPk
 			),
@@ -537,7 +538,8 @@ public class ProductionResultService {
 				c."LotNumber" AS lot_num,
 				base_jr."SourceDataPk" AS suju_id,
 				s."CompanyName" as company_name,
-				s."Standard" as standard
+				s."Standard" as standard, 
+				t.memo
 		
 			FROM target t
 			JOIN base_pick b                 ON 1=1

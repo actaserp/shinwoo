@@ -702,7 +702,7 @@ public class ProductionResultController {
         jr.setShiftCode(shiftCode);
         jr.setWorkCenter_id(workcenterId);
         jr.setEquipment_id(equipmentId);
-        jr.setDescription(description);
+//        jr.setDescription(description);
         jr.setState("finished");
 
         this.productionResultService.add_jobres_defectqty_inout(jrPk, user.getId());

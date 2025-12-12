@@ -403,7 +403,25 @@ public class DashBoardController {
 		
 		return result;
 	}
-	
+
+
+	@GetMapping("/job_state_read")
+	public AjaxResult getJobStateRead(
+		@RequestParam(value = "date_from", required = false) String dateFrom,
+		@RequestParam(value = "date_to", required = false) String dateTo,
+		@RequestParam(value = "is_include_comp", required = false) String isIncludeComp,
+		@RequestParam(value="factory", required=false) Integer cboFactory,
+		@RequestParam(value = "choMat", required = false) String choMat,
+		@RequestParam(value = "company", required = false) String company,
+		@RequestParam("spjangcd") String spjangcd) {
+
+		List<Map<String, Object>> items = this.dashBoardService.getJobStateRead(dateFrom, dateTo, isIncludeComp, spjangcd, choMat, cboFactory, company);
+
+		AjaxResult result = new AjaxResult();
+		result.data = items;
+
+		return result;
+	}
 	
 	
 	
