@@ -198,7 +198,7 @@ public class BomController {
 		return result;
 	}
 	
-	@RequestMapping("/material_save")
+	/*@RequestMapping("/material_save")
 	public AjaxResult bomComponentSave(
 			@RequestParam(value="id" , required = false) Integer id,
 			@RequestParam(value="BOM_id") int bom_id,
@@ -239,8 +239,69 @@ public class BomController {
 		bomComponent = this.bomService.saveBomComponent(bomComponent);
 		result.data = bomComponent.getId();
 		return result;		
+	}*/
+
+	@RequestMapping("/material_save")
+	public AjaxResult bomComponentSave(
+		@RequestParam(value="id" , required = false) Integer id,
+		@RequestParam(value="BOM_id") int bom_id,
+		@RequestParam(value="Material_id") int materialId,
+		@RequestParam(value="Amount") float amt,
+		@RequestParam(value="_order",required = false) Integer _order,
+		@RequestParam(value="Description",required = false) String description,
+		Authentication auth
+	) {
+
+		User user = (User)auth.getPrincipal();
+		AjaxResult result = new AjaxResult();
+
+		// ✅ 0) BOM 헤더의 완제품 Material_id와 동일하면 저장 차단
+		Integer bomHeaderMatId = this.bomService.getBomMaterialId(bom_id);
+
+		if (bomHeaderMatId == null) {
+			result.success = false;
+			result.message = "BOM 정보를 찾을 수 없습니다. (id=" + bom_id + ")";
+			return result;
+		}
+
+		if (bomHeaderMatId.equals(materialId)) {
+			result.success = false;
+			result.message = "동일한 품목은 구성품으로 등록할 수 없습니다.";
+			return result;
+		}
+
+		BomComponent bomComponent = null;
+
+		if (id != null) {
+			bomComponent = this.bomService.getBomComponent(id);
+			if (bomComponent == null) {
+				result.success = false;
+				result.message = "구성품 정보를 찾을 수 없습니다. (id=" + id + ")";
+				return result;
+			}
+		} else {
+			boolean exists = this.bomService.checkDuplicateBomComponent(bom_id, materialId);
+			if (exists) {
+				result.success = false;
+				result.message = "이미 존재하는 품목입니다.";
+				return result;
+			}
+			bomComponent = new BomComponent();
+		}
+
+		bomComponent.setBomId(bom_id);
+		bomComponent.setMaterialId(materialId);
+		bomComponent.setAmount(amt);
+		bomComponent.set_order(_order);
+		bomComponent.setDescription(description);
+		bomComponent.set_audit(user);
+
+		bomComponent = this.bomService.saveBomComponent(bomComponent);
+		result.data = bomComponent.getId();
+		return result;
 	}
-	
+
+
 	@RequestMapping("/material_detail")
     public AjaxResult bomComponentDetail(
     		@RequestParam(value="id") int id    		

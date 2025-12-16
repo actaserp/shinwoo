@@ -536,4 +536,18 @@ public class BomService {
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
 		return items;
 	}
+
+	public Integer getBomMaterialId(int bomId) {
+		String sql = """
+        select "Material_id" as mat_id
+        from bom
+        where id = :bomId
+    """;
+		MapSqlParameterSource pm = new MapSqlParameterSource().addValue("bomId", bomId);
+		List<Map<String,Object>> rows = this.sqlRunner.getRows(sql, pm);
+		if (rows.isEmpty()) return null;
+		Object v = rows.get(0).get("mat_id");
+		return (v == null) ? null : Integer.valueOf(v.toString());
+	}
+
 }
