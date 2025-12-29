@@ -1353,9 +1353,10 @@
           const state = String(data?.StateName ?? '').trim();
           const ship  = String(data?.ShipmentStateName ?? '').trim();
 
-          if (ship) return false;                                        // 출하 진행됨 → 수정 불가
-          if (!state) return true;                                       // 상태 미지정이면 일단 허용(원하면 false로)
-          return ['수주', '지시', '계획'].includes(state);               // 허용 상태만 통과
+          if (ship) return false;     // 출하 진행됨 → 수정 불가
+          if (!state) return true;    // 상태 미지정이면 일단 허용(원하면 false로)
+          return ['수주', '지시', '계획',
+           '부분 지시', '부분 계획' ].includes(state); // 허용 상태만 통과
         }
 
         function applyEditability(data) {

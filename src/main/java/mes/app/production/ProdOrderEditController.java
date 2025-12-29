@@ -271,7 +271,12 @@ public class ProdOrderEditController {
 //
 //			jobResRepository.save(child);
 //		}
-
+		Suju suju = sujuRepository.getSujuById(sujuId);  // 수주 엔티티 조회
+		if (suju != null) {
+			suju.setConfirm("1");             // 확정 처리
+			suju.setState("ordered");
+			sujuRepository.save(suju);
+		}
 
 		result.success = true;
 		result.data = header;

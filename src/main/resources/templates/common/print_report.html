@@ -66,7 +66,9 @@
                 const month = date[1];
                 const day = date[2];
                 const items = o.items || [];
-                const rows = 10;
+
+                // ✅ rows를 외부에서 주면 그걸 쓰고, 없으면 기본 10
+                const rows = (o.rows != null) ? Number(o.rows) : 10;
               %}
               <!-- 부모행 -->
               <tr>
