@@ -64,9 +64,8 @@ public class ProdOrderEditService {
 	                left join factory f on m."Factory_id" = f.id
 	                where 1 = 1 and mg."MaterialType"!='sangpum'
 	                and s.spjangcd = :spjangcd
-	                and s.confirm = '1'
         		""";
-        
+//        and s.confirm = '1'
         if ("suju_date".equals(date_kind)) {
         	sql += " and s.\"JumunDate\" between :start and :end ";
         } else {

@@ -234,7 +234,45 @@ public class SujuController {
 
     head.set_status("manual");
     head = sujuHeadRepository.save(head);
+    // =========================================================
+    // ✅ [삭제 동기화] 시작: payload에 없는 기존 상세행 삭제
+    // =========================================================
+    // 1) 이번 payload에 포함된 기존 suju_id 목록 수집
+    List<Integer> incomingIds = new ArrayList<>();
+    if (items != null) {
+      for (Map<String, Object> item : items) {
+        Integer sid = toIntegerOrNull(item.get("suju_id"));
+        if (sid != null && sid > 0) incomingIds.add(sid);
+      }
+    }
 
+    // 2) DB에 존재하는 기존 상세행 조회
+    List<Suju> existingList = SujuRepository.findBySujuHeadId(head.getId());
+
+    // 3) 기존행 중 payload에 없는 건 = 화면에서 삭제된 행 → DB에서도 삭제
+    for (Suju ex : existingList) {
+      Integer exId = ex.getId();
+      if (exId == null) continue;
+
+      if (!incomingIds.contains(exId)) {
+
+        // 🔒 출하 연동이면 삭제 차단
+        boolean hasShipment = shipmentRepository
+                                .existsBySourceTableNameAndSourceDataPk("rela_data", exId);
+
+        if (hasShipment) {
+          result.success = false;
+          result.message = "출하계획 또는 진행중인 수주는 삭제할 수 없습니다.";
+          TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+          return result;
+        }
+
+        // ✅ FK 고려: 상세 먼저 삭제 후 본문 삭제
+        suJuDetailRepository.deleteBySujuId(exId);
+        SujuRepository.deleteById(exId);
+      }
+    }
+    // ✅ [삭제 동기화] 끝
 
     for (Map<String, Object> item : items) {
       Suju suju;

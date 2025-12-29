@@ -27,15 +27,20 @@
               <td style="text-align:center; border:1px solid #000; height:28px;">{%= o.DueDate || '' %}</td>
               <td style="border:1px solid #000; height:28px;"></td>
             </tr>
-            <tr>
+            <!--<tr>
               <td style="text-align:center; border:1px solid #000; height:28px;">전화번호</td>
               <td style="border:1px solid #000; height:28px;">{%= o.phoneNumber || '' %}</td>
+              <td style="border:1px solid #000; height:28px;"></td>
+            </tr>-->
+            <tr>
+              <td style="text-align:center; border:1px solid #000; height:28px;">작업지시번호</td>
+               <td style="text-align:center; border:1px solid #000; height:28px;">{%= o.WorkOrderNumber || '' %}</td>
               <td style="border:1px solid #000; height:28px;"></td>
             </tr>
             <tr>
             </tr>
             <tr>
-              <td style="text-align:center; border:1px solid #000; height:80px;">특이사항</td>
+              <td style="text-align:center; border:1px solid #000; height:60px;">특이사항</td>
               <td style="border:1px solid #000; height:28px;">{%= o.note || '' %}</td>
               <td style="border:1px solid #000; height:28px;"></td>
             </tr>

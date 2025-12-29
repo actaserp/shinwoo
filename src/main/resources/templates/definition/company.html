@@ -260,7 +260,7 @@
                                                        name="zip_code" onclick="sample4_execDaumPostcode()" placeholder="우편번호">
                                             </td>
 
-                                            <th>
+                                            <!--<th>
                                                 <label for="address">주소</label>
                                             </th>
                                             <td colspan="2">
@@ -268,8 +268,13 @@
                                                        name="address" >
                                                 <input type="hidden" id="placeAddress" placeholder="지번주소">
                                                 <span id="guide" style="color:#999;display:none"></span>
+                                            </td>-->
+                                            <th>
+                                                <label for="relyn">거래중지여부</label>
+                                            </th>
+                                            <td style="text-align: center;" colspan="2">
+                                                <input type="checkbox" id="relyn" name="relyn" value="1" style="display: block; margin: auto; height: 26px; width: 26px;">
                                             </td>
-
 
                                         </tr>
                                         <tr>
@@ -291,11 +296,15 @@
                                         </tr>
                                        <tr>
                                            <th>
-                                               <label for="relyn">거래중지여부</label>
+                                               <label for="address">주소</label>
                                            </th>
-                                           <td style="text-align: center;" colspan="5">
-                                               <input type="checkbox" id="relyn" name="relyn" value="1" style="display: block; margin: auto; height: 26px; width: 26px;">
+                                           <td colspan="5">
+                                               <input type="text" style="width: 100%;" id="address"
+                                                      name="address" >
+                                               <input type="hidden" id="placeAddress" placeholder="지번주소">
+                                               <span id="guide" style="color:#999;display:none"></span>
                                            </td>
+
                                         </tr>
                                         <tr>
                                             <th>

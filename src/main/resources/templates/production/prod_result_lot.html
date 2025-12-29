@@ -2810,10 +2810,12 @@
                     CompanyName: detail.company_name,
                     ProductionDate: detail.prod_date,
                     WorkcenterName: detail.WorkcenterName,
+                    DueDate:detail.due_date,
                     mat_name: detail.mat_name,
                     standard: detail.standard,
                     unit_name: detail.unit,
                     OrderQty: detail.good_qty,
+                    WorkOrderNumber :detail.order_num,
                     month: m,
                     day: d,
                     items: detail.items || [],
@@ -3004,7 +3006,7 @@
                     standard:  item.standard,
                     unit_name: item.unit,
                     OrderQty:  item.order_qty,
-
+                    WorkOrderNumber :item.order_num,
                     month: m,
                     day:   d,
 

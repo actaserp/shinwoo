@@ -30,4 +30,6 @@ public interface SujuRepository extends JpaRepository<Suju, Integer>{
 	@Modifying
 	@Query("UPDATE Suju s SET s.state = 'force_completion' WHERE s.id IN :ids")
 	void forceCompleteSujuList(@Param("ids") List<Integer> ids);
+
+	List<Suju> findBySujuHeadId(Integer id);
 }

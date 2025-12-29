@@ -514,6 +514,7 @@ public class ProductionResultService {
 				 ROUND(COALESCE(base_jr."LossQty", 0)::numeric, 2)    AS loss_qty,
 				 ROUND(COALESCE(base_jr."ScrapQty", 0)::numeric, 2)   AS scrap_qty,
 				to_char(base_jr."ProductionDate",'yyyy-mm-dd') AS prod_date,
+				to_char(s."DueDate" ,'yyyy-mm-dd') AS due_date,
 				to_char(c."StartTime",'hh24:mi')   AS start_time,
 				c."EndDate" AS end_date,
 				to_char(c."StartTime",'yyyy-mm-dd') AS start_date,
