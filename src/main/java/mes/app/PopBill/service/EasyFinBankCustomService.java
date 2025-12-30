@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import mes.Encryption.EncryptionUtil;
 import mes.Exception.EncryptionException;
 import mes.app.PopBill.dto.EasyFinBankAccountFormDto;
+import mes.sse.Service.SseService;
 import mes.sse.SseController;
 import mes.app.transaction.service.TransactionInputService;
 import mes.app.util.UtilClass;
@@ -55,7 +56,7 @@ public class EasyFinBankCustomService {
     TB_ACCOUNTRepository accountRepository;
 
     @Autowired
-    SseController sseController;
+    SseService sseService;
 
 
     //TODO: tid를 기준으로 중복저장 방지함 , tid 목록을 메모리에 적재한다음 유효성 판단할 것
@@ -208,7 +209,7 @@ public class EasyFinBankCustomService {
 
                                 sqlRunner.batchUpdate(sql, batchParams.toArray(new SqlParameterSource[0]));
 
-                                sseController.SendingToClientMessage(spjangcd, accountNumber);
+                                sseService.sendSystem(spjangcd, accountNumber);
 
                             } catch (Exception e) {
                                 log.warn("배치 저장 중 일부 오류 발생 (무시됨): {}", e.getMessage());
@@ -226,7 +227,7 @@ public class EasyFinBankCustomService {
 
                         sqlRunner.batchUpdate(sql, batchParams.toArray(new SqlParameterSource[0]));
 
-                        sseController.SendingToClientMessage(spjangcd, accountNumber);
+                        sseService.sendSystem(spjangcd, accountNumber);
                     } catch (Exception e) {
                         log.warn("마지막 배치 저장 중 일부 오류 발생 (무시됨): {}", e.getMessage());
                     }

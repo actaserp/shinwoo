@@ -10,7 +10,7 @@ import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
-public class NotificationController {
+public class NotificationController_modal {
 
     private final SimpMessagingTemplate messagingTemplate;
 

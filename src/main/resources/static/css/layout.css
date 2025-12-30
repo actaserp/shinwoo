@@ -350,6 +350,7 @@ header .right .alarm {
     font-weight: 700;
     color: #333;
     gap: 8px;
+    min-width: 125px;
 }
 
 header .right .alarm::after {
@@ -365,23 +366,14 @@ header .right .alarm-box {
     display: none;
     position: absolute;
     top: 60px;
-    right: 200px;
-    max-width: 400px;
+    right: 220px;
+    width: 330px;
+    max-width: 330px;
     padding: 8px;
     background-color: #fff;
     box-shadow: 0px 0px 10px rgba(0, 2, 6, 0.08);
     border-radius: 3px;
-}
-
-header .right .alarm-box a.btn-gray {
-    display: block;
-    min-width: 120px;
-    padding: 9px 16px;
-    background-color: #EDEFF5;
-    border-radius: 3px;
-    color: #333333;
-    font-weight: 700;
-    text-align: center;
+    z-index: 10001;
 }
 
 header .right .alarm-box .alarm-tab-links {

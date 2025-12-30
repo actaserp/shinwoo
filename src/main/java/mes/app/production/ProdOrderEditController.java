@@ -1,14 +1,13 @@
 package mes.app.production;
 
 import java.sql.Timestamp;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
-import mes.app.common.NotificationController;
+import mes.app.common.NotificationController_modal;
 import mes.domain.entity.*;
 import mes.domain.repository.*;
 import mes.domain.services.CommonUtil;
@@ -52,7 +51,7 @@ public class ProdOrderEditController {
 	BomRepository bomRepository;
 
 	@Autowired
-	NotificationController notificationController;
+	NotificationController_modal notificationController_modal;
 	
 	// 수주 목록 조회
 	@GetMapping("/suju_list")
@@ -148,139 +147,17 @@ public class ProdOrderEditController {
 		
 		AjaxResult result = new AjaxResult();
 		User user = (User)auth.getPrincipal();
-
-		Integer matPk = cboMaterial;
-		Material m = materialRepository.getMaterialById(matPk);
-		Integer routingPk = m.getRoutingId();
-		Integer locPk = m.getStoreHouseId();
-		Integer factoryPk = m.getFactory_id();
-
-		Timestamp prodDate = CommonUtil.tryTimestamp(productionDate);
-
-		// 신규 or 수정 검증
-		JobRes header = new JobRes();
-
-		final boolean hasRouting = (routingPk != null);
-
-		// ===== 헤더 저장 =====
-		header.set_audit(user);
-		header.setProductionDate(prodDate);
-		header.setProductionPlanDate(prodDate);
-		header.setMaterialId(matPk);
-		header.setOrderQty((float) txtOrderQty);
-		header.setStoreHouse_id(locPk);
-		header.setLotCount(1);
-		header.setState("ordered");
-		header.setSourceDataPk(sujuId);
-		header.setSourceTableName("suju");
-		header.setSpjangcd(spjangcd);
-
-		if (!hasRouting) {
-			// 라우팅 없음 → 화면값 사용
-			header.setRouting_id(null);
-			header.setProcessCount(1);
-			header.setWorkCenter_id(cboWorcenter);
-			header.setFirstWorkCenter_id(cboWorcenter);
-			header.setEquipment_id(cboEquipment);
-			header.setShiftCode(cboShiftCode);
-			header = jobResRepository.save(header); // 트리거가 번호 생성
-			result.success = true;
-			result.data = header;
-			return result;
-		}
-
-		// 라우팅 있음 → 공정 목록
-		List<RoutingProc> steps = routingProcRepository.findByRoutingIdOrderByProcessOrder(routingPk);
-		if (steps == null || steps.isEmpty()) {
-			result.success = false;
-			result.message = "라우팅 공정이 없습니다.";
-			return result;
-		}
-
-		// 마지막 공정 = 헤더
-		RoutingProc last = steps.get(steps.size() - 1);
-		Integer lastProcId = last.getProcessId();
-		Workcenter lastWc = workcenterRepository.findByProcessIdAndFactoryId(lastProcId, factoryPk);
-		Integer lastWcId = (lastWc != null ? lastWc.getId() : null);
-
-		header.setRouting_id(routingPk);
-		header.setProcessCount(steps.size()); // 전체 공정 수
-		header.setWorkCenter_id(lastWcId);
-		header.setFirstWorkCenter_id(lastWcId);
-		header.setEquipment_id(cboEquipment);   // 설비/교대는 라우팅 있을 땐 화면값 미사용
-		header.setShiftCode(cboShiftCode);
-
-		header = jobResRepository.save(header); // 트리거가 헤더 번호 생성
-
-		notificationController.sendJobOrderNotification(
-				"작업지시가 생성되었습니다.",
-				header.getId(),
-				m.getName(),
+		return prodOrderEditService.makeProdOrder(
+				sujuId,
+				productionDate,
+				cboMaterial,
+				cboShiftCode,
+				cboWorcenter,
+				cboEquipment,
 				txtOrderQty,
-				m.getFactory_id()
+				spjangcd,
+				user
 		);
-
-//		// ===== 자식(전 공정들) 생성: 마지막 공정 제외 =====
-//		for (int i = 0; i < steps.size() - 1; i++) {
-//			RoutingProc step = steps.get(i);
-//			Integer processId = step.getProcessId();
-//
-//			// 공정→워크센터
-//			Workcenter wc = workcenterRepository.findByProcessId(processId);
-//			Integer wcId = (wc != null ? wc.getId() : null);
-//
-//			// ★ 공정 대상(Product) 조회
-//			List<Integer> prodIds = bomProcCompRepository
-//					.findDistinctProductIdsByRoutingAndProcess(routingPk, processId);
-//
-//			Integer stepProductId = null;
-//			if (prodIds != null && !prodIds.isEmpty()) {
-//				// 다수면 헤더 품목과 일치하는 게 있으면 우선, 없으면 첫 번째
-//				stepProductId = prodIds.contains(matPk) ? matPk : prodIds.get(0);
-//			}
-//			if (stepProductId == null) stepProductId = matPk; // fallback
-//
-//			JobRes child = new JobRes();
-//			child.set_audit(user);
-//
-//			child.setProductionDate(prodDate);
-//			child.setProductionPlanDate(prodDate);
-//
-//			// 자식 공정의 대상 품목으로 설정
-//			child.setMaterialId(stepProductId);
-//
-//			// 자식 지시량을 넣게되면 생산해야할것 같아서 일단 뺌
-//			// 자식 수량을 공정 대상에 맞춰 스케일링하려면 아래 참고 섹션 참조
-////			BigDecimal factor = bomRepository.findLevel1Factor(matPk, stepProductId); // 지붕→판넬 2
-////			float childQty = factor != null
-////					? factor.multiply(BigDecimal.valueOf(txtOrderQty)).floatValue()
-////					: (float) txtOrderQty;
-////			child.setOrderQty(childQty);
-//			child.setOrderQty(null);
-//
-//			child.setParentId(header.getId());
-//			child.setRouting_id(routingPk);
-//			child.setProcessCount(1);
-//			child.setWorkCenter_id(wcId);
-//			child.setFirstWorkCenter_id(wcId);
-//			child.setEquipment_id(null);
-//			child.setShiftCode(cboShiftCode);
-//			child.setStoreHouse_id(locPk);
-//			child.setState("ordered");
-//			child.setSpjangcd(spjangcd);
-//
-//			jobResRepository.save(child);
-//		}
-		Suju suju = sujuRepository.getSujuById(sujuId);  // 수주 엔티티 조회
-		if (suju != null) {
-			suju.setConfirm("1");             // 확정 처리
-			suju.setState("ordered");
-			sujuRepository.save(suju);
-		}
-
-		result.success = true;
-		result.data = header;
-		return result;
 	}
 
 	// 지시내역 수정

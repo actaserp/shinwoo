@@ -61,6 +61,7 @@ public class UserGroupMenuController {
 			
 			boolean r = Boolean.parseBoolean(map.get("r").toString());
 			boolean w = Boolean.parseBoolean(map.get("w").toString());
+			boolean a = Boolean.parseBoolean(map.get("a").toString());
 			
 			String authCode = "";
 			if(r) {
@@ -69,6 +70,7 @@ public class UserGroupMenuController {
 			if(w) {
 				authCode+="W";
 			}
+			if (a) authCode += "A";
 			
 			MapSqlParameterSource dicParam = new MapSqlParameterSource();			
 			dicParam.addValue("auth_code", authCode);

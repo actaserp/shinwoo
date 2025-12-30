@@ -201,6 +201,7 @@ public class SystemService {
                             , ugm."AuthCode"
                             , case when tree.is_folder then null else coalesce(ugm."AuthCode" like '%%R%%', false) end  as r
                             , case when tree.is_folder then null else coalesce(ugm."AuthCode" like '%%W%%', false) end  as w
+                            , case when tree.is_folder then null else coalesce(ugm."AuthCode" like '%%A%%', false) end  as a
                             , case when tree.is_folder then null else coalesce(ugm."AuthCode" like '%%X%%', false) end  as x
                             , tree.is_folder
                             , ugm.id as ugm_id

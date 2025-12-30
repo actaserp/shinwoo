@@ -7,24 +7,31 @@ import java.io.IOException;
 import java.util.Map;
 
 @Slf4j
-public class SseClient implements SseObserver{
+public class SseClient {
 
+    private final String userId;
     private final SseEmitter emitter;
 
-    public SseClient(SseEmitter emitter) {
+    public SseClient(String userId, SseEmitter emitter) {
+        this.userId = userId;
         this.emitter = emitter;
     }
 
-    public void send(String message) {
+    public String getUserId() {
+        return userId;
+    }
+
+    public void send(String eventName, Object data) {
         try {
-            emitter.send(SseEmitter.event().data(message));
+            emitter.send(SseEmitter.event()
+                    .name(eventName)
+                    .data(data));
         } catch (IOException e) {
-            System.out.println("emitter.send 실패 → 연결 종료 → 클라이언트가 재연결 시도함");
             emitter.completeWithError(e);
         }
     }
 
-    public SseEmitter getEmitter(){
-        return emitter;
+    public void complete() {
+        emitter.complete();
     }
 }

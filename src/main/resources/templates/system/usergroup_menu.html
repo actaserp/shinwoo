@@ -63,6 +63,13 @@
                                 </div>
                             </dd>
                         </dl>
+                        <dl>
+                            <dd>
+                                <div class="srch-box" style="margin-top: 20px;">
+                                    알람<input type="checkbox" id="AllcheckAlarm">
+                                </div>
+                            </dd>
+                        </dl>
                     </div>
                 </form>
                 <div class="button-wrap">
@@ -134,7 +141,7 @@
                     data2 = data.data;
 
                     // 중분류 메뉴를 제외한 데이터 필터링
-                    data2 = data.data.filter(item => item.r !== null || item.w !== null);
+                    data2 = data.data.filter(item => item.r !== null || item.w !== null|| item.a !== null);
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     console.error('Error fetching log_list data:', textStatus, errorThrown);
@@ -170,6 +177,14 @@
                     {
                         binding: 'w',
                         header: '쓰기',
+                        width: 200,
+                        align: 'center',
+                        dataType: wijmo.DataType.Boolean,
+                        isReadOnly: false,
+                    },
+                    {
+                        binding: 'a',
+                        header: '알람',
                         width: 200,
                         align: 'center',
                         dataType: wijmo.DataType.Boolean,
@@ -214,6 +229,14 @@
                 theGrid.setCellData(i, 'w', checked);
             }
         });
+
+        document.getElementById('AllcheckAlarm').addEventListener('change', function () {
+            var checked = this.checked;
+            for (var i = 0; i < theGrid.rows.length; i++) {
+                theGrid.setCellData(i, 'a', checked);
+            }
+        });
+
 
         $('#btnSave2').click(saveUserGroupMenu);
 
@@ -262,11 +285,12 @@
         function grid_binding2(data) {
             // 중분류 메뉴가 아닌 데이터만 필터링
             let UserMenuData = data
-                .filter(item => item.r !== null || item.w !== null) // 읽기(r) 또는 쓰기(w)가 null이 아닌 항목만 선택
+                .filter(item => item.r !== null || item.w !== null|| item.a !== null) // 읽기(r) 또는 쓰기(w)가 null이 아닌 항목만 선택
                 .map(item => ({
                     name: item.name,
                     r: item.r,
                     w: item.w,
+                    a: item.a,
                     gpname: item.gpname,  // 그룹화를 위한 속성 추가
                     menu_code: item.menu_code, // 추가: menu_code 필드 포함
                     ugm_id: item.ugm_id // 추가: ugm_id 필드 포함
@@ -293,6 +317,14 @@
                     dataType: wijmo.DataType.Boolean,
                     isReadOnly: false
                 },
+                {
+                    binding: 'a',
+                    header: '알람',
+                    width: 200,
+                    align: 'center',
+                    dataType: wijmo.DataType.Boolean,
+                    isReadOnly: false
+                },
                 {binding: '', header: '', width: "*", align: 'center'},
             ];
 
@@ -306,7 +338,7 @@
                 let item = s.itemsSource[e.row];
                 let column = theGrid.columns[e.col];
 
-                if (column.binding === 'r' || column.binding === 'w') {
+                if (column.binding === 'r' || column.binding === 'w'|| column.binding === 'a') {
                     item[column.binding] = !item[column.binding]; // 상태 토글
                     console.log(`Updated ${column.binding} for ${item.menu_code}: ${item[column.binding]}`);
                 }
@@ -336,6 +368,7 @@
                     ugm_id: item.ugm_id,
                     r: !!item.r, // 읽기 상태
                     w: !!item.w, // 쓰기 상태
+                    a: !!item.a, // 알람 상태
                 });
             });
 

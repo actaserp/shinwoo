@@ -1,9 +1,16 @@
 package mes.app.production.service;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import mes.app.common.NotificationController_modal;
+import mes.app.notification.BizEventTrigger;
+import mes.domain.entity.*;
+import mes.domain.model.AjaxResult;
+import mes.domain.repository.*;
+import mes.domain.services.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
@@ -11,11 +18,26 @@ import org.springframework.stereotype.Service;
 import io.micrometer.core.instrument.util.StringUtils;
 import mes.domain.services.SqlRunner;
 
+import javax.transaction.Transactional;
+
 @Service
 public class ProdOrderEditService {
 
 	@Autowired
 	SqlRunner sqlRunner;
+
+	@Autowired
+	MaterialRepository materialRepository;
+	@Autowired
+	RoutingProcRepository routingProcRepository;
+	@Autowired
+	WorkcenterRepository workcenterRepository;
+	@Autowired
+	JobResRepository jobResRepository;
+	@Autowired
+	SujuRepository sujuRepository;
+	@Autowired
+	NotificationController_modal notificationController_modal;
 	
 	// 수주 목록 조회
 	public List<Map<String, Object>> getSujuList(String date_kind, String start, String end, Integer mat_group, String mat_name,
@@ -145,29 +167,6 @@ public class ProdOrderEditService {
             sql += " order by s.\"JumunDate\" desc, s.\"JumunNumber\" desc ";
         }
         		
-        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
-        
-        return items;
-	}
-
-	public List<Map<String, Object>> makeProdOrder(Integer sujuId) {
-		MapSqlParameterSource dicParam = new MapSqlParameterSource();
-		dicParam.addValue("sujuId", sujuId);
-		
-		String sql = """
-                with qsum as(
-                select
-                s.id as suju_id
-                , s."Material_id"
-                , s."SujuQty"
-                , (select sum(jr."OrderQty") from job_res jr where jr."SourceDataPk" = s.id and jr."SourceTableName"='suju' and jr."State" <>'canceled' ) as ordered_qty
-                from suju s
-                where s.id = :sujuId
-                )
-                select suju_id, "Material_id", "SujuQty", ordered_qty, greatest("SujuQty"-ordered_qty, 0 ) as remain_qty
-                from qsum
-				""";
-		
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
         
         return items;
@@ -358,6 +357,119 @@ public class ProdOrderEditService {
 
 		return items;
 	}
-	
-	
+
+	@Transactional
+	@BizEventTrigger(domain = "wm_prod_order_edit", action = "SAVE")
+	public AjaxResult makeProdOrder(
+			Integer sujuId,
+			String productionDate,
+			Integer cboMaterial,
+			String cboShiftCode,
+			Integer cboWorcenter,
+			Integer cboEquipment,
+			Float txtOrderQty,
+			String spjangcd,
+			User user) {
+
+		AjaxResult result = new AjaxResult();
+
+		Integer matPk = cboMaterial;
+		Material m = materialRepository.getMaterialById(matPk);
+		Integer routingPk = m.getRoutingId();
+		Integer locPk = m.getStoreHouseId();
+		Integer factoryPk = m.getFactory_id();
+
+		Timestamp prodDate = CommonUtil.tryTimestamp(productionDate);
+
+		JobRes header = new JobRes();
+		final boolean hasRouting = (routingPk != null);
+
+		// ===== 헤더 저장 =====
+		header.set_audit(user);
+		header.setProductionDate(prodDate);
+		header.setProductionPlanDate(prodDate);
+		header.setMaterialId(matPk);
+		header.setOrderQty(txtOrderQty);
+		header.setStoreHouse_id(locPk);
+		header.setLotCount(1);
+		header.setState("ordered");
+		header.setSourceDataPk(sujuId);
+		header.setSourceTableName("suju");
+		header.setSpjangcd(spjangcd);
+
+		/* =========================
+		 * 라우팅 없음
+		 * ========================= */
+		if (!hasRouting) {
+
+			header.setRouting_id(null);
+			header.setProcessCount(1);
+			header.setWorkCenter_id(cboWorcenter);
+			header.setFirstWorkCenter_id(cboWorcenter);
+			header.setEquipment_id(cboEquipment);
+			header.setShiftCode(cboShiftCode);
+
+			header = jobResRepository.save(header);
+
+			result.success = true;
+			result.data = header;
+			return result;
+		}
+
+		/* =========================
+		 * 라우팅 있음
+		 * ========================= */
+		List<RoutingProc> steps =
+				routingProcRepository.findByRoutingIdOrderByProcessOrder(routingPk);
+
+		if (steps == null || steps.isEmpty()) {
+			result.success = false;
+			result.message = "라우팅 공정이 없습니다.";
+			return result;
+		}
+
+		RoutingProc last = steps.get(steps.size() - 1);
+		Integer lastProcId = last.getProcessId();
+
+		Workcenter lastWc =
+				workcenterRepository.findByProcessIdAndFactoryId(
+						lastProcId, factoryPk);
+
+		Integer lastWcId = (lastWc != null ? lastWc.getId() : null);
+
+		header.setRouting_id(routingPk);
+		header.setProcessCount(steps.size());
+		header.setWorkCenter_id(lastWcId);
+		header.setFirstWorkCenter_id(lastWcId);
+		header.setEquipment_id(cboEquipment);
+		header.setShiftCode(cboShiftCode);
+
+		header = jobResRepository.save(header);
+
+		// ===== 알림 =====
+//		notificationController_modal.sendJobOrderNotification(
+//				"작업지시가 생성되었습니다.",
+//				header.getId(),
+//				m.getName(),
+//				txtOrderQty,
+//				factoryPk
+//		);
+
+		// ===== 수주 확정 =====
+		Suju suju = sujuRepository.getSujuById(sujuId);
+		if (suju != null) {
+			suju.setConfirm("1");
+			suju.setState("ordered");
+			sujuRepository.save(suju);
+		}
+
+		Map<String, Object> payload = new HashMap<>();
+		payload.put("jobResId", header.getId());
+		payload.put("factoryPk", factoryPk);
+
+		result.success = true;
+		result.data = payload;
+		return result;
+	}
+
 }
