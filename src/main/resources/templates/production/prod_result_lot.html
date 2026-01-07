@@ -1065,6 +1065,10 @@
             init() {
                 let _this = this;
 
+                // ✅ 출력 표시 캐시
+                this._printedJobResIds = new Set();   // 생산지시서 출력된 row id들
+                this._printedReportIds = new Set();   // 제품확인서 출력된 row id들
+
                 const $factory  = $('#Factory_id');
                 AjaxUtil.fillSelectOptions($factory,  'factory', 'all', false);
 
@@ -1108,6 +1112,17 @@
                             cell.style.backgroundColor = '';
                             cell.style.color = '';
                             cell.style.borderBottom = '';
+
+
+                            // ✅ 생산지시서 출력 표시: 판매처 컬럼
+                            if (column.binding === 'company_name' && _this._printedJobResIds?.has(item.id)) {
+                                cell.style.backgroundColor = '#CBDCED';
+                            }
+
+                            // ✅ 제품확인서 출력 표시: 제품명(품목) 컬럼
+                            if (column.binding === 'mat_name' && _this._printedReportIds?.has(item.id)) {
+                                cell.style.backgroundColor = '#DAD3F0';
+                            }
 
                             // 상태 값에 따라 스타일 적용
                             if (column.binding === 'job_state') {
@@ -1257,10 +1272,10 @@
                         if (panel.cellType === wijmo.grid.CellType.Cell) {
                             // 컬럼 스타일 적용
                             if (column.binding === 'good_qty') {
-                                cell.style.backgroundColor = '#dcf0f8';
+                                cell.style.backgroundColor = '#FFE093FF';
                             }
                             if (column.binding === 'defect_qty') {
-                                cell.style.backgroundColor = '#f8d2cb';
+                                cell.style.backgroundColor = '#63F2FFFF';
                             }
                         }
                         if (panel.cellType === wijmo.grid.CellType.ColumnHeader) {
@@ -2776,11 +2791,21 @@
 
                 AjaxUtil.getAsyncData(url, param, function (res) {
                     if (res.success && res.data) {
+
+                        // ✅ 제품확인서 출력 표시(시도 기준)
+                        const selected = _this.grid?.selectedItems?.[0];
+                        const key = selected?.id ?? selected?.jr_pk;
+                        if (key != null) {
+                            _this._printedReportIds.add(key);
+                            _this.grid?.collectionView?.refresh();
+                        }
+
                         _this.printBarcodeReport(select_chasu, res.data);
                     } else {
                         Alert.alert('', res.message || 'LOT 상세 정보를 불러올 수 없습니다.');
                     }
                 });
+
             }
 
             printBarcodeReport(select_chasu, detail) {
@@ -3060,11 +3085,26 @@
                 printWindow.document.write(allHtml);
                 printWindow.document.close();
 
-                printWindow.onload = function () {
+               /* printWindow.onload = function () {
                     printWindow.focus();
                     printWindow.print();
                     setTimeout(() => printWindow.close(), 300);
+                };*/
+                printWindow.onload = function () {
+                    printWindow.focus();
+
+                    // ✅ 출력했다고 표시(취소까지 완벽히 구분은 어려움)
+                    const mark = () => {
+                        if (item?.id) _this._printedJobResIds.add(item.id);
+                        _this.grid?.collectionView?.refresh();
+                        printWindow.removeEventListener('afterprint', mark);
+                    };
+                    printWindow.addEventListener('afterprint', mark);
+
+                    printWindow.print();
+                    setTimeout(() => printWindow.close(), 300);
                 };
+
             }
 
             printJobResWithBarcodeSameWindow() {
@@ -3274,6 +3314,14 @@
                     </body>
                     </html>`;
 
+                    // ✅ 출력 표시(재조회 유지용) - 한 번에 둘 다
+                    const key = selected?.id;   // item.id가 맞는지 꼭 확인!
+                    if (key != null) {
+                        _this._printedJobResIds.add(key);   // 판매처 표시
+                        _this._printedReportIds.add(key);   // 품목 표시
+                        _this.grid?.collectionView?.refresh();
+                    }
+
                     // 1번만 새 창 열기
                     const win = window.open('', '_blank', 'width=850,height=1000');
                     if (!win) {
@@ -3293,39 +3341,39 @@
                     lib.onload = () => {
                         const runner = win.document.createElement('script');
                         runner.textContent = `
-        (function(){
-          const prodMatNm = ${JSON.stringify(prod_mat_nm)};
-          const rows = ${JSON.stringify(select_chasu || [])};
+                        (function(){
+                          const prodMatNm = ${JSON.stringify(prod_mat_nm)};
+                          const rows = ${JSON.stringify(select_chasu || [])};
 
-          function renderBarcodes() {
-            rows.forEach(function(chasu, i) {
-              const lot = chasu && chasu.lot_no ? String(chasu.lot_no) : '';
-              if (!lot) return;
-              try {
-                JsBarcode("#svgBarcode_" + i, lot, {
-                  format: "code128",
-                  width: 2,
-                  height: 100,
-                  displayValue: true,
-                  text: lot + " (" + prodMatNm + ")",
-                  fontSize: 12,
-                  margin: 10,
-                  background: "#fff",
-                  lineColor: "#000"
-                });
-              } catch (e) {
-                console.error("Barcode render failed for index", i, e);
-              }
-            });
+                          function renderBarcodes() {
+                            rows.forEach(function(chasu, i) {
+                              const lot = chasu && chasu.lot_no ? String(chasu.lot_no) : '';
+                              if (!lot) return;
+                              try {
+                                JsBarcode("#svgBarcode_" + i, lot, {
+                                  format: "code128",
+                                  width: 2,
+                                  height: 100,
+                                  displayValue: true,
+                                  text: lot + " (" + prodMatNm + ")",
+                                  fontSize: 12,
+                                  margin: 10,
+                                  background: "#fff",
+                                  lineColor: "#000"
+                                });
+                              } catch (e) {
+                                console.error("Barcode render failed for index", i, e);
+                              }
+                            });
 
-            window.print();
-            setTimeout(() => window.close(), 300);
-          }
+                            window.print();
+                            setTimeout(() => window.close(), 300);
+                          }
 
-          if (document.readyState === "complete") renderBarcodes();
-          else window.addEventListener("load", renderBarcodes);
-        })();
-      `;
+                          if (document.readyState === "complete") renderBarcodes();
+                          else window.addEventListener("load", renderBarcodes);
+                        })();
+                      `;
                         win.document.body.appendChild(runner);
                     };
                     win.document.head.appendChild(lib);
