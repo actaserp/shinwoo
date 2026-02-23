@@ -1618,8 +1618,8 @@
             }
 
             if (shouldAuto) {
-              const lineTotal = qtyForCalc * unitPrice;
-
+              // const lineTotal = qtyForCalc * unitPrice;
+             const lineTotal = Math.floor(qtyForCalc * unitPrice);
               if (isVatExempt) {
                 supplyAmount = lineTotal;
                 vatAmount    = 0;
@@ -1631,7 +1631,7 @@
                 vatAmount    = Math.floor(supplyAmount * 0.1);
               }
 
-              if (!isSupplyEdited) {
+              if (!isSupplyEdited) 
                 $row.find('input[name^="supplyAmount_"]').val(supplyAmount === 0 ? '' : supplyAmount.toLocaleString());
               }
               if (!isVatEdited) {
