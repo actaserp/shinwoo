@@ -1631,7 +1631,7 @@
                 vatAmount    = Math.floor(supplyAmount * 0.1);
               }
 
-              if (!isSupplyEdited) 
+              if (!isSupplyEdited) {
                 $row.find('input[name^="supplyAmount_"]').val(supplyAmount === 0 ? '' : supplyAmount.toLocaleString());
               }
               if (!isVatEdited) {
