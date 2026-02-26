@@ -140,8 +140,8 @@ public class AccountController {
 		clearCookie.setPath("/");     // 전체 경로 적용
 		response.addCookie(clearCookie);
 
-		// ✅ 로그인 페이지로 리다이렉트
-		response.sendRedirect("/login");
+		String ctx = request.getContextPath(); // "/mes"
+		response.sendRedirect(ctx + "/login");
 	}
 
 

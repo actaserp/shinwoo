@@ -37,7 +37,7 @@
                 </a>
             </div>
             <ul class="page-navi">
-                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li><img th:src="@{/images/icon/ico-nav-home.svg}" alt="홈아이콘"></li>
                 <li>대시보드</li>
                 <li>수주 진행 현황</li>
             </ul>
@@ -69,7 +69,7 @@
     </div>
 </th:block>
 <th:block layout:fragment="scripts">
-    <script src="/resource/apexcharts/apexcharts.3.26.min.js"></script>
+    <script th:src="@{/resource/apexcharts/apexcharts.3.26.min.js}"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="text/javascript">
         class CustomOrderPage {

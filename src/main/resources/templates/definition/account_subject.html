@@ -1,6 +1,6 @@
 <html layout:decorate="~{layout_page}">
 <th:block layout:fragment="content">
-    <script type="text/javascript" src="/js/fileupload.js?v=20220503"></script> <!--?v=1003-->
+    <script type="text/javascript" th:src="@{/js/fileupload.js}"></script> <!--?v=1003-->
     <div class="layout-contents">
         <div class="page-title-wrap">
             <div class="left">
@@ -10,7 +10,7 @@
                 </a>
             </div>
             <ul class="page-navi">
-                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li><img th:src="@{/images/icon/ico-nav-home.svg}" alt="홈아이콘"></li>
                 <li>기준정보</li>
                 <li>계정과목관리</li>
             </ul>
@@ -55,7 +55,7 @@
                             <dd>
                                 <li>
                                     <a class="btn btn-delete" title="검색" id="btnSearch">
-                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        <img th:src="@{/images/icon/btn-srch.svg}" alt="검색 아이콘">
                                         검색
                                     </a>
                                 </li>
@@ -298,7 +298,7 @@
 
 <th:block layout:fragment="scripts">
     <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
-    <script type="text/javascript" src="/js/grid.js"></script>
+    <script type="text/javascript" th:src="@{/js/grid.js}"></script>
 
     <script type="text/javascript">
         class AccountsubjectPage {

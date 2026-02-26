@@ -25,7 +25,7 @@
         </a>
       </div>
       <ul class="page-navi">
-        <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+        <li><img th:src="@{/images/icon/ico-nav-home.svg}" alt="홈아이콘"></li>
         <li>기준정보</li>
         <li>사업장 정보</li>
       </ul>
@@ -48,19 +48,19 @@
             <ul>
               <li>
                 <a id="newdataBtn" class="btn btn-excell" title="신규등록" onclick="resetFormFields();">
-                  <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                  <img th:src="@{/images/icon/ico-plus.svg}" alt="등록 아이콘">
                   신규등록
                 </a>
               </li>
               <li>
                 <a class="btn btn-delete" id="deleteButton" title="삭제" onclick="deleteSpjang()">
-                  <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
+                  <img th:src="@{/images/icon/ico-delete.svg}" alt="삭제 아이콘">
                   삭제
                 </a>
               </li>
               <li>
                 <a class="btn btn-edit" id="btnSave" title="저장" onclick="save()">
-                  <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
+                  <img th:src="@{/images/icon/ico-save.svg}" alt="저장 아이콘">
                   저장
                 </a>
               </li>
@@ -221,7 +221,7 @@
   <th:block th:replace="/common/popup_tax_office :: popup_tax_office"></th:block>
   <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <!--  연락처 및 사업번호 등 포맷 js파일  -->
-  <script src="/js/InputFormat.js"></script>
+  <script th:src="@{/js/InputFormat.js}"></script>
   <script type="text/javascript">
     attachTelFormatterAll('.phone-format'); // 연락처 포맷 메서드
     attachBizNumberFormatterAll('.biz-number'); // 사업자번호 포맷 메서드

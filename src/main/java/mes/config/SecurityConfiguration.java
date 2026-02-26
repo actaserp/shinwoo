@@ -23,77 +23,90 @@ import org.springframework.beans.factory.annotation.Value;
 @Configuration
 @ComponentScan("mes.domain.security")
 public class SecurityConfiguration {
-	
-	@Autowired
-	private CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
-	@Autowired
-	private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+    @Autowired
+    private CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+
+    @Autowired
+    private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
     @Value("${server.servlet.session.cookie.name}")
     private String sessionCookieName;
-		
-	@Bean(name="authenticationManager")	
-	CustomAuthenticationManager authenticationManager() {
-		CustomAuthenticationManager authenticationManager = new CustomAuthenticationManager();
-		return authenticationManager;
-	}
-	
+
+    @Bean(name="authenticationManager")
+    CustomAuthenticationManager authenticationManager() {
+        return new CustomAuthenticationManager();
+    }
+
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.headers().frameOptions().sameOrigin(); 
-        //http.csrf().disable();
-        http.csrf().ignoringAntMatchers("/api/files/upload/**");
-        http.csrf().ignoringAntMatchers("/popbill/webhook");
-        http.csrf().ignoringAntMatchers("/pda/**");
 
-        
-        http.authorizeRequests().mvcMatchers("/login","/logout" , "/pda/login", "/pda/app/version/**","/useridchk/**","/user-auth/save", "/popbill/webhook", "/api/transaction/input/**").permitAll()
-        .mvcMatchers("/authentication/**","/user-auth/**").permitAll()
-        .mvcMatchers("/setup").hasAuthority("admin")		// hasRole -> hasAuthority로 수정
-                .anyRequest().authenticated();
+        // 1. 헤더 설정
+        http
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin())
+                );
 
-        http.formLogin()
-        .loginPage("/login")
-        .loginProcessingUrl("/postLogin")
-        .successHandler(customAuthenticationSuccessHandler)
-		.failureHandler(customAuthenticationFailureHandler)		
-        .permitAll();
-                
-        http.logout().logoutUrl("/logout")
-        .logoutSuccessUrl("/login")
-        .invalidateHttpSession(true)
-        .deleteCookies(sessionCookieName)
-        .clearAuthentication(true)
-        .permitAll();
-        
-        http.httpBasic().disable();
-        http.exceptionHandling().accessDeniedHandler(new CustomAccessDeniedHandler()).authenticationEntryPoint(new AjaxAwareLoginUrlAuthenticationEntryPoint("/login"));
-        
+        // 2. CSRF 예외 경로 (기존 pda 및 기타 추가)
+        http
+                .csrf(csrf -> csrf
+                        .ignoringAntMatchers(
+                                "/api/files/upload/**",
+                                "/popbill/webhook",
+                                "/pda/**"
+                        )
+                );
 
-        
+        // 3. 권한 설정 (기존 소스의 모든 permitAll 경로 통합)
+        http
+                .authorizeRequests(auth -> auth
+                        .antMatchers(
+                                // 기본 페이지 및 인증
+                                "/login", "/logout", "/postLogin", "/intro", "/error", "/alive",
+                                // 정적 리소스
+                                "/resource/**", "/img/**", "/images/**", "/js/**", "/css/**",
+                                "/assets_mobile/**", "/font/**", "/robots.txt", "/favicon.ico",
+                                // PDA 관련
+                                "/pda/login", "/pda/app/version/**", "/pda/**",
+                                // API 및 외부 연동
+                                "/useridchk/**", "/user-auth/**", "/user-auth/save",
+                                "/popbill/webhook", "/api/transaction/input/**",
+                                "/api/das_device", "/authentication/**"
+                        ).permitAll()
+                        .antMatchers("/setup").hasAuthority("admin")
+                        .anyRequest().authenticated()
+                );
+
+        // 4. 로그인 설정
+        http
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .loginProcessingUrl("/postLogin")
+                        .successHandler(customAuthenticationSuccessHandler)
+                        .failureHandler(customAuthenticationFailureHandler)
+                        .permitAll()
+                );
+
+        // 5. 로그아웃 설정
+        http
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login")
+                        .invalidateHttpSession(true)
+                        .deleteCookies(sessionCookieName)
+                        .clearAuthentication(true)
+                        .permitAll()
+                );
+
+        // 6. 예외 처리 및 기타 (기존 소스의 AjaxAware 및 AccessDenied 적용)
+        http.httpBasic(httpBasic -> httpBasic.disable());
+
+        http.exceptionHandling(exception -> exception
+                .accessDeniedHandler(new CustomAccessDeniedHandler())
+                .authenticationEntryPoint(new AjaxAwareLoginUrlAuthenticationEntryPoint("/login"))
+        );
+
         return http.build();
     }
-
-    /*
-    @Bean
-    WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().mvcMatchers("/intro", "/error", "/alive", "/api/das_device");
-    }
-    */
-    
-    @Bean
-    @Order(0)
-    SecurityFilterChain exceptResources(HttpSecurity http) throws Exception {
-    	http.requestMatchers(matchers -> matchers.antMatchers("/resource/**","/img/**", "/images/**", "/js/**","/css/**","/assets_mobile/css/**","/font/**","/robots.txt","/favicon.ico","/intro", "/error", "/alive", "/api/das_device"))
-		.authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
-		.requestCache(RequestCacheConfigurer::disable)
-		.securityContext(AbstractHttpConfigurer::disable)
-		.sessionManagement(AbstractHttpConfigurer::disable);   	
-    	
-    	http.headers().frameOptions().disable();
-        return http.build();
-    }     
-    
 }
 

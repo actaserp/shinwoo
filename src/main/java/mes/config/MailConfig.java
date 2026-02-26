@@ -16,6 +16,9 @@ public class MailConfig {
     @Autowired
     UserRepository userRepository;
 
+    @Value("${spring.mail.username}")
+    private String fromEmail;
+
     @Value("${spring.mail.password}")
     private String mailPassword;
 
@@ -27,7 +30,7 @@ public class MailConfig {
 
         mailSender.setHost("smtp.naver.com");
         mailSender.setPort(465);
-        mailSender.setUsername("kimyouli0330@naver.com");
+        mailSender.setUsername(fromEmail);
         mailSender.setPassword(mailPassword); // 반드시 앱 비밀번호
 
         Properties props = mailSender.getJavaMailProperties();

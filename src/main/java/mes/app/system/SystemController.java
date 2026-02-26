@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,14 +27,13 @@ public class SystemController {
 	
 	@Autowired
 	SqlRunner sqlRunner;
-	
+
+	@Cacheable(value = "menus",  key = "#auth.name")
 	@SuppressWarnings("unchecked")
 	@GetMapping("/menus")
-	public AjaxResult menus() {	
-		
-        SecurityContext sc = SecurityContextHolder.getContext();
-        Authentication auth = sc.getAuthentication();
-        User user = (User)auth.getPrincipal();
+	public AjaxResult menus(Authentication auth) {
+
+		User user = (User) auth.getPrincipal();
        
         List<Map<String, Object>> items = this.systemService.getWebMenuList(user);
         

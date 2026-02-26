@@ -3,6 +3,19 @@
 
 'use strict';
 
+// common.js (최상단)
+window.CTX = document.querySelector('meta[name="ctx"]')?.content || '/';
+
+// 끝에 붙은 '/' 제거한 버전도 같이 준비
+window.CTX_PATH = window.CTX.replace(/\/$/, '');
+
+window.withCtx = function (url) {
+    if (!url) return url;
+    if (url.startsWith('/')) {
+        return window.CTX_PATH + url;
+    }
+    return url;
+};
 
 var JQuery = {
     extends: function () {
@@ -1054,7 +1067,7 @@ let AjaxUtil = {
             async: false,
             dataType: 'json',
             type: 'GET',
-            url: url,
+            url: withCtx(url),
             data: p_data,
             success: function (res) {
                 items = res;
@@ -1079,7 +1092,7 @@ let AjaxUtil = {
             async: true,
             dataType: 'json',
             type: 'GET',
-            url: url,
+            url: withCtx(url),
             data: param_data,
             success: function (res) {
                 fn_success(res);
@@ -1109,7 +1122,7 @@ let AjaxUtil = {
             async: false,
             dataType: 'json',
             type: 'POST',
-            url: url,
+            url: withCtx(url),
             data: param_data,
             success: function (res) {
                 result = res;
@@ -1146,7 +1159,7 @@ let AjaxUtil = {
             async: true,
             dataType: 'json',
             type: 'POST',
-            url: url,
+            url: withCtx(url),
             data: param_data,
             success: function (res) {
                 // console.log('asdas');
@@ -1183,7 +1196,7 @@ let AjaxUtil = {
             async: true,
             dataType: 'json',
             type: 'POST',
-            url: url,
+            url: withCtx(url),
             data: JSON.stringify(param_data), // JSON 형식으로 변환
             contentType: 'application/json',  // 반드시 설정
             headers: {
@@ -1219,7 +1232,7 @@ let AjaxUtil = {
             async: true,
             dataType: 'json',
             type: 'POST',
-            url: url,
+            url: withCtx(url),
             data: JSON.stringify(param_data), // JSON 형식으로 변환
             contentType: 'application/json; charset=UTF-8',  // 반드시 설정
             headers: {
@@ -1266,7 +1279,7 @@ let AjaxUtil = {
             async: true,
             dataType: 'json',
             type: 'POST',
-            url: url,
+            url: withCtx(url),
             contentType: 'application/json',
             data: JSON.stringify(data),
             beforeSend: function(xhr) {
@@ -1311,7 +1324,7 @@ let AjaxUtil = {
             async: false,
             dataType: 'json',
             type: 'POST',
-            url: url,
+            url: withCtx(url),
             contentType: 'application/json',
             data: JSON.stringify(data),
             beforeSend: function(xhr) {
@@ -1349,7 +1362,7 @@ let AjaxUtil = {
         $.ajax({
             async: false,
             type: 'POST',
-            url: url,
+            url: withCtx(url),
             data: form_data,
             processData: false,
             contentType: false,
@@ -1385,7 +1398,7 @@ let AjaxUtil = {
         $.ajax({
             async: true,
             type: 'POST',
-            url: url,
+            url: withCtx(url),
             data: form_data,
             processData: false,
             contentType: false,
@@ -1604,7 +1617,10 @@ let AjaxUtil = {
         });
 
         downloadmask.open({
-            content: '<h1><img src="/img/loading.svg">로딩중...</h1>'
+            content: `<h1>
+                <img src="${withCtx('/img/loading.svg')}">
+                    로딩중...
+                </h1>`
         });
 
         fetch(url)
@@ -2324,4 +2340,25 @@ $(document).ready(function () {
 
 
 
+});
+
+// 자동 컨텍스트 패스 적용
+$.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+
+    if (!options.url) return;
+
+    // 외부 URL / CDN 제외
+    if (/^https?:\/\//i.test(options.url) || options.url.startsWith('//')) {
+        return;
+    }
+
+    // 이미 컨텍스트 패스가 붙어 있으면 제외
+    if (window.CTX_PATH && options.url.startsWith(window.CTX_PATH + '/')) {
+        return;
+    }
+
+    // / 로 시작하는 내부 경로만 처리
+    if (options.url.startsWith('/')) {
+        options.url = window.CTX_PATH + options.url;
+    }
 });

@@ -10,7 +10,7 @@
         </a>
       </div>
       <ul class="page-navi">
-        <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+        <li><img th:src="@{/images/icon/ico-nav-home.svg}" alt="홈아이콘"></li>
         <li>입금관리</li>
         <li>입금 현황</li>
       </ul>
@@ -102,7 +102,7 @@
               <li>
                 <a class="btn btn-delete" title="검색" id="btnSearch">
                   <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
-                  <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                  <img th:src="@{/images/icon/btn-srch.svg}" alt="검색 아이콘">
                   검색
                 </a>
               </li>
@@ -122,7 +122,7 @@
   <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
   <th:block th:replace="/common/popup_company :: popup_company"></th:block>
   <th:block th:replace="/common/popup_account :: popup_account" />
-  <script src="/js/AccountInputHandler.js"></script>
+  <script th:src="@{/js/AccountInputHandler.js}"></script>
   <script type="text/javascript">
     class DepositListPage {
       constructor() {

@@ -42,7 +42,7 @@
                 <h2>관리기준서</h2>
             </div>
             <ul class="page-navi">
-                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li><img th:src="@{/images/icon/ico-nav-home.svg}" alt="홈아이콘"></li>
                 <li>HACCP 기준정보</li>
                 <li>관리기준서</li>
             </ul>
@@ -154,7 +154,7 @@
     <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
     <th:block th:replace="/common/approve_box :: approve_box" ></th:block>
     <th:block th:replace="/common/ax5_uploader :: ax5_uploader" ></th:block>
-    <script type="text/javascript" src="/js/fileupload.js"></script>
+    <script type="text/javascript" th:src="@{/js/fileupload.js}"></script>
     <script type="text/javascript">
         class HaccpStandardDocDiaryPage {
             constructor() {

@@ -21,110 +21,65 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-
-
-//import com.zaxxer.hikari.HikariConfig;
-//import com.zaxxer.hikari.HikariDataSource;
-@EnableJpaRepositories(basePackages = "mes.domain.repository",  entityManagerFactoryRef = "entityManagerFactory", transactionManagerRef = "transactionManager")
+@EnableJpaRepositories(basePackages = "mes.domain.repository",  entityManagerFactoryRef = "entityManagerFactory", transactionManagerRef = "transactionManagerCustom")
 @Configuration
 public class DataSourceConfig {
 
-	
+
 	@Bean("jdbcTemplate")
-    JdbcTemplate jdbcTemplate(DataSource dataSource) {
-        return new JdbcTemplate(dataSource);
-    }	
-	
-	@ConfigurationProperties(prefix="spring.datasource.hikari")
-	@Bean(name="dataSource")	
+	JdbcTemplate jdbcTemplate(DataSource dataSource) {
+		return new JdbcTemplate(dataSource);
+	}
+
+	@ConfigurationProperties(prefix = "spring.datasource.hikari")
+	@Bean(name = "dataSource")
 	DataSource dataSource() {
-		/*
-		HikariConfig config = new HikariConfig();		
-		config.setJdbcUrl( "jdbc:postgresql://10.10.10.231:5432/mes_java" );
-        config.setUsername( "mes21" );
-        config.setPassword( "mes7033" );
-        config.addDataSourceProperty( "cachePrepStmts" , true );
-        config.addDataSourceProperty( "prepStmtCacheSize" , 250 );
-        config.addDataSourceProperty( "prepStmtCacheSqlLimit" , 2048 );		
-		HikariDataSource ds = new HikariDataSource(config);
-		return ds;
-		*/
-		//DRIVER=Devart ODBC Driver for PostgreSQL;Data Source=localhost;Database=mes_db;User ID=actasmes;Password=actas5200
-		/*
-		HikariConfig config = new HikariConfig();		
-		config.setJdbcUrl( "jdbc:postgresql://localhost:5432/mes_db" );
-        config.setUsername( "actasmes" );
-        config.setPassword( "actas5200" );
-        config.addDataSourceProperty( "cachePrepStmts" , true );
-        config.addDataSourceProperty( "prepStmtCacheSize" , 250 );
-        config.addDataSourceProperty( "prepStmtCacheSqlLimit" , 2048 );		
-		HikariDataSource ds = new HikariDataSource(config);
-		return ds;
-		 */
 		return DataSourceBuilder.create().build();
-	}	
-	
-	@Bean(name="entityManagerFactory")
-	LocalContainerEntityManagerFactoryBean entityManagerFactory(){
+	}
+
+	@Bean(name = "entityManagerFactory")
+	LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
 		emf.setDataSource(this.dataSource());
 		emf.setPackagesToScan(new String[]{"mes.domain.entity"});
 		HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
 		emf.setJpaVendorAdapter(vendorAdapter);
-		HashMap<String, Object> properties =new HashMap<>();
+		HashMap<String, Object> properties = new HashMap<>();
 		properties.put("hibernate.ddl-auto", "validate");
-		properties.put("hibernate.format_sql",true);
-		properties.put("hibernate.show-sql",true);
-		properties.put("hibernate.dialect","org.hibernate.dialect.PostgreSQLDialect");
+		properties.put("hibernate.format_sql", true);
+		properties.put("hibernate.show-sql", true);
+		properties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
 		//properties.put("hibernate.storage_engine", property.getStorage_engine());
-		emf.setJpaPropertyMap(properties);	
+		emf.setJpaPropertyMap(properties);
 		return emf;
-    } 
-	
+	}
+
 	@Bean
 	@Primary
-	PlatformTransactionManager transactionManagerCustom(){
-		
-		// MyBatis transactional
-		//DataSourceTransactionManager dataSourceTransactionManager = new DataSourceTransactionManager();
-		//dataSourceTransactionManager.setDataSource(dataSource());
-		
-		// JPA transactional
-		//JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
-		//jpaTransactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
-		
-		// Chained transaction manager (MyBatis X JPA)
-		//ChainedTransactionManager transactionManager = new ChainedTransactionManager(jpaTransactionManager, dataSourceTransactionManager);
-		//return transactionManager;
-		
-		JpaTransactionManager transactionManager =new JpaTransactionManager();
-		transactionManager.setEntityManagerFactory(this.entityManagerFactory().getObject()); 
-		return transactionManager;	
+	PlatformTransactionManager transactionManagerCustom() {
+		JpaTransactionManager transactionManager = new JpaTransactionManager();
+		transactionManager.setEntityManagerFactory(this.entityManagerFactory().getObject());
+		return transactionManager;
 	}
-	
-	@Bean  
-	TransactionTemplate transactionTemplate(PlatformTransactionManager transactionManager) {  
-	    return new TransactionTemplate(transactionManager);  
-	}	
-	
-	
+
 	@Bean
-	SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception{
+	TransactionTemplate transactionTemplate(PlatformTransactionManager transactionManager) {
+		return new TransactionTemplate(transactionManager);
+	}
+
+
+	@Bean
+	SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
 		final SqlSessionFactoryBean sessionFactory = new SqlSessionFactoryBean();
 		sessionFactory.setDataSource(dataSource);
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-		sessionFactory.setMapperLocations(resolver.getResources("mapper/*.xml")); 	//mapper 파일 로드
-		//sessionFactory.setConfigLocation(resolver.getResource("mybatis-config.xml"));//mybatis-config 로드
+		sessionFactory.setMapperLocations(resolver.getResources("mapper/*.xml"));    //mapper 파일 로드
 		return sessionFactory.getObject();
 	}
-	
+
 	@Bean
-	SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) throws Exception{
+	SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) throws Exception {
 		final SqlSessionTemplate sqlSessionTemplate = new SqlSessionTemplate(sqlSessionFactory);
 		return sqlSessionTemplate;
 	}
-
-
 }

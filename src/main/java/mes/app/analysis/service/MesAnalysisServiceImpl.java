@@ -165,6 +165,6 @@ public class MesAnalysisServiceImpl implements MesAnalysisService {
 
     @PostConstruct
     public void testKey() {
-        System.out.println("[OpenAI API Key] " + apiKey);
+//        System.out.println("[OpenAI API Key] " + apiKey);
     }
 }

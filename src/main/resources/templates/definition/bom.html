@@ -30,7 +30,7 @@
                 </a>
             </div>
             <ul class="page-navi">
-                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li><img th:src="@{/images/icon/ico-nav-home.svg}" alt="홈아이콘"></li>
                 <li>기준정보</li>
                 <li>BOM</li>
             </ul>
@@ -91,7 +91,7 @@
                             <dd>
                                 <li>
                                     <a class="btn btn-delete" title="검색" id="btnSearch">
-                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        <img th:src="@{/images/icon/btn-srch.svg}" alt="검색 아이콘">
                                         검색
                                     </a>
                                 </li>
@@ -502,7 +502,6 @@
 
 <th:block layout:fragment="scripts">
     <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
-    <script type="text/javascript" src="/js/grid.js"></script>
 
     <script type="text/javascript">
 
@@ -1885,35 +1884,6 @@
                 }
             });
 
-            $('#btnCompUp').click(function (e) {
-                let grid = wijmo.Control.getControl('#bomcomp-grid'); // 그리드 객체 가져오기
-                GridUtil.changeOrder('U', grid);
-            });
-
-
-            $('#btnCompDown').click(function (e) {
-                let grid = wijmo.Control.getControl('#bomcomp-grid'); // 그리드 객체 가져오기
-                GridUtil.changeOrder('D', grid);
-            });
-
-            $('#btnCompOrderSave').click(function (e) {
-                let grid = wijmo.Control.getControl('#bomcomp-grid'); // 그리드 객체 가져오기
-
-                if (!grid || !grid.itemsSource) {
-                    console.error("버튼클릭 함수 gridBomComp 또는 itemsSource가 존재하지 않습니다.");
-                    return;
-                }
-
-                let count = grid.itemsSource.length;
-
-                if (count === 0 || count === 1) {
-                    return;
-                }
-
-                Alert.confirm('', '순서를 저장하시겠습니까?', function () {
-                    page.saveBomCompOrder();
-                });
-            });
 
 
             /*let items = page.gridBom.getList("selected");*/

@@ -93,7 +93,7 @@
         </a>
       </div>
       <ul class="page-navi">
-        <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+        <li><img th:src="@{/images/icon/ico-nav-home.svg}" alt="홈아이콘"></li>
         <li>전자결재</li>
         <li>결재목록현황</li>
       </ul>
@@ -153,7 +153,7 @@
               <dd>
                 <li>
                   <a class="btn btn-delete" title="검색" id="searchButton1" onclick="Search()">
-                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                    <img th:src="@{/images/icon/btn-srch.svg}" alt="검색 아이콘">
                     검색
                   </a>
                 </li>
@@ -180,7 +180,7 @@
       <div class="popup-title">
         <h3>결재 승인</h3>
         <a onclick="NewClose()" title="팝업닫기" class="btn-popup-close">
-          <img src="/images/icon/btn-popup-close.svg" alt="닫기">
+          <img th:src="@{/images/icon/btn-popup-close.svg}" alt="닫기">
         </a>
       </div>
       <div class="popup-contents">
@@ -211,7 +211,7 @@
                         <!-- PDF 페이지가 동적으로 추가됩니다. -->
                         <div id="loadingSpinner" style="display: none;">
                           <div class="spinner"></div>
-                          <p>PDF를 불러오는 중입니다...</p><img src="/img/icon/downloadSpinner.gif" alt="로딩중" style="width: 30px; height: 30px">
+                          <p>PDF를 불러오는 중입니다...</p><img th:src="@{/img/icon/downloadSpinner.gif}" alt="로딩중" style="width: 30px; height: 30px">
                         </div>
                       </div>
                     </div>

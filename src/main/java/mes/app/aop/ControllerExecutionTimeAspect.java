@@ -21,6 +21,12 @@ public class ControllerExecutionTimeAspect implements Filter {
 
         HttpServletRequest req = (HttpServletRequest) request;
         String uri = req.getRequestURI();
+        String contextPath = req.getContextPath();
+
+        // 컨텍스트 패스 제거
+        if (uri.startsWith(contextPath)) {
+            uri = uri.substring(contextPath.length());
+        }
 
         // /api 로 시작하는 요청만 측정
         if (!uri.startsWith("/api")) {

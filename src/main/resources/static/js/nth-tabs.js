@@ -134,7 +134,7 @@
 
                 // 매뉴얼 오픈
                 $('.tab-question').bind('click', function (e) {
-                    Ax5Modal.open({ url: '/modal/manual', width: 800, height: 600, callbackfn: 'setPopUpManualResult', params: { objId: $(this).data('objid') } });
+                    Ax5Modal.open({ url: withCtx('/modal/manual'), width: 800, height: 600, callbackfn: 'setPopUpManualResult', params: { objId: $(this).data('objid') } });
                 });
                 return this;
             },
@@ -173,7 +173,7 @@
 
                                 // 북마크 상태 저장
                                 $.ajax({
-                                    url: '/api/system/bookmark/save',
+                                    url: withCtx('/api/system/bookmark/save'),
                                     type: 'POST',
                                     data: {
                                         menucode: menuCode,
@@ -551,7 +551,7 @@
             // 탭 전환 이벤트
             onTabToggle: function () {
                 nthTabs.on("click", '.nav-tabs li', function () {
-                    $('.gnb ul li a').removeClass('on');
+                    $('#left-menu a').removeClass('on');
                     $('li.has_sub2').removeClass('open');
                     $('li.has_sub2 > ul').slideUp(200);
                     if (delflag == false) {

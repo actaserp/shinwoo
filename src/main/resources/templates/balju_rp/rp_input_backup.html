@@ -185,7 +185,7 @@
                 </a>
             </div>
             <ul class="page-navi">
-                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li><img th:src="@{/images/icon/ico-nav-home.svg}" alt="홈아이콘"></li>
                 <li>발주/수불관리</li>
                 <li>수불 전표 등록</li>
             </ul>
@@ -271,7 +271,7 @@
                             <dd>
                                 <li>
                                     <a class="btn btn-delete" title="검색" id="btnSearch">
-                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        <img th:src="@{/images/icon/btn-srch.svg}" alt="검색 아이콘">
                                         검색
                                     </a>
                                 </li>
@@ -356,7 +356,7 @@
                                     <input id="Material_name" name="Material_name" readonly placeholder="품목 조회 버튼을 클릭하여 선택하세요." />
                                     &nbsp;
                                     <a class="btn" title="품목 조회" id="btnMaterial">
-                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        <img th:src="@{/images/icon/btn-srch.svg}" alt="검색 아이콘">
                                         품목조회
                                     </a>
 
@@ -499,7 +499,7 @@
                       <li>
                         <a class="btn btn-delete" title="검색" id="btnSearch">
                           <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
-                          <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                          <img th:src="@{/images/icon/btn-srch.svg}" alt="검색 아이콘">
                           검색
                         </a>
                       </li>
@@ -857,7 +857,7 @@
 
 
 <th:block layout:fragment="scripts">
-    <script type="text/javascript" src="/resource/jsBarcode/JsBarcode.all.min.js"></script>
+    <script type="text/javascript" th:src="@{/resource/jsBarcode/JsBarcode.all.min.js}"></script>
     <th:block th:replace="/common/popup_material :: popup_material"></th:block>
 
     <script type="text/javascript">

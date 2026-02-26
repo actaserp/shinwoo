@@ -91,6 +91,7 @@ public class HomeController {
 		mv.addObject("groupname", groupname);
 		mv.addObject("factory_id", factory_id);
 		session.setAttribute("userid", userid);
+		session.setAttribute("username", username);
 		session.setAttribute("groupid", groupid);
 		session.setAttribute("factory_id", factory_id);
 		session.setAttribute("spjangcd", spjangcd);

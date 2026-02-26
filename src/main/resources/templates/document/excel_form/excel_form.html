@@ -10,7 +10,7 @@
                 </a>
             </div>
             <ul class="page-navi">
-                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li><img th:src="@{/images/icon/ico-nav-home.svg}" alt="홈아이콘"></li>
                 <li>기준정보</li>
                 <li>엑셀양식</li>
             </ul>
@@ -35,7 +35,7 @@
                         <dd>
                             <li>
                                 <a class="btn btn-delete" title="검색" id="btnSearch">
-                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    <img th:src="@{/images/icon/btn-srch.svg}" alt="검색 아이콘">
                                     검색
                                 </a>
                             </li>
@@ -46,7 +46,7 @@
                     <ul>
                         <li>
                             <!-- <a class="btn btn-excell" title="신규" id="btnAddNew">
-                                 <img src="/images/icon/ico-plus.svg" alt="신규 아이콘">
+                                 <img th:src="@{/images/icon/ico-plus.svg}" alt="신규 아이콘">
                                  신규
                              </a>-->
                             <button type="button" class="btn-excellt btn-default" id="btnNew" title="신규" style="width: 115px; height: 36px;"><i class="fas fa-plus">신규등록</i>
@@ -54,14 +54,14 @@
                         </li>
                         <li>
                             <!--<a class="btn btn-delete" title="삭제" id="btnDel">
-                                <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
+                                <img th:src="@{/images/icon/ico-delete.svg}" alt="삭제 아이콘">
                                 삭제
                             </a>-->
                             <button type="button" class="btn-delete btn-danger" id="btnDel" title="삭제" style="width: 115px; height: 36px;"><i class="fas fa-trash">삭제</i></button>
                         </li>
                         <li>
                             <!--<a class="btn btn-edit" title="저장" id="btnSave">
-                                <img src="/images/icon/ico-edit.svg" alt="저장 아이콘">
+                                <img th:src="@{/images/icon/ico-edit.svg}" alt="저장 아이콘">
                                 저장
                             </a>-->
                             <button type="button" class="btn-edit btn-default" id="btnEdit" title="수정" style="width: 115px; height: 36px;"><i class="fas fa-edit"></i>수정</button>

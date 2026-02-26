@@ -2,29 +2,36 @@
 <html lang="ko" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8"/>
+    <meta name="ctx" th:content="@{/}">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1, minimum-scale=1, maximum-scale=1">
-<!--    <link rel="icon" type="image/png" href="/images/logo/actas_log_a.png">-->
+    <link rel="icon" th:href="@{/images/logo/actas_log_a.png}">
     <title th:text="${ system_title }"></title>
-    <link rel="stylesheet" href="/resource/windowContainer/css/jquery.scrollbar.min.css">
-    <link rel="stylesheet" href="/resource/windowContainer/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/resource/windowContainer/css/nth-icons.css">
-    <link rel="stylesheet" href="/resource/windowContainer/css/nth-tabs.css">
-    <link rel="stylesheet" href="/resource/ax5ui/ax5ui.all.css">
-    <link rel="stylesheet" href="/css/animate.css">
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/theme-top-mes.css">
-    <!--    <link rel="stylesheet" href="/css/theme-left-mes.css">-->
-    <link rel="stylesheet" type="text/css" href="/css/import.css">
-    <script src="/js/vendor/jquery-3.6.0.js"></script>
-    <script src="/js/vendor/jquery-ui.min.js"></script>
-    <script src="/js/ui.js"></script> <!-- Common js -->
-    <script src="/js/utilscript.js"></script> <!-- 박광열 -->
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/resource/windowContainer/css/jquery.scrollbar.min.css}">
+    <link rel="stylesheet" th:href="@{/resource/windowContainer/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/resource/windowContainer/css/nth-icons.css}">
+    <link rel="stylesheet" th:href="@{/resource/windowContainer/css/nth-tabs.css}">
+    <link rel="stylesheet" th:href="@{/resource/ax5ui/ax5ui.all.css}">
+    <link rel="stylesheet" th:href="@{/css/animate.css}">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/theme-top-mes.css}">
+    <!-- <link rel="stylesheet" th:href="@{/css/theme-left-mes.css}"> -->
+    <link rel="stylesheet" th:href="@{/css/import.css}" type="text/css">
+
+    <!-- JS -->
+    <script th:src="@{/js/vendor/jquery-3.6.0.js}"></script>
+    <script th:src="@{/js/vendor/jquery-ui.min.js}"></script>
+    <script th:src="@{/js/ui.js}"></script>
+    <script th:src="@{/js/utilscript.js}"></script>
 
     <script th:inline="javascript">
         var spjangList = /*[[${session.spjangList}]]*/ [];
-
+        sessionStorage.setItem("username", [[${session.username}]]);
+        sessionStorage.setItem("userid", [[${session.userid}]]);
+        sessionStorage.setItem("groupid", [[${session.groupid}]]);
+        sessionStorage.setItem("spjangcd", [[${session.spjangcd}]]);
     </script>
 
     <style>
@@ -110,6 +117,7 @@
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
+
         .header-menu::-webkit-scrollbar {
             display: none; /* ✅ Chrome, Safari */
         }
@@ -301,16 +309,16 @@
 
         .alarm-actions .btn-gray {
             flex: 1;
-            padding: 6px 0;                /* 🔥 높이 줄이기 */
-            font-size: 12px;               /* 🔥 살짝 작게 */
+            padding: 6px 0; /* 🔥 높이 줄이기 */
+            font-size: 12px; /* 🔥 살짝 작게 */
             font-weight: 600;
             text-align: center;
 
-            background: #f5f6f8;           /* 연한 배경 */
+            background: #f5f6f8; /* 연한 배경 */
             color: #555;
 
-            border: 1px solid #e0e3e8;     /* 얇은 테두리 */
-            border-radius: 14px;           /* 🔥 둥글게 */
+            border: 1px solid #e0e3e8; /* 얇은 테두리 */
+            border-radius: 14px; /* 🔥 둥글게 */
 
             cursor: pointer;
             transition: all .15s ease;
@@ -336,7 +344,7 @@
         <header>
             <div class="left" style="justify-content: center;">
                 <div class="logo">
-<!--                    <img src="/images/logo/actas_log.png" alt="로고">-->
+                    <!--                    <img src="/images/logo/actas_log.png" alt="로고">-->
                     <h1>SHINWOO MES</h1>
                 </div>
             </div>
@@ -350,72 +358,6 @@
                 </div>
                 <div class="header-info">
                     <div class="header-left">
-    <!--                    <div class="weather">-->
-    <!--                        <div class="wt-main">-->
-    <!--                            <p id="area"></p>-->
-    <!--                            <div class="wt-graphic">-->
-    <!--                                <img id="weatherIcon" src="" alt="">-->
-    <!--                                &lt;!&ndash;                            <p id="temperature"></p> &lt;!&ndash; 기존의 <span> 태그를 제거 &ndash;&gt;-->
-    <!--                                <p id="temperature"></p>-->
-    <!--                            </div>-->
-    <!--                            &lt;!&ndash;<p id="lastUpdated" style="font-size: 12px; color: gray;"></p>&ndash;&gt;-->
-    <!--                            <p id="lastUpdated" style="display: none;"></p>-->
-    <!--                        </div>-->
-    <!--                        <div class="wt-detail">-->
-    <!--                            <ul>-->
-    <!--                                <li>-->
-    <!--                                    <img src="/images/icon/ico-umbrella.svg" alt="강수">-->
-    <!--                                    <p id="precipitationProbability"></p>-->
-    <!--                                </li>-->
-    <!--                                <li>-->
-    <!--                                    <img src="/images/icon/ico-water.svg" alt="습도">-->
-    <!--                                    <p id="humidity"></p>-->
-    <!--                                </li>-->
-    <!--                                <li>-->
-    <!--                                    <img src="/images/icon/ico-wind.svg" alt="풍속">-->
-    <!--                                    <p id="windSpeed"></p>-->
-    <!--                                </li>-->
-    <!--                            </ul>-->
-    <!--                        </div>-->
-    <!--                    </div>-->
-                        <!-- 알람 -->
-    <!--                    <a href="#" class="alarm" title="알람">-->
-    <!--                        <img src="/images/icon/ico-bell.svg" alt="알람 아이콘">-->
-    <!--                        <span>알람</span>-->
-    <!--                        <span class="num">0</span>-->
-    <!--                    </a>-->
-    <!--                    <div class="alarm-box" style="width: 1000px;">-->
-    <!--                        <ul class="alarm-tab-links">-->
-    <!--                            <li class="active">-->
-    <!--                                <a href="#alarm-tab1" title="주문의뢰">주문의뢰(0)</a> &lt;!&ndash; 동적으로 업데이트 &ndash;&gt;-->
-    <!--                            </li>-->
-    <!--                        </ul>-->
-    <!--                        <div class="alarm-tab-contents">-->
-    <!--                            <div class="alarm-tab-item" id="alarm-tab1">-->
-    <!--                                <div class="table-wrap">-->
-    <!--                                    <table>-->
-    <!--                                        <caption>알람 테이블</caption>-->
-    <!--                                        <colgroup>-->
-    <!--                                            <col class="wp30"> &lt;!&ndash; 날짜 &ndash;&gt;-->
-    <!--                                            <col class="wp45"> &lt;!&ndash; 업체 이름 &ndash;&gt;-->
-    <!--                                            <col class="wp25"> &lt;!&ndash; 주문 상태 &ndash;&gt;-->
-    <!--                                        </colgroup>-->
-    <!--                                        <thead>-->
-    <!--                                        <tr>-->
-    <!--                                            <th>날 짜</th>-->
-    <!--                                            <th>업체 이름</th>-->
-    <!--                                            <th>주문 상태</th>-->
-    <!--                                        </tr>-->
-    <!--                                        </thead>-->
-    <!--                                        <tbody>-->
-    <!--                                        &lt;!&ndash; 알림 데이터가 여기 동적으로 추가됨 &ndash;&gt;-->
-    <!--                                        </tbody>-->
-    <!--                                    </table>-->
-    <!--                                </div>-->
-    <!--                            </div>-->
-    <!--                            <a href="#" title="확인" class="btn-gray" id="AlarmOk" onclick="AlarmOk()">확인</a>-->
-    <!--                        </div>-->
-    <!--                    </div>-->
                         <div class="header-menu">
 
                         </div>
@@ -424,7 +366,7 @@
                     <div class="header-right">
                         <!-- 알림 -->
                         <a href="#" class="alarm" title="알림">
-                            <img src="/images/icon/ico-bell.svg">
+                            <img th:src="@{/images/icon/ico-bell.svg}">
                             <span>알림</span>
                             <span class="num" id="alarmCount" th:text="${unreadAlarmCount}">0</span>
                         </a>
@@ -473,7 +415,8 @@
                         <div class="user-box2">
                             <ul>
                                 <li>
-                                    <a id="helpweb" href="https://939.co.kr/onit" title="원격접속" data-popup="" target="_blank" rel="noopener noreferrer">원격접속</a>
+                                    <a id="helpweb" href="https://939.co.kr/onit" title="원격접속" data-popup=""
+                                       target="_blank" rel="noopener noreferrer">원격접속</a>
                                 </li>
                                 <li id="btnMaintenance">
                                     <a href="#" title="요청등록/확인">요청등록/확인</a>
@@ -523,9 +466,9 @@
                         </li>
                     </ul>
                     <div class="layout-sidebar-tabcont">
-<!--                        <div style="margin-top: 10px" id="searchkeyword-box">-->
-<!--                            <input type="text" style="width: 90%" id="searchkeyword" name="searchkeyword" />-->
-<!--                        </div>-->
+                        <!--                        <div style="margin-top: 10px" id="searchkeyword-box">-->
+                        <!--                            <input type="text" style="width: 90%" id="searchkeyword" name="searchkeyword" />-->
+                        <!--                        </div>-->
                         <nav class="layout-nav sidebar-tabcont" id="menu">
                             <ul class="dep1">
                                 <li class="dep1-1">
@@ -584,14 +527,14 @@
 
                                     </ul>
                                 </li>
-<!--                                <li class="dep1-1">-->
-<!--                                    <a href="#a" title="보고서 관리" class="ico-lnb04">-->
-<!--                                        보고서 관리-->
-<!--                                    </a>-->
-<!--                                    <ul class="dep2" id="dep2-report">-->
+                                <!--                                <li class="dep1-1">-->
+                                <!--                                    <a href="#a" title="보고서 관리" class="ico-lnb04">-->
+                                <!--                                        보고서 관리-->
+                                <!--                                    </a>-->
+                                <!--                                    <ul class="dep2" id="dep2-report">-->
 
-<!--                                    </ul>-->
-<!--                                </li>-->
+                                <!--                                    </ul>-->
+                                <!--                                </li>-->
                                 <li class="dep1-1">
                                     <a href="#a" title="입출금 관리" class="ico-lnb04">
                                         입출금 관리
@@ -600,14 +543,14 @@
 
                                     </ul>
                                 </li>
-<!--                                <li class="dep1-1">-->
-<!--                                    <a href="#a" title="근태관리" class="ico-lnb04">-->
-<!--                                        근태 관리-->
-<!--                                    </a>-->
-<!--                                    <ul class="dep2" id="dep2-clock-inout">-->
+                                <!--                                <li class="dep1-1">-->
+                                <!--                                    <a href="#a" title="근태관리" class="ico-lnb04">-->
+                                <!--                                        근태 관리-->
+                                <!--                                    </a>-->
+                                <!--                                    <ul class="dep2" id="dep2-clock-inout">-->
 
-<!--                                    </ul>-->
-<!--                                </li>-->
+                                <!--                                    </ul>-->
+                                <!--                                </li>-->
                                 <li class="dep1-1">
                                     <a href="#a" title="시스템설정" class="ico-lnb05">
                                         시스템 설정
@@ -650,35 +593,48 @@
     </div>
 </div>
 
-
-<script type="text/javascript" src="/resource/jquery.min.js"></script>
-<script type="text/javascript" src="/resource/jquery-validation/1.17.0/jquery.validate.min.js"></script>
+<script th:src="@{/resource/jquery.min.js}"></script>
+<script th:src="@{/resource/jquery-validation/1.17.0/jquery.validate.min.js}"></script>
 
 <script type="text/javascript">
     $('html').attr('lang', sessionStorage.getItem('lang_code'));
 </script>
-<script type="text/javascript" src="/resource/windowContainer/js/jquery.scrollbar.min.js"></script>
-<script type="text/javascript" src="/resource/windowContainer/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="/resource/ax5ui/ax5ui.all.min.js?v=1000"></script>
+
+<script th:src="@{/resource/windowContainer/js/jquery.scrollbar.min.js}"></script>
+<script th:src="@{/resource/windowContainer/js/bootstrap.min.js}"></script>
+<script th:src="@{/resource/ax5ui/ax5ui.all.min.js}"></script>
 
 <!-- 메뉴탭 이동 script -->
-<script type="text/javascript" src="/resource/windowContainer/js/html5sortable.js"></script>
-<script type="text/javascript" src="/js/nth-tabs.js?v=1030"></script>
+<script th:src="@{/resource/windowContainer/js/html5sortable.js}"></script>
+<script th:src="@{/js/nth-tabs.js}"></script>
 
 <th:block th:replace="system_js :: system_js"></th:block>
 
-<script src="/js/common.js?v=1060"></script>
-<script type="text/javascript" src="/js/yumenu.js?v=1070"></script>
-<script type="text/javascript" src="/js/yuscript.js?v=1060"></script>
-<script type="text/javascript" src="/js/ax5commUtil.js?v=1070"></script>
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/yumenu.js}"></script>
+<script th:src="@{/js/yuscript.js}"></script>
+<script th:src="@{/js/ax5commUtil.js}"></script>
+
 <script type="text/javascript">
     let nthTabs = null;
     let default_menu = null;
     let menuName_list = [];
     let menu_arr = [];
+    let cachedMenus = null;
 
     $(document).ready(function () {
 
+        function loadMenusOnce(callback) {
+            if (cachedMenus) {
+                callback(cachedMenus);
+                return;
+            }
+
+            $.getJSON(withCtx('/api/system/menus'), function (response) {
+                cachedMenus = response.data;
+                callback(cachedMenus);
+            });
+        }
 
         $(".left").click(function () {
             nthTabs.delAllTab();
@@ -692,44 +648,6 @@
         // 메뉴 매핑(FrontFolder_id)
 
         nthTabs = $('#main-tabs').nthTabs();
-
-        //-------페이지 이동
-        //전역에 공유 + 준비 플래그 세팅
-        window.nthTabs = nthTabs;
-        window.__nthTabsReady = true;
-        window.__nthOpenQueue = window.__nthOpenQueue || [];
-
-        // 준비 완료 이벤트 (옵션)
-        window.dispatchEvent(new Event('nthTabsReady'));
-
-        //대기열 처리 (초기화 전에 열린 요청들 실행)
-        const queue = window.__nthOpenQueue.splice(0);
-        queue.forEach(args => window.openTabInMain(args));
-
-        //탭 열기 함수는 그대로 사용
-        window.openTabInMain = function ({ id, title, url, isbookmark=false, allowClose=true }) {
-            if (!id) return;
-            url = url || ('/gui/' + id + '/default');
-
-            if (!window.__nthTabsReady || !window.nthTabs || typeof window.nthTabs.addTab !== 'function') {
-                window.__nthOpenQueue.push({ id, title, url, isbookmark, allowClose });
-                return;
-            }
-
-            if (window.nthTabs.isExistsTab('#' + id)) {
-                window.nthTabs.toggleTab('#' + id);
-            } else {
-                window.nthTabs.addTab({
-                    id,
-                    title: title || id,
-                    url,
-                    active: true,
-                    allowClose,
-                    isbookmark: isbookmark ? 'true' : 'false'
-                });
-            }
-        };
-        //------- 페이지 이동 끝
 
         const dep2Mappings = {
             1: '#dep2-monitoring',
@@ -746,141 +664,129 @@
             13: '#dep2-inventory-materials',
         };
 
-        function loadMenu(FrontFolderId, $FrontFolderElement) {
-            $.ajax({
-                url: '/api/system/menus', // menus API를 통해 전체 메뉴 데이터를 가져옴
-                type: 'GET',
-                success: function (response) {
+        function renderMenuByFrontFolder(menus, FrontFolderId, $FrontFolderElement) {
 
-                    //메뉴리스트 초기화
-                    menuName_list = response.data.flatMap(folder =>
-                        (folder.nodes || []).map(node => node.objNm)
-                    ).filter(Boolean)
+            // 메뉴리스트 초기화 (⚠️ 전체 기준, 1회만)
+            menuName_list = menus.flatMap(folder =>
+                (folder.nodes || []).map(node => node.objNm)
+            ).filter(Boolean);
 
-                    //메뉴명 : 메뉴경로 (key : value) 배열 초기화
-                    menu_arr = response.data.flatMap(folder =>
-                        (folder.nodes || []).map(node => ({ [node.objNm]: node.objUrl }))
-                    )
+            menu_arr = menus.flatMap(folder =>
+                (folder.nodes || []).map(node => ({[node.objNm]: node.objUrl}))
+            );
 
-                    //console.log('arr', menu_arr);
+            // FrontFolder_id 기준 필터링
+            const folders = menus.filter(folder =>
+                folder.frontfolder_id === parseInt(FrontFolderId)
+            );
 
-                    // FrontFolder_id를 기반으로 폴더 필터링
-                    const folders = response.data.filter(folder => folder.frontfolder_id === parseInt(FrontFolderId));
+            if (folders.length === 0) return;
 
-                    if (folders.length > 0) {
-                        // 해당 FrontFolderId에 해당하는 폴더가 있으면 대 메뉴를 다시 보여줌
-                        $FrontFolderElement.closest('.dep1-1').css('display', 'block');
+            // 해당 FrontFolderId 메뉴 표시
+            $FrontFolderElement.closest('.dep1-1').css('display', 'block');
 
-                        folders.forEach(function (folder) {
-                            let $li = $('<li class="dep2-1"></li>');
-                            let $a = $('<a href="#"></a>').text(folder.folder_name);
-                            $li.append($a);
+            folders.forEach(function (folder) {
 
-                            let $subUl = $('<ul class="dep3 documents" style="display: none;"></ul>');
-                            $li.append($subUl);
+                let $li = $('<li class="dep2-1"></li>');
+                let $a = $('<a href="#"></a>').text(folder.folder_name);
+                $li.append($a);
 
-                            // 해당 폴더의 하위 메뉴 항목 추가
-                            folder.nodes.forEach(function (item) {
-                                let $itemLi = $('<li class="dep3-custom-list-style"></li>');
-                                let $itemA = $('<a href="#" menuurl="' + item.url + '" data-bookmark="' + item.isbookmark + '" data-objid="' + item.objId + '" title="' + item.objNm + '"></a>').text(item.objNm);
+                let $subUl = $('<ul class="dep3 documents" style="display: none;"></ul>');
+                $li.append($subUl);
 
-                                $itemLi.append($itemA);
-                                $subUl.append($itemLi);
+                folder.nodes.forEach(function (item) {
+                    let $itemLi = $('<li class="dep3-custom-list-style"></li>');
+                    let $itemA = $('<a href="#" ' +
+                        'menuurl="' + item.objUrl + '" ' +
+                        'data-bookmark="' + item.isbookmark + '" ' +
+                        'data-objid="' + item.objId + '" ' +
+                        'title="' + item.objNm + '">' +
+                        item.objNm +
+                        '</a>');
+
+                    $itemLi.append($itemA);
+                    $subUl.append($itemLi);
+                });
+
+                $FrontFolderElement.append($li);
+
+                // dep2 클릭 이벤트
+                $a.on('click', function (e) {
+                    e.preventDefault();
+
+                    let $dep3 = $li.find('.dep3 li');
+
+                    if ($dep3.length === 1) {
+                        let $a = $dep3.find('a');
+                        let objid = $a.data('objid');
+                        let title = $a.text();
+
+                        if (nthTabs.isExistsTab('#' + objid)) {
+                            nthTabs.toggleTab('#' + objid);
+                        } else {
+                            nthTabs.addTab({
+                                id: objid,
+                                title: title,
+                                url: withCtx('/gui/' + objid + '/default'),
+                                active: true,
+                                allowClose: true
                             });
+                        }
 
-                            $FrontFolderElement.append($li);
-
-                            // dep2 클릭 시 dep3 항목이 1개면 바로 탭 추가하고 dep3 숨김
-                            $a.on('click', function (e) {
-                                e.preventDefault();
-
-                                // dep3 항목 찾기
-                                var $dep3 = $li.find('.dep3 li');
-
-                                if ($dep3.length > 1) {
-
-                                } else if ($dep3.length === 1) {
-                                    $('.dep2-1').removeClass('on');
-                                    $('.dep3 li').removeClass('on');
-                                    $li.addClass('on');
-
-                                    var $a = $dep3.find('a');
-                                    var val = $a.text();
-                                    var menuurl = $a.attr('menuurl');
-                                    var objid = $a.attr('data-objid');
-                                    // var _bookmark = $a.attr('data-bookmark');
-
-                                    if (nthTabs.isExistsTab('#' + objid)) {
-                                        nthTabs.toggleTab('#' + objid);
-                                    } else {
-                                        nthTabs.addTab({
-                                            id: objid,
-                                            title: val,
-                                            url: '/gui/' + objid + '/default',
-                                            active: true,
-                                            allowClose: true,
-                                            // isbookmark: _bookmark
-                                        });
-                                        // nthTabs.bindBookmarkEvent(objid, _bookmark);
-                                    }
-
-                                    // dep3 리스트 숨김
-                                    $subUl.hide(); // dep3 항목이 1개일 때 숨김
-                                    return false;
-                                }
-                            });
-                        });
-
-                        $FrontFolderElement.find('.dep3').on('click', 'a', function (e) {
-                            e.preventDefault();
-
-                            // 모든 dep3의 li에서 on 클래스 제거
-                            $('.dep3 li').removeClass('on');
-
-                            // 현재 클릭한 li에 on 클래스 추가
-                            var $clickedDep3 = $(this).parent('li');
-                            $clickedDep3.addClass('on');
-
-                            // dep3가 1개인 dep2에서 on 클래스 제거
-                            $('.dep2-1.on').removeClass('on');
-
-                            var val = $(this).text();
-                            var menuurl = $(this).attr('menuurl');
-                            var objid = $(this).attr('data-objid');
-                            var _bookmark = $(this).attr('data-bookmark');
-
-                            if (nthTabs.isExistsTab('#' + objid)) {
-                                nthTabs.toggleTab('#' + objid);
-                            } else {
-                                nthTabs.addTab({
-                                    id: objid,
-                                    title: val,
-                                    url: '/gui/' + objid + '/default',
-                                    active: true,
-                                    allowClose: true,
-                                    isbookmark: _bookmark
-                                });
-                                nthTabs.bindBookmarkEvent(objid, _bookmark);
-                            }
-                            const winWidth = $(window).width();
-                            // if (winWidth <= 1366) {
-                            //     $('.menu_area').addClass('hidden');
-                            //     $('#navbarBarMenu2 .open_menu').removeClass('menu_open'); // 버튼 상태 초기화
-                            //     $('.con_area, .tab-content').css({
-                            //         'width': '100%',
-                            //         'left': '0'
-                            //     });
-                            // }
-                        });
+                        $subUl.hide();
                     }
+                });
+            });
+
+            // dep3 클릭 이벤트 (이벤트 위임)
+            $FrontFolderElement.find('.dep3').off('click').on('click', 'a', function (e) {
+                e.preventDefault();
+
+                $FrontFolderElement.find('.dep3 li').removeClass('on');
+                $(this).closest('li').addClass('on');
+
+                let objid = $(this).data('objid');
+                let title = $(this).text();
+                let bookmark = $(this).data('bookmark');
+
+                if (nthTabs.isExistsTab('#' + objid)) {
+                    nthTabs.toggleTab('#' + objid);
+                } else {
+                    nthTabs.addTab({
+                        id: objid,
+                        title: title,
+                        url: withCtx('/gui/' + objid + '/default'),
+                        active: true,
+                        allowClose: true,
+                        isbookmark: bookmark
+                    });
                 }
             });
         }
 
+        function initializeMenuSearchData(menus) {
+            menuName_list = menus.flatMap(folder =>
+                (folder.nodes || []).map(node => node.objNm)
+            ).filter(Boolean);
 
-        Object.keys(dep2Mappings).forEach(FrontFolderId => {
-            loadMenu(FrontFolderId, $(dep2Mappings[FrontFolderId]));
+            menu_arr = menus.flatMap(folder =>
+                (folder.nodes || []).map(node => ({[node.objNm]: node.objUrl}))
+            );
+        }
+
+        loadMenusOnce(function (menus) {
+            initializeMenuSearchData(menus);
+
+            Object.keys(dep2Mappings).forEach(FrontFolderId => {
+                renderMenuByFrontFolder(
+                    menus,
+                    FrontFolderId,
+                    $(dep2Mappings[FrontFolderId])
+                );
+            });
         });
+
+
 
         $(function () {
             let userToggled = false;  // 사용자가 직접 토글했는지 여부
@@ -930,8 +836,9 @@
         });
 
 
+
         // 북마크 및 default_menu를 한 번에 처리
-        $.getJSON('/api/system/bookmark', function (result) {
+        $.getJSON(withCtx('/api/system/bookmark'), function (result) {
             let _data = result.data;
             var litagbook = '';
             var btnHtml = '';
@@ -973,7 +880,7 @@
                     nthTabs.addTab({
                         id: objid,
                         title: val,
-                        url: '/gui/' + objid + '/default',
+                        url: withCtx('/gui/' + objid + '/default'),
                         active: true,
                         allowClose: true,
                         isbookmark: _bookmark
@@ -987,7 +894,7 @@
                     this.scrollLeft += e.deltaY;
                     e.preventDefault();
                 }
-            }, { passive: false });
+            }, {passive: false});
 
             // 🔹 드래그 가능하도록 설정
             const headerMenu = document.querySelector('.header-menu');
@@ -1025,11 +932,11 @@
                     const box = child.getBoundingClientRect();
                     const offset = x - box.left - box.width / 2;
                     if (offset < 0 && offset > closest.offset) {
-                        return { offset: offset, element: child };
+                        return {offset: offset, element: child};
                     } else {
                         return closest;
                     }
-                }, { offset: Number.NEGATIVE_INFINITY }).element;
+                }, {offset: Number.NEGATIVE_INFINITY}).element;
             }
 
             // 🔹 순서 저장 AJAX
@@ -1046,11 +953,11 @@
                 let csrf = document.querySelector('[name=_csrf]').value;
 
                 $.ajax({
-                    url: '/api/system/bookmark/reorder',
+                    url: withCtx('/api/system/bookmark/reorder'),
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(newOrder),
-                    headers: { 'X-CSRF-TOKEN': csrf },
+                    headers: {'X-CSRF-TOKEN': csrf},
                     success: function (res) {
                         if (res.success) {
                             console.log('북마크 순서 저장 완료');
@@ -1065,7 +972,7 @@
             }
 
             // default_menu 처리
-            $.getJSON('/api/system/usergroup/defaultmenu', function (result) {
+            $.getJSON(withCtx('/api/system/usergroup/defaultmenu'), function (result) {
                 default_menu = result.data.gmenu;
                 let title = result.data.MenuName;
 
@@ -1080,7 +987,7 @@
                 nthTabs.addTab({
                     id: default_menu,
                     title: title,
-                    url: '/gui/' + default_menu + '/default',
+                    url: withCtx('/gui/' + default_menu + '/default'),
                     active: true,
                     allowClose: false,
                     // isbookmark: _bookmark
@@ -1398,7 +1305,6 @@
             </div>
 
 
-
         </div>
 
         <div class="modal-footer">
@@ -1432,7 +1338,7 @@
         color: #fff;
         padding: 12px 14px;
         border-radius: 6px;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
         animation: slideUp 0.25s ease-out;
         font-size: 13px;
     }
@@ -1506,8 +1412,14 @@
 
     /* 애니메이션 */
     @keyframes slideUp {
-        from { transform: translateY(20px); opacity: 0; }
-        to   { transform: translateY(0); opacity: 1; }
+        from {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
     }
 
     .toast-reply-box {
@@ -1540,16 +1452,16 @@
         width: 420px;
         background: #fff;
         border-radius: 10px;
-        box-shadow: 0 10px 30px rgba(0,0,0,.2);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .2);
         /*display: flex;*/
         flex-direction: column;
     }
 
     /* 헤더 */
     .modal-header {
-        position: relative;                 /* 🔥 기준점 */
+        position: relative; /* 🔥 기준점 */
         display: flex;
-        justify-content: center;             /* 제목은 가운데 */
+        justify-content: center; /* 제목은 가운데 */
         align-items: center;
         padding: 14px 16px;
         font-size: 16px;
@@ -1689,7 +1601,7 @@
     }
 
     .history-table-wrap {
-        max-height: 260px;          /* 모달 높이에 맞게 조절 */
+        max-height: 260px; /* 모달 높이에 맞게 조절 */
         overflow-y: auto;
         border: 1px solid #e1e5ea;
         border-radius: 4px;
@@ -1741,30 +1653,21 @@
 
 
 <script type="text/javascript">
-    // 날씨 정보
-    // fetchWeatherData();
-    // 30분마다 날씨 정보 자동 갱신
-    // setInterval(fetchWeatherData, 1800000);
+
     let eventSource = null;
 
     function getUiType(alarm) {
         if (alarm.action === 'REPLY') return 'reply';
-        if (alarm.action === 'SEND')  return 'message';
+        if (alarm.action === 'SEND') return 'message';
         return 'alarm';
     }
 
     function sseConnect() {
 
         const spjangcd = sessionStorage.getItem("spjangcd");
-        if (!spjangcd) return;
+        const url = withCtx('/sse/subscribe') + '?spjangcd=' + encodeURIComponent(spjangcd);
 
-        // 🔥 기존 SSE 정리
-        if (eventSource) {
-            eventSource.close();
-            eventSource = null;
-        }
-
-        eventSource = new EventSource("/sse/subscribe?spjangcd=" + spjangcd);
+        const eventSource = new EventSource(url);
 
         // ✅ 기존 SYSTEM 이벤트 (레거시)
         eventSource.addEventListener("SYSTEM", function (e) {
@@ -1826,7 +1729,7 @@
             sessionStorage.clear();
             i18n.resetData();
 
-            location.href = '/logout';
+            location.href = withCtx('/logout');
         });
     });
 
@@ -1894,7 +1797,7 @@
             const uiType = getUiType(alarm);
             const tr = document.createElement("tr");
 
-            const { date, time } = formatAlarmDate(alarm.createdAt);
+            const {date, time} = formatAlarmDate(alarm.createdAt);
 
             tr.innerHTML = `
                 <td class="notif-type">
@@ -1931,7 +1834,7 @@
             hour12: true
         });
 
-        return { date, time };
+        return {date, time};
     }
 
 
@@ -1962,7 +1865,7 @@
         }
 
         const titleText =
-            uiType === 'reply'   ? '💬 답장' :
+            uiType === 'reply' ? '💬 답장' :
                 uiType === 'message' ? '✉️ 메시지' :
                     '🔔 알림';
 
@@ -2059,7 +1962,7 @@
     function markAsRead(notiId) {
         AjaxUtil.postAsyncData(
             "/api/notifications/read",
-            { notiId: notiId },
+            {notiId: notiId},
             function () {
                 // 성공 시 특별히 할 거 없으면 비워도 됨
             }
@@ -2174,7 +2077,7 @@
         $('#sendMessage').val('');
         $('#userSearch').val('');
 
-        AjaxUtil.fillSelectOptions($('#cboUserGroup'), 'user_group',  10);
+        AjaxUtil.fillSelectOptions($('#cboUserGroup'), 'user_group', 10);
 
         currentGroup = '10';
         $('#cboUserGroup').val('10');
@@ -2206,7 +2109,7 @@
         }
 
         userListXhr = $.ajax({
-            url: '/api/notifications/user_read',
+            url: withCtx('/api/notifications/user_read'),
             type: 'GET',
             data: {
                 group,
@@ -2259,7 +2162,7 @@
         const login = $(this).data('login');
 
         if (this.checked) {
-            selectedUserMap.set(userId, { id: userId, name, login });
+            selectedUserMap.set(userId, {id: userId, name, login});
         } else {
             selectedUserMap.delete(userId);
         }
@@ -2403,76 +2306,6 @@
         });
     }
 
-    // 날씨 정보를 서버에서 가져오는 함수
-    function fetchWeatherData() {
-        $.ajax({
-            url: '/weather/current',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                // JSON 데이터 구조를 이용하여 각 항목에 대한 값을 추출
-                //console.log(data); // 반환된 데이터를 콘솔에 출력
-                const fullAddress = data.address;
-                const shortAddress = fullAddress.split(" ")[0] + " " + fullAddress.split(" ")[1] + " " + fullAddress.split(" ")[2];
-                $('#area').text(shortAddress); // 지역 정보 표시
-                $('#temperature').html(`${data.T1H}<span class="celsius">℃</span>`);
-                $('#precipitationProbability').html(data.POP ? `${data.POP}%` : '0%'); // 강수확률이 없는 경우 '0%'로 표시
-                $('#humidity').html(`${data.REH}%`); // 습도를 표시할 때 '%'를 추가
-                $('#windSpeed').html(`${data.WSD}m/s`); // 풍속을 표시할 때 'm/s'를 추가
-
-                // 날씨 아이콘 업데이트
-                updateWeatherIcon(data.SKY, data.PTY);
-
-                const now = new Date();
-                const formatted = now.getHours().toString().padStart(2, '0') + ':' +
-                    now.getMinutes().toString().padStart(2, '0');
-                $('#lastUpdated').text(`업데이트: ${formatted}`);
-            },
-            error: function (error) {
-                console.error('Error fetching weather data:', error);
-            }
-        });
-    }
-
-    // 날씨 아이콘 업데이트 함수
-    function updateWeatherIcon(skyValue, ptyValue) {
-        // console.log("PTY Value:", ptyValue);
-        // console.log("SKY Value:", skyValue);
-
-        let iconPath = '/images/icon/weather/';
-        let altText = '날씨 아이콘';
-
-        // PTY 값에 따라 먼저 판단 (강수 형태 우선)
-        if (ptyValue == '1') {
-            iconPath += 'ico-wt4.svg'; // 비
-            altText = '비';
-        } else if (ptyValue == '3') {
-            iconPath += 'ico-wt5.svg'; // 눈
-            altText = '눈';
-        } else if (ptyValue == '4') {
-            iconPath += 'ico-wt7.svg'; // 소나기
-            altText = '소나기';
-        } else {
-            // PTY 값이 0이거나 비어 있을 때는 SKY 값으로 판단
-            if (skyValue == '1') {
-                iconPath += 'ico-wt1.svg'; // 맑음
-                altText = '맑음';
-            } else if (skyValue == '2') {
-                iconPath += 'ico-wt2.svg'; // 구름 조금
-                altText = '구름 조금';
-            } else if (skyValue == '3' || skyValue == '4') {
-                iconPath += 'ico-wt3.svg'; // 구름 많음 또는 흐림
-                altText = '구름 많음 또는 흐림';
-            }
-        }
-
-        // 아이콘 업데이트
-        const weatherIcon = $('#weatherIcon');
-        weatherIcon.attr('src', iconPath);
-        weatherIcon.attr('alt', altText);
-
-    }
-
     document.addEventListener('DOMContentLoaded', function () {
         const wrapper = document.getElementById('spjangSelectWrapper');
         const savedSpjangcd = sessionStorage.getItem('spjangcd');
@@ -2573,7 +2406,8 @@
                 try {
                     if (stompClient.connected)
                         stompClient.send('/app/hello', {}, 'ping');
-                } catch (_) { }
+                } catch (_) {
+                }
             }, 30000);
         }, function () {
             isConnecting = false;
@@ -2590,11 +2424,11 @@
                 function () {
                     const id = 'wm_prod_result_lot';
                     const title = '생산 실적 입력';
-                    const url = '/gui/wm_prod_result_lot/default';
+                    const url = withCtx('/gui/wm_prod_result_lot/default');
                     const openerWindow = window.top || window.opener;
 
                     if (!openerWindow || typeof openerWindow.openTabInMain !== 'function') return;
-                    openerWindow.openTabInMain({ id, title, url });
+                    openerWindow.openTabInMain({id, title, url});
 
                     const waitIframe = setInterval(() => {
                         const iframe = openerWindow.document.querySelector(`iframe[src*="${url}"]`);
@@ -2637,29 +2471,6 @@
         reconnectTimeout = setTimeout(connectWS, delay);
     }
 
-    // ✅ 화면 복귀 시 자동 재연결
-    // document.addEventListener('visibilitychange', () => {
-    //     if (document.visibilityState === 'visible' && (!stompClient || !stompClient.connected)) {
-    //         connectWS();
-    //     }
-    // });
-    //
-    // // ✅ 주기적 상태 점검 (5분 주기)
-    // setInterval(() => {
-    //     if (!stompClient || !stompClient.connected) connectWS();
-    // }, 300000);
-
-    // ✅ 페이지 로드 시 자동 연결
-    // window.addEventListener('load', connectWS);
-
-    // ✅ 종료 시 정리
-    // window.addEventListener('beforeunload', () => {
-    //     try {
-    //         if (stompClient && stompClient.connected) stompClient.disconnect();
-    //     } catch (_) { }
-    //     clearInterval(heartbeatInterval);
-    //     clearTimeout(reconnectTimeout);
-    // });
 </script>
 
 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>

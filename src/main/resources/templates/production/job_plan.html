@@ -22,7 +22,7 @@
                 </a>
             </div>
             <ul class="page-navi">
-                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li><img th:src="@{/images/icon/ico-nav-home.svg}" alt="홈아이콘"></li>
                 <li>생산 관리</li>
                 <li>생산 계획 등록</li>
             </ul>
@@ -72,7 +72,7 @@
                             <li>
                                 <a class="btn btn-delete" title="검색" id="btnSearch">
                                     <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
-                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    <img th:src="@{/images/icon/btn-srch.svg}" alt="검색 아이콘">
                                     검색
                                 </a>
                             </li>
@@ -83,19 +83,19 @@
                     <ul>
                         <li>
                             <a class="btn btn-excell" title="등록" id="btnAddNew">
-                                <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                                <img th:src="@{/images/icon/ico-plus.svg}" alt="등록 아이콘">
                                 등록
                             </a>
                         </li>
                         <!--                        <li>-->
                         <!--                            <a class="btn btn-delete" title="삭제" id="btnDelete">-->
-                        <!--                                <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">-->
+                        <!--                                <img th:src="@{/images/icon/ico-delete.svg}" alt="삭제 아이콘">-->
                         <!--                                삭제-->
                         <!--                            </a>-->
                         <!--                        </li>-->
                         <li>
                             <a class="btn btn-edit" title="수정" id="btnEdit">
-                                <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">
+                                <img th:src="@{/images/icon/ico-edit.svg}" alt="수정 아이콘">
                                 수정
                             </a>
                             <!--                        </li>-->
@@ -320,7 +320,7 @@
                         <th>메모</th>
                         <th>
                             <a class="btn in_btn plus" id="addRemark" title="추가">
-                                <img src="/images/icon/ico-plus.svg" alt="등록 아이콘" />
+                                <img th:src="@{/images/icon/ico-plus.svg}" alt="등록 아이콘" />
                             </a>
                         </th>
                     </tr>
@@ -335,7 +335,7 @@
                                 <input type="text" name="txtProductName" placeholder="코드 또는 품명 입력 후 엔터" autocomplete="off" />
                                 <input type="hidden" name="material_id" />
                                 <a class="btn in_btn" title="품목 검색" id="btnProductSearch" >
-                                    <img src="/images/icon/btn-srch-black.svg" alt="검색 아이콘" />
+                                    <img th:src="@{/images/icon/btn-srch-black.svg}" alt="검색 아이콘" />
                                 </a>
                             </div>
                         </td>
@@ -345,7 +345,7 @@
 
                         <td class="al_c item_border">
                             <a class="btn in_btn" title="삭제" onclick="removeItemRow(this)">
-                                <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘" />
+                                <img th:src="@{/images/icon/ico-delete.svg}" alt="삭제 아이콘" />
                             </a>
                         </td>
                     </tr>

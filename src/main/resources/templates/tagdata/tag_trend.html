@@ -27,7 +27,7 @@
                 </a>
             </div>
             <ul class="page-navi">
-                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li><img th:src="@{/images/icon/ico-nav-home.svg}" alt="홈아이콘"></li>
                 <li>공정 데이터</li>
                 <li>데이터 트랜드</li>
             </ul>
@@ -92,7 +92,7 @@
                                 <li>
                                     <a class="btn btn-delete" title="검색" id="btnSearch">
                                         <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
-                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        <img th:src="@{/images/icon/btn-srch.svg}" alt="검색 아이콘">
                                         검색
                                     </a>
                                 </li>
@@ -129,7 +129,7 @@
 
 <th:block layout:fragment="scripts">
     <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
-    <script src="/resource/apexcharts/apexcharts.3.26.min.js"></script>
+    <script th:src="@{/resource/apexcharts/apexcharts.3.26.min.js}"></script>
     <script type="text/javascript">
         class chartTrend {
             constructor(chartId, title, lsl, usl, show_brush, series_data) {

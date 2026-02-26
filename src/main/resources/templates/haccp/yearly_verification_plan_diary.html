@@ -12,7 +12,7 @@
                 </a>
             </div>
             <ul class="page-navi">
-                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li><img th:src="@{/images/icon/ico-nav-home.svg}" alt="홈아이콘"></li>
                 <li>HACCP 관리</li>
                 <li>연간 검증계획서</li>
             </ul>
@@ -106,7 +106,7 @@
 
 <th:block layout:fragment="scripts">
     <th:block th:replace="/common/approve_box :: approve_box"></th:block>
-    <script src="/js/grid.js?v=1000"></script>
+    <script type="text/javascript" th:src="@{/js/grid.js}"></script>
     <script type="text/javascript">
         class EquipResultDiaryPage {
             constructor() {

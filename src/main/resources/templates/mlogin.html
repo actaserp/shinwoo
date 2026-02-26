@@ -194,7 +194,7 @@
             </dd>
             <!-- 에러메시지 출력 -->
             <dd class="hint-red" id="hint-red" style="display: none">
-              <img src="/images/icon/ico-info-red.svg" alt="힌트메세지">
+              <img th:src="@{/images/icon/ico-info-red.svg}" alt="힌트메세지">
               계정이 맞지 않습니다.
             </dd>
           </dl>
@@ -239,11 +239,10 @@
       <div class="popup-title">
         <h3>사용자권한신청</h3>
         <a onclick="RegisterUserClose()" title="팝업닫기" class="btn-popup-close">
-          <img src="/images/icon/btn-popup-close.svg" alt="닫기">
+          <img th:src="@{/images/icon/btn-popup-close.svg}" alt="닫기">
         </a>
       </div>
       <div class="popup-contents">
-        <!--<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />-->
         <form id="bomForm">
           <div class="table-wrap">
             <table class="write-table">
@@ -402,7 +401,7 @@
           <input type="email" id="mail" name="mail" required="" maxlength="30" autocomplete="off" style="width: 80%;">
         </div>
         <div class="hint-red" id="ErrMessage" style="margin: 5px auto 0;">
-          <img src="/images/icon/ico-info-red.svg" alt="힌트메세지">신청시 등록한 이메일을 입력해주세요.
+          <img th:src="@{/images/icon/ico-info-red.svg}" alt="힌트메세지">신청시 등록한 이메일을 입력해주세요.
         </div>
         <div id="ErrMsg" style="margin-top: 10px;text-align: center; display: none; color: red;"><span>해당 사용자는 존재하지 않습니다.</span></div>
 
@@ -432,7 +431,7 @@
           <button type="button" style="margin: 0px;width: 17%;background: white;color: #03428E;border: 1px solid #03428E;" id="BtnAuthentication">코드발급</button>
         </div>
         <div class="hint-red" style="margin: 5px auto 0;">
-          <img src="/images/icon/ico-info-red.svg" alt="힌트메세지">신청시 등록한 이메일을 입력해주세요.
+          <img th:src="@{/images/icon/ico-info-red.svg}" alt="힌트메세지">신청시 등록한 이메일을 입력해주세요.
         </div>
 
 
@@ -1354,41 +1353,6 @@
     }
     $('#loginFrm').validate({ submitHandler: submitHandler });
   });
-
-
-  // document.getElementById('testBtn').addEventListener('click', function() {
-  //     // const data = document.getElementById('loginid').value;
-  //
-  //     // x-www-form-urlencoded 형식으로 데이터를 보냄
-  //     const params = new URLSearchParams();
-  //     params.append('userId', 'UIS02024000000000096');
-  //     params.append('accessToken', 'eyJraWQiOiIwN2JhZTU4MS1kNzBiLTRiZWEtYjc2Zi1hMWNmMzFmZDc0NTQiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJuY2RuY2pmQG5hdmVyLmNvbSIsImF1ZCI6IkNJUzAyMDI0MDAwMDAwMDAwMDAyIiwibmJmIjoxNzMzNzA0NzU5LCJzY29wZSI6WyJvcGVuaWQiXSwiaXNzIjoiaHR0cDovLzE3Mi4yNS4xLjE1ODo4MTAwL3NzbyIsImV4cCI6MTczMzcwNjU1OSwiaWF0IjoxNzMzNzA0NzU5LCJ1c2VySWQiOiJVSVMwMjAyNDAwMDAwMDAwMDA5NiIsImp0aSI6ImZhNWVjN2E3LTBhMWMtNGJmMy04ZDY1LWQ3ODU1OTBmMGFkMSIsImF1dGhvcml0aWVzIjpbIlVJUzAyMDI0MDAwMDAwMDAwMDk2IiwiQ09NX1NJVEUiXX0.YuwDg7_3aNPXloR0DRPqOMfiLbAnk-b3V6uytUktCfF1OT7WOsK546SaZaFuc1HeCLQmJQDHFkBZNP3isfukGg1TE13o0CaVxUBkJ-u0UzCAZ40HbF3xNQ7AN5j7mt_f_XeUBC-3w3BXfXQ3CfscgkL3-MhpH19onpycjZNuKFswyG6cubUkazFALHHiYglvGWFwQCkx6al6pCTORYMwMXIIMRxq1u6XsnANij4TOC4fx3I_wChYAu338o8ckno8R26MxaIb85iUo4LaLY2cLYvTquYFvjhMb1Gjy92rdckMaVewS9lwWsUJIICF8Nsl1NeGvhYvy5wXm0IPaJ1tCg');
-  //
-  //     fetch('https://foms-route-kt.p-e.kr/foms/main', {
-  //         method: 'POST',
-  //         headers: {
-  //             'Content-Type': 'application/x-www-form-urlencoded',
-  //         },
-  //         body: params.toString(),
-  //         credentials: 'include'
-  //
-  //     })
-  //         .then(response => {
-  //             // 리디렉션이 있을 경우 자동으로 따름
-  //             if (response.redirected) {
-  //                 // 리디렉션된 URL로 이동
-  //                 window.location.href = response.url;
-  //             } else {
-  //                 return response.json();  // 응답 본문 처리
-  //             }
-  //         })
-  //         .then(data => {
-  //             console.log('Success:', data);
-  //         })
-  //         .catch(error => {
-  //             console.error('Error:', error);
-  //         });
-  // });
 
   document.getElementById('productionManage').addEventListener('click', function() {
     console.log("🔄 생산관리 버튼이 클릭되었습니다!");

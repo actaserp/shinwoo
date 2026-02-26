@@ -205,6 +205,21 @@ var Ax5DatePicker = {
     }
 };
 
+function safeWithCtx(url) {
+    if (!url) return url;
+
+    // withCtx가 있으면 사용
+    if (typeof window.withCtx === 'function') {
+        return window.withCtx(url);
+    }
+
+    // 없으면 meta 태그 직접 읽기
+    const ctx =
+        document.querySelector('meta[name="ctx"]')?.content || '';
+
+    return ctx.replace(/\/$/, '') + url;
+}
+
 // ax5ui alert,confirm
 var Alert = {
     init: function () {
@@ -226,7 +241,7 @@ var Alert = {
                     // 기존에 'X' 버튼이 없으면 추가
                     if (!dialogTitle.querySelector('.btn-close')) {
                         const closeButton = document.createElement('img');
-                        closeButton.src = '/images/icon/btn-popup-close.svg'; // 이미지 경로
+                        closeButton.src = safeWithCtx('/images/icon/btn-popup-close.svg'); // 이미지 경로
                         closeButton.alt = '닫기';
                         closeButton.className = 'btn-close';
                         closeButton.style.position = 'absolute';
@@ -272,7 +287,7 @@ var Alert = {
                     // 기존에 'X' 버튼이 없으면 추가
                     if (!dialogTitle.querySelector('.btn-close')) {
                         const closeButton = document.createElement('img');
-                        closeButton.src = '/images/icon/btn-popup-close.svg'; // 이미지 경로
+                        closeButton.src = safeWithCtx('/images/icon/btn-popup-close.svg'); // 이미지 경로
                         closeButton.alt = '닫기';
                         closeButton.className = 'btn-close';
                         closeButton.style.position = 'absolute';
