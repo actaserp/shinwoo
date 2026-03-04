@@ -2527,9 +2527,9 @@
             $popup.find('.item-Standard-table tr.std-row').each(function () {
               const $r = $(this);
 
-              const standard      = toStr($r.find('input[name="standard"]').val());
-              const UnitName      = toStr($r.find('input[name="UnitName"]').val());
-              const qtyStr        = toStr($r.find('input[name="qty"]').val());
+              const standard      = toStr($r.find('input[name="standard"]').val()).replace(/["“”]/g, '').replace(/\s+/g, ' ').trim();
+              const UnitName      = toStr($r.find('input[name="UnitName"]').val()).trim();
+              const qtyStr        = toStr($r.find('input[name="qty"]').val()).trim();
               const unitPriceStr  = toStr($r.find('input[name="sd_UnitPrice"]').val()).replace(/,/g,'');
               const priceStr      = toStr($r.find('input[name="sd_price"]').val()).replace(/,/g,'');
               const vatStr        = toStr($r.find('input[name="sd_vat"]').val()).replace(/,/g,'');

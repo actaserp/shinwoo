@@ -244,7 +244,7 @@ public class SujuService {
 				       ELSE s."State"
 				     END AS final_state
 				   FROM suju s
-				   -- ★★★ 여기부터 LEFT JOIN으로 변경 ★★★
+				   --여기부터 LEFT JOIN으로 변경
 				   LEFT JOIN material  m  ON m.id = s."Material_id"
 				   LEFT JOIN mat_grp   mg ON mg.id = m."MaterialGroup_id"
 				   LEFT JOIN unit      u  ON u.id  = m."Unit_id"
@@ -294,9 +294,10 @@ public class SujuService {
 
 		Map<String, Object> sujuHead = this.sqlRunner.getRow(sql, paramMap);
 		List<Map<String, Object>> sujuList = this.sqlRunner.getRows(detailSql, paramMap);
-
+//		log.info("수주상세조회 SQL: {}", detailSql);
+//		log.info("SQL : {}", paramMap.getValues());
 		sujuHead.put("sujuList", sujuList);
-		
+
 		return sujuHead;
 	}
 	

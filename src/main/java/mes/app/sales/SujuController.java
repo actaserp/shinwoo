@@ -330,9 +330,22 @@ public class SujuController {
         }
 
         // (필요하면) 변경 없음이면 스킵
+        // ✅ 규격/상세 변경도 "변경"으로 인식해야 함
+        boolean standardChanged = !java.util.Objects.equals(
+          java.util.Objects.toString(suju.getStandard(), ""),
+          java.util.Objects.toString(standard, "")
+        );
+
+        // 표준상세 payload가 오면(빈 리스트 포함 여부는 정책에 따라 선택)
+        Object sdObj = item.get("standardDetails");
+        boolean hasDetailsPayload = (sdObj instanceof List) && !((List<?>) sdObj).isEmpty();
+
         boolean nothingChanged = !coreChanged
-            && java.util.Objects.equals(suju.getTotalAmount(), tryIntNull(item.get("totalAmount")))
-            && java.util.Objects.equals(suju.getDescription(), (String) item.get("description"));
+         && !standardChanged
+         && !hasDetailsPayload
+         && java.util.Objects.equals(suju.getTotalAmount(), tryIntNull(item.get("totalAmount")))
+         && java.util.Objects.equals(suju.getDescription(), (String) item.get("description"));
+
         if (nothingChanged) continue;
 
       } else {
