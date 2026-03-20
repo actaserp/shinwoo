@@ -3152,7 +3152,8 @@
                 const rowsForPrint = samePage ? 5 : 10;
 
                 // 4) 제품확인서 detail 조회(/print_detail)
-                const jr_pk = $('#tabBasic').find('#id').val();
+                const jr_pk = selected.id;
+                // const jr_pk = $('#tabBasic').find('#id').val();
                 const url = _this.baseUrl + '/print_detail';
                 const param = { jr_pk };
 
@@ -3215,8 +3216,8 @@
                     .replace(/&amp;/g, '&');
 
                     // =========================
-// B) 제품확인서 HTML 만들기 (+바코드 svg 블록)
-// =========================
+                    // B) 제품확인서 HTML 만들기 (+바코드 svg 블록)
+                    // =========================
                     const prod_mat_nm = ($('#tabBasic').find('#prod_mat_nm').val() || '').trim();
 
                     const date2 = detail.prod_date || '';
@@ -3225,8 +3226,16 @@
                     const parentQty2 = parseFloat(detail.good_qty || 0) || 0;
                     const parentLen2 = parseFloat(detail.standard || 0) || 0;
 
-// ✅ 여기: detail.items -> detailItems 로 통일
-                    const detailTotal2 = (detailItems || []).reduce((sum, v) => {
+                    // // ✅ 여기: detail.items -> detailItems 로 통일
+                    // const detailTotal2 = (detailItems || []).reduce((sum, v) => {
+                    //     const len = parseFloat(v.Standard || 0) || 0;
+                    //     const qty = parseFloat(v.Qty || 0) || 0;
+                    //     return sum + (len * qty);
+                    // }, 0);
+                    // ✅ detail.items 사용 (서버에서 이미 suju_detail 조회해서 넣어줌)
+                    const detailItems2 = detail.items || [];
+
+                    const detailTotal2 = (detailItems2 || []).reduce((sum, v) => {
                         const len = parseFloat(v.Standard || 0) || 0;
                         const qty = parseFloat(v.Qty || 0) || 0;
                         return sum + (len * qty);
@@ -3254,8 +3263,8 @@
                         day: d2,
 
                         // ✅ 여기: detail.items -> detailItems 로 통일
-                        items: detailItems || [],
-
+                        // items: detailItems || [],
+                        items: detailItems2,
                         totalMeter: totalMeter2,
                         note: detail.memo,
                         rows: rowsForPrint
