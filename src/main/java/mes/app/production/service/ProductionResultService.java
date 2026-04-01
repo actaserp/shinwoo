@@ -374,7 +374,7 @@ public class ProductionResultService {
 
 		String sql = """
 			WITH target AS (
-				SELECT jr.id AS child_id, jr."Parent_id" AS parent_id
+				SELECT jr.id AS child_id, jr."Parent_id" AS parent_id, jr."Description"
 				FROM job_res jr
 				WHERE jr.id = :jrPk
 			),
@@ -425,7 +425,8 @@ public class ProductionResultService {
 		
 				-- 필요하면 정렬/표시용
 				base_jr."WorkIndex"                             AS work_idx,
-				c."LotNumber"                                   AS lot_num
+				c."LotNumber"                                   AS lot_num,
+				t."Description" as description
 		
 			FROM target t
 			JOIN base_pick b                 ON 1=1

@@ -3254,7 +3254,8 @@
                         ProductionDate: detail.prod_date,
                         WorkcenterName: detail.WorkcenterName,
                         DueDate: detail.due_date,
-                        mat_name: detail.mat_name,
+                        mat_name: `<span style="color:red; font-weight:bold;">${detail.mat_name || ''}</span>`,
+                        // mat_name: detail.mat_name,
                         standard: detail.standard,
                         unit_name: detail.unit,
                         OrderQty: detail.good_qty,
@@ -3266,11 +3267,19 @@
                         // items: detailItems || [],
                         items: detailItems2,
                         totalMeter: totalMeter2,
-                        note: detail.memo,
+                        note: `<span style="color:blue; font-weight:bold;">${detail.memo || ''}</span>`,
+                        // note: detail.memo,
                         rows: rowsForPrint
                     };
 
                     let barcodeReportHtml = tmpl('print_report', barcodeData);
+
+                    barcodeReportHtml = barcodeReportHtml
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&quot;/g, '"')
+                    .replace(/&#39;/g, "'")
+                    .replace(/&amp;/g, '&');
 
                     // ✅ 바코드 블록 생성(기존 replace('</div>') 방식은 위험해서 별도 area로 붙임)
                     const barcodeBlocks = (select_chasu || []).map((_, i) => `
